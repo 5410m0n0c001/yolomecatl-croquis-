@@ -539,6 +539,17 @@
             <path d="M 18,20 A 20,20 0 0,0 0,0" class="svg-door-swing" />
           </g>
 
+          <!-- Muro divisorio de servicio (Línea blanca del croquis) entre Pasillo de Cocina/Bar y Estacionamiento -->
+          <line x1="750" y1="250" x2="770" y2="250" stroke="var(--svg-wall-stroke)" stroke-width="3" />
+
+          <!-- Acceso Proveedores y Personal / Salida de Emergencia (Right wall, below kitchen) -->
+          <g transform="translate(750, 280)">
+            <rect x="-2" y="-15" width="4" height="30" fill="var(--svg-bg)" /> <!-- Gap in the wall -->
+            <line x1="0" y1="-15" x2="15" y2="-15" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <path d="M 15,-15 A 15,15 0 0,1 0,0" class="svg-door-swing" />
+            <text x="-8" y="5" class="svg-label-sub" text-anchor="end" font-size="7">PROVEEDORES / EMERGENCIA</text>
+          </g>
+
           <!-- STAGE / DJ ESCENARIO (Elevated Platform) -->
           <g id="stage-group">
             <rect x="385" y="80" width="200" height="60" fill="rgba(0,0,0,0.15)" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
@@ -593,11 +604,11 @@
           <!-- Guest Path: Vehicular/Parking -> Pedestrian -> Lobby -> Salon -> Zona de Baile & Bathrooms (Blue) -->
           <path id="path-guest-draw" d="M 980,770 L 875,770 L 510,770 L 510,755 L 510,730 L 510,700 L 510,220 M 510,730 L 290,727 L 270,727 L 200,727 L 200,860 L 210,860 M 510,770 L 200,770 L 200,860 L 210,860 M 810,300 L 875,300 L 875,770 M 945,360 L 875,360 L 875,770 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60" class="circulation-path circulation-guest" />
           
-          <!-- Service Path: Kitchen -> Bar -> Tables Norte & Salon (Green) -->
-          <path id="path-service-draw" d="M 875,120 L 780,120 M 820,180 L 760,180 L 760,260 L 680,260 C 510,260 420,350 420,450" class="circulation-path circulation-service" />
+          <!-- Service Path: Kitchen/Providers -> Bar -> Tables Norte & Salon (Green) -->
+          <path id="path-service-draw" d="M 875,120 L 780,120 M 820,180 L 760,180 L 760,250 M 875,340 L 875,280 L 755,280 L 720,280 M 760,250 L 760,260 L 680,260 C 510,260 420,350 420,450" class="circulation-path circulation-service" />
 
-          <!-- Emergency Path: Salon Corners -> Lobby -> Pedestrian Hallway -> Main Vehicular Entrance/Exit (Red) -->
-          <path id="path-emergency-draw" d="M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,770 L 980,770 M 735,95 L 735,685 L 700,705 L 510,705" class="circulation-path circulation-emergency" />
+          <!-- Emergency Path: Salon Evacuation to Vehicular exits (Red) -->
+          <path id="path-emergency-draw" d="M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,770 L 980,770 M 735,95 L 735,280 L 755,280 L 875,280 L 875,770 L 980,770 M 735,280 L 735,685 L 700,705 L 510,705" class="circulation-path circulation-emergency" />
         </g>
 
         <!-- TABLES & SEATING LAYER (Interactive, populated via JS) -->
