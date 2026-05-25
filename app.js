@@ -270,6 +270,9 @@ function selectTable(num) {
   // Open Right side drawer
   detailDrawer.classList.add('open');
   
+  // Close mobile sidebar if open to prevent UI clashing
+  closeSidebarMobile();
+  
   // Populate Drawer Fields
   const data = tablesData[num];
   drawerTitle.textContent = `Configuración: Mesa ${num}`;
@@ -540,5 +543,35 @@ function applyViewportTransform() {
   const viewport = document.getElementById('main-viewport');
   if (viewport) {
     viewport.setAttribute('transform', `translate(${panX}, ${panY}) scale(${zoomScale})`);
+  }
+}
+
+// --- MOBILE UX INTERACTIONS ---
+function toggleSidebarMobile() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  
+  const isOpen = sidebar.classList.toggle('open');
+  if (backdrop) {
+    backdrop.classList.toggle('visible', isOpen);
+  }
+  
+  const toggleBtn = document.getElementById('mobile-toggle-btn');
+  if (toggleBtn) {
+    toggleBtn.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+  }
+}
+
+function closeSidebarMobile() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  
+  if (sidebar) sidebar.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('visible');
+  
+  const toggleBtn = document.getElementById('mobile-toggle-btn');
+  if (toggleBtn) {
+    toggleBtn.innerHTML = '<i class="fa-solid fa-bars"></i>';
   }
 }

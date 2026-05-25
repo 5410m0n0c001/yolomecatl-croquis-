@@ -26,6 +26,14 @@
 
   <div class="app-container">
     
+    <!-- Sidebar backdrop for mobile overlay closing -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
+    
+    <!-- Floating toggle button for mobile sidebar -->
+    <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="toggleSidebarMobile()" title="Menú de Opciones">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    
     <!-- LEFT SIDEBAR: Controls & Metrics -->
     <aside class="sidebar">
       <div class="brand">
