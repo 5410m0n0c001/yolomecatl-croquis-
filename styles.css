@@ -1,0 +1,1025 @@
+/* 
+   Yolomecatl - Planificador y Visualizador de Eventos
+   Premium CSS Design System & Theme Engine
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Default Theme: Premium Render */
+  --bg-primary: #121316;
+  --bg-secondary: #1a1c23;
+  --bg-card: rgba(30, 32, 42, 0.7);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  
+  --accent: #bda068; /* Luxury Gold */
+  --accent-light: #d4af37;
+  --accent-glow: rgba(189, 160, 104, 0.15);
+  
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  /* SVG Specific Styles (Premium Render default) */
+  --svg-bg: #14161d;
+  --svg-grid: rgba(255, 255, 255, 0.03);
+  --svg-wall-stroke: #2e313d;
+  --svg-wall-fill: #1f222b;
+  --svg-wall-inner: #1a1d24;
+  
+  --svg-grass: #1b2f21;
+  --svg-water: #1b3d54;
+  --svg-pista: #472b15;
+  --svg-lobby: #282830;
+  --svg-kitchen: #252833;
+  --svg-bathroom: #222530;
+  --svg-parking: #1d1e24;
+  
+  --svg-table-bg: #2e241c;
+  --svg-table-stroke: #bda068;
+  --svg-chair-bg: #40342a;
+  --svg-chair-stroke: #8b6e3c;
+  
+  --svg-text: #f3f4f6;
+  --svg-text-num: #ffffff;
+  
+  --sidebar-width: 340px;
+  --drawer-width: 320px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Theme: AutoCAD Clásico (CAD Dark) */
+[data-theme="cad-dark"] {
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #111115;
+  --bg-card: rgba(20, 20, 28, 0.8);
+  --border-color: #22222a;
+  --text-primary: #00ff66; /* Neon technical tint */
+  --text-secondary: #88ffaa;
+  --text-muted: #55aa77;
+  --accent: #00ffff; /* Neon Cyan */
+  --accent-light: #00ffff;
+  --accent-glow: rgba(0, 255, 255, 0.15);
+  
+  --svg-bg: #000000;
+  --svg-grid: rgba(0, 255, 255, 0.05);
+  --svg-wall-stroke: #00ff66; /* Neon Green Muros */
+  --svg-wall-fill: #001f07;
+  --svg-wall-inner: #000000;
+  
+  --svg-grass: #001202;
+  --svg-water: #00121a;
+  --svg-pista: #1f1100;
+  --svg-lobby: #0d0d12;
+  --svg-kitchen: #12121c;
+  --svg-bathroom: #101018;
+  --svg-parking: #0b0b0d;
+  
+  --svg-table-bg: #000000;
+  --svg-table-stroke: #00ffff; /* Cyan furniture */
+  --svg-chair-bg: #000000;
+  --svg-chair-stroke: #00aaaa;
+  
+  --svg-text: #ffff00; /* Yellow text for standard CAD annotations */
+  --svg-text-num: #00ffff;
+}
+
+/* Theme: AutoCAD Claro (CAD Light) */
+[data-theme="cad-light"] {
+  --bg-primary: #f0f2f5;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --border-color: #d1d5db;
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --accent: #2563eb; /* Technical Royal Blue */
+  --accent-light: #3b82f6;
+  --accent-glow: rgba(37, 99, 235, 0.1);
+  
+  --svg-bg: #ffffff;
+  --svg-grid: rgba(37, 99, 235, 0.06);
+  --svg-wall-stroke: #1e293b; /* Dark Blueprint lines */
+  --svg-wall-fill: #f1f5f9;
+  --svg-wall-inner: #ffffff;
+  
+  --svg-grass: #f8fafc;
+  --svg-water: #f0f7ff;
+  --svg-pista: #fafaf9;
+  --svg-lobby: #f8fafc;
+  --svg-kitchen: #fafafa;
+  --svg-bathroom: #fafafa;
+  --svg-parking: #f1f5f9;
+  
+  --svg-table-bg: #ffffff;
+  --svg-table-stroke: #2563eb;
+  --svg-chair-bg: #ffffff;
+  --svg-chair-stroke: #64748b;
+  
+  --svg-text: #1e293b;
+  --svg-text-num: #2563eb;
+}
+
+/* Theme: Técnico Minimalista B/N */
+[data-theme="minimalist"] {
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --border-color: #e5e5e5;
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --accent: #000000;
+  --accent-light: #333333;
+  --accent-glow: rgba(0, 0, 0, 0.05);
+  
+  --svg-bg: #ffffff;
+  --svg-grid: none;
+  --svg-wall-stroke: #000000;
+  --svg-wall-fill: none;
+  --svg-wall-inner: #ffffff;
+  
+  --svg-grass: #ffffff;
+  --svg-water: #ffffff;
+  --svg-pista: #ffffff;
+  --svg-lobby: #ffffff;
+  --svg-kitchen: #ffffff;
+  --svg-bathroom: #ffffff;
+  --svg-parking: #ffffff;
+  
+  --svg-table-bg: #ffffff;
+  --svg-table-stroke: #000000;
+  --svg-chair-bg: #ffffff;
+  --svg-chair-stroke: #000000;
+  
+  --svg-text: #000000;
+  --svg-text-num: #000000;
+}
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Main Application Layout */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 10;
+  overflow-y: auto;
+  flex-shrink: 0;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
+  transition: var(--transition);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brand h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+}
+
+/* Section Header styling */
+.section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+/* Theme Selector Control */
+.theme-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.theme-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.6rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  transition: var(--transition);
+}
+
+.theme-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.theme-btn.active {
+  background-color: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.theme-btn i {
+  font-size: 1.1rem;
+}
+
+/* Metric Cards */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.metric-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.metric-lbl {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Global Capacity Density Control */
+.density-control {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.density-lbl {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.density-lbl span:last-child {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.density-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.density-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.density-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.density-btn.active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Layer Control Checks */
+.layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+
+.layer-item:hover {
+  color: var(--text-primary);
+}
+
+/* Custom switch checkbox */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #374151;
+  transition: .2s;
+  border-radius: 18px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--accent);
+}
+
+input:checked + .slider:before {
+  transform: translateX(14px);
+}
+
+/* Dynamic Action Buttons */
+.sidebar-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-primary, .btn-secondary {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--bg-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-light);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 15px rgba(189, 160, 104, 0.4);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--text-secondary);
+}
+
+/* Interactive Blueprint Area */
+.canvas-area {
+  flex-grow: 1;
+  height: 100%;
+  position: relative;
+  background-color: var(--svg-bg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+/* Zoom controls */
+.zoom-controls {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 5;
+}
+
+.zoom-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
+}
+
+.zoom-btn:hover {
+  background-color: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Scale Bar */
+.scale-bar {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  background-color: rgba(17, 24, 39, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 5;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  backdrop-filter: blur(10px);
+}
+
+.scale-line-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scale-line {
+  width: 60px; /* Equivalent to 6 meters in our coordinates (10 units per meter, so 60 units) */
+  height: 4px;
+  background-color: var(--accent);
+  position: relative;
+}
+
+.scale-line::before, .scale-line::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 12px;
+  background-color: var(--accent);
+}
+
+.scale-line::before { left: 0; }
+.scale-line::after { right: 0; }
+
+/* SVG Architectural Elements Style */
+#event-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  user-select: none;
+  cursor: grab;
+}
+
+#event-svg:active {
+  cursor: grabbing;
+}
+
+/* SVG Elements styling */
+.svg-grid-line {
+  stroke: var(--svg-grid);
+  stroke-width: 0.5;
+}
+
+.svg-wall {
+  fill: var(--svg-wall-fill);
+  stroke: var(--svg-wall-stroke);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: var(--transition);
+}
+
+.svg-wall-glass {
+  fill: rgba(0, 255, 255, 0.05);
+  stroke: rgba(0, 255, 255, 0.4);
+  stroke-width: 2.5;
+}
+
+.svg-door-swing {
+  fill: none;
+  stroke: var(--svg-wall-stroke);
+  stroke-width: 1.2;
+  stroke-dasharray: 4,4;
+}
+
+.svg-stair-step {
+  fill: none;
+  stroke: var(--svg-wall-stroke);
+  stroke-width: 1;
+}
+
+/* Zones */
+.zone-grass {
+  fill: var(--svg-grass);
+  transition: var(--transition);
+}
+
+.zone-water {
+  fill: var(--svg-water);
+  transition: var(--transition);
+}
+
+.zone-pista {
+  fill: var(--svg-pista);
+  stroke: var(--svg-wall-stroke);
+  stroke-width: 2.5;
+  transition: var(--transition);
+}
+
+.zone-lobby {
+  fill: var(--svg-lobby);
+  transition: var(--transition);
+}
+
+.zone-kitchen {
+  fill: var(--svg-kitchen);
+  transition: var(--transition);
+}
+
+.zone-bathroom {
+  fill: var(--svg-bathroom);
+  transition: var(--transition);
+}
+
+.zone-parking {
+  fill: var(--svg-parking);
+  transition: var(--transition);
+}
+
+/* Furniture & Tables */
+.svg-table-block {
+  fill: var(--svg-table-bg);
+  stroke: var(--svg-table-stroke);
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.svg-table-block:hover {
+  fill: var(--accent-glow);
+  stroke-width: 2.5;
+}
+
+.svg-table-block.vip {
+  stroke: var(--accent-light);
+  stroke-dasharray: none;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.6));
+}
+
+.svg-table-block.reserved {
+  stroke: var(--danger);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.4));
+}
+
+.svg-table-block.active-selected {
+  stroke: #3b82f6 !important;
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.7));
+}
+
+.svg-chair {
+  fill: var(--svg-chair-bg);
+  stroke: var(--svg-chair-stroke);
+  stroke-width: 1;
+  transition: var(--transition);
+}
+
+.svg-car {
+  fill: #374151;
+  stroke: #4b5563;
+  stroke-width: 1;
+}
+
+.svg-shrub {
+  fill: #14532d;
+  stroke: #166534;
+  stroke-width: 1;
+}
+
+/* Annotation and text labels */
+.svg-label {
+  fill: var(--svg-text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  letter-spacing: 0.05em;
+  transition: var(--transition);
+}
+
+.svg-label-sub {
+  fill: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.svg-label-table {
+  fill: var(--svg-text-num);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Interactive Circulation Routes */
+.circulation-path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 6,6;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.circulation-path.active {
+  opacity: 0.75;
+  animation: dash 30s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+.circulation-guest {
+  stroke: var(--info);
+}
+
+.circulation-service {
+  stroke: var(--success);
+}
+
+.circulation-emergency {
+  stroke: var(--danger);
+  stroke-width: 4;
+}
+
+/* Detail Drawer Sliding Panel */
+.detail-drawer {
+  width: var(--drawer-width);
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 10;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: var(--transition);
+}
+
+.detail-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.drawer-header h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.close-drawer-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.close-drawer-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+/* Form inputs styling */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-select, .form-input, .form-textarea {
+  width: 100%;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+
+.form-select:focus, .form-input:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 5px var(--accent-glow);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.info-box {
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 1px dashed rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-box strong {
+  color: var(--info);
+}
+
+/* Floating Commercial Tooltip */
+.architect-tooltip {
+  position: absolute;
+  background-color: rgba(17, 24, 39, 0.95);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  max-width: 250px;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Welcome Overlay / Premium Splash */
+.welcome-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(10, 11, 14, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  padding: 2rem;
+  text-align: center;
+}
+
+.welcome-box {
+  max-width: 600px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.welcome-logo {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.welcome-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.welcome-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.welcome-btn {
+  background-color: var(--accent);
+  color: var(--bg-primary);
+  font-weight: 700;
+  padding: 0.8rem 2rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: var(--transition);
+}
+
+.welcome-btn:hover {
+  background-color: var(--accent-light);
+  box-shadow: 0 0 20px rgba(189, 160, 104, 0.5);
+}
+
+/* Print/Export Styling (Clean Blueprint Layout) */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  .sidebar, .zoom-controls, .detail-drawer, .welcome-overlay, .scale-bar {
+    display: none !important;
+  }
+  
+  .app-container {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+  }
+  
+  .canvas-area {
+    width: 100% !important;
+    height: 100vh !important;
+    background-color: #ffffff !important;
+    page-break-after: always;
+  }
+  
+  #event-svg {
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* Force CAD Light theme for prints */
+  :root {
+    --svg-bg: #ffffff !important;
+    --svg-grid: none !important;
+    --svg-wall-stroke: #000000 !important;
+    --svg-wall-fill: none !important;
+    --svg-table-bg: #ffffff !important;
+    --svg-table-stroke: #000000 !important;
+    --svg-chair-bg: #ffffff !important;
+    --svg-chair-stroke: #000000 !important;
+    --svg-text: #000000 !important;
+    --svg-text-num: #000000 !important;
+  }
+}

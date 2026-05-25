@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yolomecatl - Planificador y Visualizador de Eventos Premium</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-theme="premium">
+
+  <!-- Welcome Overlay (Commercial Presentation Intro) -->
+  <div class="welcome-overlay" id="welcome-overlay">
+    <div class="welcome-box">
+      <div class="welcome-logo">YOLOMECATL</div>
+      <div class="welcome-title">Diseño Arquitectónico e Ingeniería de Eventos</div>
+      <div class="welcome-text">
+        Bienvenido al Planificador de Eventos Yolomecatl. Hemos interpretado el croquis a mano del salón de eventos y lo hemos transformado en un plano arquitectónico interactivo de alta fidelidad. 
+        <br><br>
+        Esta herramienta comercial le permite explorar la distribución en cuatro modos visuales (incluyendo AutoCAD técnico y render de plano), simular la capacidad de comensales, configurar mesas cuadradas de forma individual y gestionar la logística de invitados según el croquis original.
+      </div>
+      <button class="welcome-btn" onclick="closeWelcome()">Comenzar Visualización</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- LEFT SIDEBAR: Controls & Metrics -->
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Yolomecatl</h1>
+        <span>Salón de Eventos</span>
+      </div>
+
+      <!-- Theme Selector -->
+      <div>
+        <h3 class="section-title">Estilo del Plano</h3>
+        <div class="theme-selector">
+          <button class="theme-btn active" id="theme-premium" onclick="setTheme('premium')">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Render 2D
+          </button>
+          <button class="theme-btn" id="theme-cad-dark" onclick="setTheme('cad-dark')">
+            <i class="fa-solid fa-terminal"></i> CAD Oscuro
+          </button>
+          <button class="theme-btn" id="theme-cad-light" onclick="setTheme('cad-light')">
+            <i class="fa-solid fa-drafting-compass"></i> CAD Claro
+          </button>
+          <button class="theme-btn" id="theme-minimalist" onclick="setTheme('minimalist')">
+            <i class="fa-solid fa-print"></i> Técnico B/N
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Statistics -->
+      <div>
+        <h3 class="section-title">Métricas de Evento</h3>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-val" id="metric-capacity">200</span>
+            <span class="metric-lbl">Capacidad</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val" id="metric-tables">20/20</span>
+            <span class="metric-lbl">Mesas Activas</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">576 m²</span>
+            <span class="metric-lbl">Área Cubierta</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">322 m²</span>
+            <span class="metric-lbl">Área Jardín</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Density Settings (Chairs per table globally) -->
+      <div>
+        <h3 class="section-title">Comensales por Mesa</h3>
+        <div class="density-control">
+          <div class="density-lbl">
+            <span>Distribución Estándar</span>
+            <span id="density-val">10 personas</span>
+          </div>
+          <div class="density-options">
+            <button class="density-btn" id="density-8" onclick="setGlobalDensity(8)">8 Sillas</button>
+            <button class="density-btn active" id="density-10" onclick="setGlobalDensity(10)">10 Sillas</button>
+            <button class="density-btn" id="density-12" onclick="setGlobalDensity(12)">12 Sillas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layers Manager -->
+      <div>
+        <h3 class="section-title">Capas (Layers)</h3>
+        <div class="layers-list">
+          <label class="layer-item">
+            <span>Muros y Estructuras</span>
+            <span class="switch">
+              <input type="checkbox" id="layer-walls" checked onchange="toggleLayer('walls', this.checked)">
+              <span class="slider"></span>
+            </span>
+          </label>
+          <label class="layer-item">
+            <span>Distribución de Mesas</span>
+            <span class="switch">
+              <input type="checkbox" id="layer-furniture" checked onchange="toggleLayer('furniture', this.checked)">
+              <span class="slider"></span>
+            </span>
+          </label>
+          <label class="layer-item">
+            <span>Rejilla CAD (Grid)</span>
+            <span class="switch">
+              <input type="checkbox" id="layer-grid" checked onchange="toggleLayer('grid', this.checked)">
+              <span class="slider"></span>
+            </span>
+          </label>
+          <label class="layer-item">
+            <span>Áreas Verdes y Jardín</span>
+            <span class="switch">
+              <input type="checkbox" id="layer-garden" checked onchange="toggleLayer('garden', this.checked)">
+              <span class="slider"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Circulation Paths (Logistics) -->
+      <div>
+        <h3 class="section-title">Logística y Circulación</h3>
+        <div class="layers-list">
+          <label class="layer-item" style="color: #3b82f6;">
+            <span>Flujo de Invitados</span>
+            <span class="switch">
+              <input type="checkbox" id="path-guest" onchange="toggleCirculation('guest', this.checked)">
+              <span class="slider" style="background-color: rgba(59, 130, 246, 0.3);"></span>
+            </span>
+          </label>
+          <label class="layer-item" style="color: #10b981;">
+            <span>Servicio (Cocina y Bar)</span>
+            <span class="switch">
+              <input type="checkbox" id="path-service" onchange="toggleCirculation('service', this.checked)">
+              <span class="slider" style="background-color: rgba(16, 185, 129, 0.3);"></span>
+            </span>
+          </label>
+          <label class="layer-item" style="color: #ef4444;">
+            <span>Salidas de Emergencia</span>
+            <span class="switch">
+              <input type="checkbox" id="path-emergency" onchange="toggleCirculation('emergency', this.checked)">
+              <span class="slider" style="background-color: rgba(239, 68, 68, 0.3);"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="sidebar-actions">
+        <button class="btn-primary" onclick="window.print()">
+          <i class="fa-solid fa-print"></i> Exportar Ficha Comercial
+        </button>
+        <button class="btn-secondary" onclick="resetCanvasView()">
+          <i class="fa-solid fa-compress"></i> Centrar Plano
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER CANVAS: Interactive architectural layout -->
+    <main class="canvas-area" id="canvas-area">
+      
+      <!-- SVG Architectural Design -->
+      <svg id="event-svg" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+        
+        <!-- Background definitions for realistic render styling -->
+        <defs>
+          <!-- Grass Pattern -->
+          <pattern id="grass-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+            <rect width="40" height="40" fill="#1b2f21"/>
+            <circle cx="10" cy="10" r="1.5" fill="#154020" opacity="0.3"/>
+            <circle cx="30" cy="30" r="2" fill="#154020" opacity="0.3"/>
+            <circle cx="20" cy="20" r="1.2" fill="#1a4d2e" opacity="0.4"/>
+          </pattern>
+          
+          <!-- Water Pattern for Waterfall -->
+          <linearGradient id="water-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.9" />
+            <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.9" />
+          </linearGradient>
+
+          <!-- Parquet Wood Pattern for Dance Floor -->
+          <pattern id="parquet-pattern" width="30" height="30" patternUnits="userSpaceOnUse">
+            <rect width="30" height="30" fill="#4a2c16" />
+            <rect x="0" y="0" width="15" height="15" fill="none" stroke="#2c1a0e" stroke-width="0.8"/>
+            <rect x="15" y="15" width="15" height="15" fill="none" stroke="#2c1a0e" stroke-width="0.8"/>
+            <line x1="0" y1="7.5" x2="15" y2="7.5" stroke="#3d2412" stroke-width="0.4"/>
+            <line x1="15" y1="22.5" x2="30" y2="22.5" stroke="#3d2412" stroke-width="0.4"/>
+          </pattern>
+
+          <!-- Diagonal Hatch Pattern for Concrete Walls -->
+          <pattern id="wall-hatch" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+          </pattern>
+
+          <!-- Drop shadows for realistic look -->
+          <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+            <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+
+        <!-- Dynamic technical background grid (Toggleable) -->
+        <g id="g-grid">
+          <!-- Grid lines generated dynamically or simple grid backplate -->
+          <rect width="1000" height="800" fill="none" />
+          <!-- Vertical lines spaced by 20 units -->
+          <path d="M 20,0 L 20,800 M 40,0 L 40,800 M 60,0 L 60,800 M 80,0 L 80,800 M 100,0 L 100,800 M 120,0 L 120,800 M 140,0 L 140,800 M 160,0 L 160,800 M 180,0 L 180,800 M 200,0 L 200,800 M 220,0 L 220,800 M 240,0 L 240,800 M 260,0 L 260,800 M 280,0 L 280,800 M 300,0 L 300,800 M 320,0 L 320,800 M 340,0 L 340,800 M 360,0 L 360,800 M 380,0 L 380,800 M 400,0 L 400,800 M 420,0 L 420,800 M 440,0 L 440,800 M 460,0 L 460,800 M 480,0 L 480,800 M 500,0 L 500,800 M 520,0 L 520,800 M 540,0 L 540,800 M 560,0 L 560,800 M 580,0 L 580,800 M 600,0 L 600,800 M 620,0 L 620,800 M 640,0 L 640,800 M 660,0 L 660,800 M 680,0 L 680,800 M 700,0 L 700,800 M 720,0 L 720,800 M 740,0 L 740,800 M 760,0 L 760,800 M 780,0 L 780,800 M 800,0 L 800,800 M 820,0 L 820,800 M 840,0 L 840,800 M 860,0 L 860,800 M 880,0 L 880,800 M 900,0 L 900,800 M 920,0 L 920,800 M 940,0 L 940,800 M 960,0 L 960,800 M 980,0 L 980,800" class="svg-grid-line" />
+          <!-- Horizontal lines spaced by 20 units -->
+          <path d="M 0,20 L 1000,20 M 0,40 L 1000,40 M 0,60 L 1000,60 M 0,80 L 1000,80 M 0,100 L 1000,100 M 0,120 L 1000,120 M 0,140 L 1000,140 M 0,160 L 1000,160 M 0,180 L 1000,180 M 0,200 L 1000,200 M 0,220 L 1000,220 M 0,240 L 1000,240 M 0,260 L 1000,260 M 0,280 L 1000,280 M 0,300 L 1000,300 M 0,320 L 1000,320 M 0,340 L 1000,340 M 0,360 L 1000,360 M 0,380 L 1000,380 M 0,400 L 1000,400 M 0,420 L 1000,420 M 0,440 L 1000,440 M 0,460 L 1000,460 M 0,480 L 1000,480 M 0,500 L 1000,500 M 0,520 L 1000,520 M 0,540 L 1000,540 M 0,560 L 1000,560 M 0,580 L 1000,580 M 0,600 L 1000,600 M 0,620 L 1000,620 M 0,640 L 1000,640 M 0,660 L 1000,660 M 0,680 L 1000,680 M 0,700 L 1000,700 M 0,720 L 1000,720 M 0,740 L 1000,740 M 0,760 L 1000,760 M 0,780 L 1000,780" class="svg-grid-line" />
+        </g>
+
+        <!-- LANDSCAPING & GARDEN LAYER (Toggleable) -->
+        <g id="g-garden">
+          <!-- Green lawn space -->
+          <rect x="20" y="20" width="230" height="680" class="zone-grass" />
+          
+          <!-- Garden Stone Pathway -->
+          <path d="M 120,700 L 120,530 C 120,400 60,350 60,280 C 60,200 150,150 150,80 L 170,80 C 170,160 80,210 80,280 C 80,340 140,390 140,530 L 140,700 Z" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5"/>
+          
+          <!-- Capilla (Chapel) Structure - Lower Left -->
+          <g id="chapel-group">
+            <rect x="30" y="520" width="150" height="180" fill="rgba(0,0,0,0.2)" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <!-- Chapel altar -->
+            <rect x="35" y="585" width="20" height="50" fill="#4b5563" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+            <path d="M 40,610 L 50,610 M 45,600 L 45,620" stroke="#f3f4f6" stroke-width="2" fill="none" /> <!-- Altar Cross -->
+            
+            <!-- Chapel Benches -->
+            <g opacity="0.8">
+              <!-- Bench Row 1 -->
+              <rect x="80" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <rect x="80" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <!-- Bench Row 2 -->
+              <rect x="105" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <rect x="105" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <!-- Bench Row 3 -->
+              <rect x="130" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <rect x="130" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <!-- Bench Row 4 -->
+              <rect x="155" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+              <rect x="155" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
+            </g>
+            <text x="105" y="515" class="svg-label" text-anchor="middle">CAPILLA</text>
+          </g>
+
+          <!-- Cascada (Waterfall) Wall - Center Left -->
+          <g id="waterfall-group">
+            <!-- Stone backplate -->
+            <rect x="20" y="200" width="15" height="240" fill="#374151" stroke="#1f2937" stroke-width="1"/>
+            <!-- Blue water pool -->
+            <rect x="25" y="195" width="30" height="250" class="zone-water" stroke="#1d4ed8" stroke-width="1"/>
+            <!-- Waterfall visual accents -->
+            <path d="M 35,195 L 35,445 M 45,195 L 45,445" stroke="#93c5fd" stroke-width="1" stroke-dasharray="20,10" opacity="0.6" />
+            <text x="50" y="325" class="svg-label" text-anchor="middle" transform="rotate(-90 50 325)">CASCADA DE AGUA</text>
+          </g>
+          
+          <!-- Decorative trees and plants in garden -->
+          <circle cx="50" cy="50" r="15" class="svg-shrub" filter="url(#shadow)" />
+          <circle cx="210" cy="60" r="18" class="svg-shrub" filter="url(#shadow)" />
+          <circle cx="200" cy="300" r="14" class="svg-shrub" filter="url(#shadow)" />
+          <circle cx="210" cy="460" r="16" class="svg-shrub" filter="url(#shadow)" />
+        </g>
+
+        <!-- PARKING & ACCESS LAYER -->
+        <g id="g-parking">
+          <!-- Parking asphalt -->
+          <polygon points="770,270 980,270 980,700 770,700" class="zone-parking" />
+          
+          <!-- Parking Bays -->
+          <!-- Bay divider lines -->
+          <path d="M 770,330 L 850,330 M 770,390 L 850,390 M 770,450 L 850,450 M 770,510 L 850,510 M 770,570 L 850,570 M 770,630 L 850,630" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="5,3" />
+          <path d="M 900,330 L 980,330 M 900,390 L 980,390 M 900,450 L 980,450 M 900,510 L 980,510 M 900,570 L 980,570 M 900,630 L 980,630" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="5,3" />
+          
+          <!-- CAD Cars parked in bays for scale context -->
+          <!-- Car 1 (Silver) -->
+          <rect x="780" y="285" width="55" height="30" rx="3" fill="#9ca3af" stroke="#4b5563" stroke-width="1" />
+          <rect x="790" y="288" width="10" height="24" fill="#1f2937" />
+          <rect x="820" y="288" width="6" height="24" fill="#1f2937" />
+          <!-- Car 2 (Crimson) -->
+          <rect x="780" y="405" width="55" height="30" rx="3" fill="#b91c1c" stroke="#7f1d1d" stroke-width="1" />
+          <rect x="790" y="408" width="10" height="24" fill="#1f2937" />
+          <rect x="820" y="408" width="6" height="24" fill="#1f2937" />
+          <!-- Car 3 (Blue) -->
+          <rect x="915" y="345" width="55" height="30" rx="3" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1" />
+          <rect x="925" y="348" width="10" height="24" fill="#1f2937" />
+          <rect x="955" y="348" width="6" height="24" fill="#1f2937" />
+          <!-- Car 4 (Black SUV) -->
+          <rect x="910" y="525" width="60" height="32" rx="3" fill="#111827" stroke="#374151" stroke-width="1.2" />
+          <rect x="922" y="528" width="12" height="26" fill="#4b5563" />
+          <rect x="955" y="528" width="7" height="26" fill="#4b5563" />
+
+          <!-- Estacionamiento driveway arrows -->
+          <path d="M 875,650 L 875,350" stroke="#f3f4f6" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.4" />
+          <text x="875" y="580" class="svg-label" text-anchor="middle" transform="rotate(-90 875 580)" opacity="0.7">CIRCULACIÓN VEHICULAR</text>
+
+          <!-- Outer pathway/street border -->
+          <rect x="20" y="700" width="960" height="80" fill="#1f2937" opacity="0.2" />
+          <line x1="20" y1="700" x2="980" y2="700" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
+          <line x1="20" y1="780" x2="980" y2="780" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
+
+          <!-- Labels -->
+          <text x="875" y="295" class="svg-label" text-anchor="middle">ESTACIONAMIENTO</text>
+          <text x="910" y="750" class="svg-label" text-anchor="middle">ENTRADA PRINCIPAL VEHICULAR</text>
+          <!-- Entrance vectors at bottom right -->
+          <path d="M 910,775 L 910,725" fill="none" stroke="var(--accent)" stroke-width="3" marker-end="url(#arrow)" />
+        </g>
+
+        <!-- SERVICE & SUPPORT ZONES: Kitchen & Bar -->
+        <g id="g-service">
+          <!-- Kitchen boundary (Moved back to x = 770 to restore vertical corridor) -->
+          <rect x="770" y="20" width="210" height="230" class="zone-kitchen" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+          
+          <!-- Kitchen furnishings (CAD schematic blocks) -->
+          <!-- Cooking Range/Ovens -->
+          <rect x="780" y="30" width="100" height="25" fill="#374151" stroke="#4b5563" />
+          <circle cx="795" cy="42.5" r="5" fill="#1f2937" />
+          <circle cx="815" cy="42.5" r="5" fill="#1f2937" />
+          <circle cx="845" cy="42.5" r="5" fill="#1f2937" />
+          <circle cx="865" cy="42.5" r="5" fill="#1f2937" />
+          <!-- Prep counters -->
+          <rect x="945" y="30" width="25" height="150" fill="#374151" stroke="#4b5563" />
+          <rect x="820" y="110" width="80" height="30" fill="#4b5563" stroke="#6b7280" />
+          <!-- Kitchen sink -->
+          <rect x="945" y="195" width="25" height="40" fill="#1e3a8a" opacity="0.3" stroke="#4b5563" />
+          <circle cx="957.5" cy="215" r="6" fill="none" stroke="#6b7280" stroke-width="1.5" />
+
+          <!-- ACCESO COCINA (Horizontal block bridging corridor between Salon and Kitchen) -->
+          <!-- Background of the entrance corridor -->
+          <rect x="720" y="190" width="50" height="60" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+          <!-- Label inside -->
+          <text x="745" y="225" class="svg-label-sub" text-anchor="middle" font-size="8" transform="rotate(-90 745 225)">ACCESO COCINA</text>
+
+          <!-- INTEGRATED BAR (Zona de Bar en el Muro del Salón - Rest of that Wall Line) -->
+          <!-- Wooden counter top at x=744 to 754, y=95 to 185 -->
+          <rect x="742" y="95" width="12" height="90" fill="#bda068" rx="2" stroke="#8b6e3c" stroke-width="0.5" filter="url(#shadow)" />
+          <!-- Circular Bar stools on the Salon side -->
+          <circle cx="730" cy="112" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
+          <circle cx="730" cy="140" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
+          <circle cx="730" cy="168" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
+          <!-- Bar text -->
+          <text x="748" y="140" class="svg-label" text-anchor="middle" font-size="9" fill="var(--bg-primary)" transform="rotate(-90 748 140)">BARRA</text>
+
+          <!-- Label -->
+          <text x="875" y="75" class="svg-label" text-anchor="middle">COCINA & BAR</text>
+          <text x="875" y="90" class="svg-label-sub" text-anchor="middle">ZONA DE SERVICIO</text>
+        </g>
+
+        <!-- LOBBY & RECEPTION -->
+        <g id="g-lobby">
+          <!-- Left Reception booth -->
+          <rect x="300" y="700" width="140" height="60" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+          <rect x="310" y="710" width="120" height="20" fill="#1f2937" stroke="var(--accent)" stroke-width="1" /> <!-- Counter desk -->
+          <circle cx="370" cy="745" r="8" class="svg-chair" /> <!-- Lobby stool -->
+          <text x="370" y="722" class="svg-label-sub" text-anchor="middle">RECEPCIÓN A</text>
+
+          <!-- Right Reception booth -->
+          <rect x="580" y="700" width="140" height="60" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+          <rect x="590" y="710" width="120" height="20" fill="#1f2937" stroke="var(--accent)" stroke-width="1" /> <!-- Counter desk -->
+          <circle cx="650" cy="745" r="8" class="svg-chair" /> <!-- Lobby stool -->
+          <text x="650" y="722" class="svg-label-sub" text-anchor="middle">RECEPCIÓN B</text>
+
+          <text x="510" y="760" class="svg-label" text-anchor="middle">ACCESO PRINCIPAL PEATONAL</text>
+          <path d="M 510,775 L 510,715" fill="none" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#arrow)" />
+        </g>
+
+        <!-- RESTROOMS (Baños Damas & Caballeros) - Top Center behind stage -->
+        <g id="g-bathrooms">
+          <!-- Backplate structure -->
+          <rect x="410" y="20" width="200" height="60" class="zone-bathroom" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+          <!-- Central divider wall -->
+          <line x1="510" y1="20" x2="510" y2="80" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+          
+          <!-- DAMAS (Left Restroom) -->
+          <!-- 3 cubicles -->
+          <line x1="410" y1="50" x2="480" y2="50" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+          <line x1="443" y1="20" x2="443" y2="50" stroke="var(--svg-wall-stroke)" stroke-width="1" />
+          <line x1="476" y1="20" x2="476" y2="50" stroke="var(--svg-wall-stroke)" stroke-width="1" />
+          <!-- Handwash counter -->
+          <rect x="490" y="25" width="15" height="50" fill="#374151" stroke="#4b5563" />
+          <circle cx="497.5" cy="35" r="3" fill="#9ca3af" />
+          <circle cx="497.5" cy="65" r="3" fill="#9ca3af" />
+          <text x="460" y="70" class="svg-label-sub" text-anchor="middle">DAMAS</text>
+
+          <!-- CABALLEROS (Right Restroom) -->
+          <!-- 2 cubicles -->
+          <line x1="540" y1="50" x2="610" y2="50" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+          <line x1="575" y1="20" x2="575" y2="50" stroke="var(--svg-wall-stroke)" stroke-width="1" />
+          <!-- Urinals -->
+          <rect x="520" y="22" width="12" height="6" fill="#4b5563" />
+          <rect x="535" y="22" width="12" height="6" fill="#4b5563" />
+          <!-- Handwash counter -->
+          <rect x="590" y="25" width="15" height="50" fill="#374151" stroke="#4b5563" />
+          <circle cx="597.5" cy="50" r="4" fill="#9ca3af" />
+          <text x="560" y="70" class="svg-label-sub" text-anchor="middle">CABALLEROS</text>
+
+          <text x="510" y="15" class="svg-label" text-anchor="middle" font-size="11">SERVICIOS SANITARIOS</text>
+        </g>
+
+        <!-- MAIN EVENT SALON STRUCTURE (Walls, Stage, Dance Floor) -->
+        <g id="g-walls">
+          <!-- Main Salon Enclosure boundaries -->
+          <rect x="270" y="80" width="480" height="620" fill="none" stroke="var(--svg-wall-stroke)" stroke-width="5" stroke-linejoin="round" />
+          
+          <!-- Outer columns inside salon wall for AutoCAD styling -->
+          <rect x="265" y="195" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          <rect x="265" y="315" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          <rect x="265" y="435" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          <rect x="265" y="555" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          
+          <rect x="745" y="195" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          <rect x="745" y="315" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          <rect x="745" y="435" width="10" height="15" fill="var(--svg-wall-stroke)" />
+          <rect x="745" y="555" width="10" height="15" fill="var(--svg-wall-stroke)" />
+
+          <!-- DOOR SYMBOLS -->
+          <!-- Main entrance door (bottom, centered) -->
+          <g transform="translate(510,700)">
+            <rect x="-40" y="-2" width="80" height="4" fill="var(--svg-bg)" /> <!-- Wall Gap -->
+            <!-- Door panels (open state) -->
+            <line x1="-40" y1="0" x2="-40" y2="-35" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <line x1="40" y1="0" x2="40" y2="-35" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <!-- Opening arc guides -->
+            <path d="M -40,-35 A 35,35 0 0,0 -5,0" class="svg-door-swing" />
+            <path d="M 40,-35 A 35,35 0 0,1 5,0" class="svg-door-swing" />
+          </g>
+
+          <!-- Garden sliding door (left, y=380 to 440) -->
+          <g transform="translate(270, 410)">
+            <rect x="-3" y="-30" width="6" height="60" fill="var(--svg-bg)" /> <!-- Gap -->
+            <!-- Sliding door lines -->
+            <line x1="0" y1="-28" x2="0" y2="28" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+            <line x1="-3" y1="-28" x2="-3" y2="0" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
+            <line x1="3" y1="0" x2="3" y2="28" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
+          </g>
+
+          <!-- Kitchen entrance doors (swinging into the vestibule) -->
+          <g transform="translate(720, 220)">
+            <rect x="-2" y="-20" width="4" height="40" fill="var(--svg-bg)" /> <!-- Gap in the wall -->
+            <line x1="0" y1="-20" x2="18" y2="-20" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <line x1="0" y1="20" x2="18" y2="20" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <path d="M 18,-20 A 20,20 0 0,1 0,0" class="svg-door-swing" />
+            <path d="M 18,20 A 20,20 0 0,0 0,0" class="svg-door-swing" />
+          </g>
+
+          <!-- STAGE / DJ ESCENARIO (Elevated Platform) -->
+          <g id="stage-group">
+            <rect x="385" y="80" width="200" height="60" fill="rgba(0,0,0,0.15)" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
+            <!-- DJ Console -->
+            <rect x="455" y="90" width="60" height="20" fill="#2d3748" stroke="var(--accent)" stroke-width="1.5" filter="url(#shadow)" />
+            <!-- Turntables/decks circles -->
+            <circle cx="470" cy="100" r="6" fill="#1a202c" stroke="#4a5568" stroke-width="0.5" />
+            <circle cx="500" cy="100" r="6" fill="#1a202c" stroke="#4a5568" stroke-width="0.5" />
+            <!-- Sound speakers flanking the stage -->
+            <rect x="390" y="115" width="16" height="16" fill="#1a202c" stroke="#4a5568" />
+            <line x1="390" y1="115" x2="406" y2="131" stroke="#4a5568" />
+            <line x1="406" y1="115" x2="390" y2="131" stroke="#4a5568" />
+            
+            <rect x="564" y="115" width="16" height="16" fill="#1a202c" stroke="#4a5568" />
+            <line x1="564" y1="115" x2="580" y2="131" stroke="#4a5568" />
+            <line x1="580" y1="115" x2="564" y2="131" stroke="#4a5568" />
+
+            <!-- Stairs (left access - horizontal steps) -->
+            <g class="stage-stairs">
+              <rect x="345" y="80" width="35" height="60" fill="none" stroke="var(--svg-wall-stroke)" stroke-width="1.5"/>
+              <line x1="345" y1="90" x2="380" y2="90" class="svg-stair-step" />
+              <line x1="345" y1="100" x2="380" y2="100" class="svg-stair-step" />
+              <line x1="345" y1="110" x2="380" y2="110" class="svg-stair-step" />
+              <line x1="345" y1="120" x2="380" y2="120" class="svg-stair-step" />
+              <line x1="345" y1="130" x2="380" y2="130" class="svg-stair-step" />
+            </g>
+
+            <!-- Stairs (right access - horizontal steps) -->
+            <g class="stage-stairs">
+              <rect x="590" y="80" width="35" height="60" fill="none" stroke="var(--svg-wall-stroke)" stroke-width="1.5"/>
+              <line x1="590" y1="90" x2="625" y2="90" class="svg-stair-step" />
+              <line x1="590" y1="100" x2="625" y2="100" class="svg-stair-step" />
+              <line x1="590" y1="110" x2="625" y2="110" class="svg-stair-step" />
+              <line x1="590" y1="120" x2="625" y2="120" class="svg-stair-step" />
+              <line x1="590" y1="130" x2="625" y2="130" class="svg-stair-step" />
+            </g>
+            
+            <text x="485" y="130" class="svg-label" text-anchor="middle" font-size="11">ESCENARIO DJ</text>
+            <text x="485" y="142" class="svg-label-sub" text-anchor="middle">NIVEL ELEVADO (+0.60m)</text>
+          </g>
+
+          <!-- DANCE FLOOR (Pista de Baile) -->
+          <g id="dancefloor-group">
+            <rect x="385" y="150" width="200" height="130" class="zone-pista" rx="4" filter="url(#shadow)" />
+            <text x="485" y="215" class="svg-label" text-anchor="middle" font-size="16" letter-spacing="0.15em">PISTA DE BAILE</text>
+          </g>
+
+          <text x="510" y="360" class="svg-label" text-anchor="middle" font-size="28" opacity="0.1" letter-spacing="0.2em">SALÓN DE EVENTOS</text>
+        </g>
+
+        <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
+        <g id="g-circulation">
+          <!-- Guest Path: Entrance -> Reception -> Salon -> Pista -> Garden -> Chapel (Blue) -->
+          <path id="path-guest-draw" d="M 510,780 L 510,735 C 510,720 370,720 370,700 L 370,680 C 370,660 510,650 510,550 L 510,250 M 510,630 C 400,630 320,600 320,500 L 320,410 L 250,410 L 130,410 L 130,520" class="circulation-path circulation-guest" />
+          
+          <!-- Service Path: Kitchen -> Bar -> Tables Norte & Salon (Green) -->
+          <path id="path-service-draw" d="M 875,120 L 875,150 L 730,150 L 680,150 M 715,190 C 700,190 700,290 650,290 C 510,290 420,350 420,450" class="circulation-path circulation-service" />
+
+          <!-- Emergency Path: Salon Corners -> Left Garden Exit -> Bottom Street Exit (Red) -->
+          <path id="path-emergency-draw" d="M 285,95 L 285,410 L 250,410 M 735,95 L 735,150 L 770,150 M 285,685 L 320,700 L 510,700 L 510,780" class="circulation-path circulation-emergency" />
+        </g>
+
+        <!-- TABLES & SEATING LAYER (Interactive, populated via JS) -->
+        <g id="g-furniture">
+          <!-- Table 1 -->
+          <g id="table-group-1" class="table-container" data-number="1" transform="translate(320, 647)"></g>
+          <!-- Table 2 -->
+          <g id="table-group-2" class="table-container" data-number="2" transform="translate(430, 647)"></g>
+          <!-- Table 3 -->
+          <g id="table-group-3" class="table-container" data-number="3" transform="translate(540, 647)"></g>
+          <!-- Table 4 -->
+          <g id="table-group-4" class="table-container" data-number="4" transform="translate(650, 647)"></g>
+
+          <!-- Table 5 -->
+          <g id="table-group-5" class="table-container" data-number="5" transform="translate(320, 549)"></g>
+          <!-- Table 6 -->
+          <g id="table-group-6" class="table-container" data-number="6" transform="translate(430, 549)"></g>
+          <!-- Table 7 -->
+          <g id="table-group-7" class="table-container" data-number="7" transform="translate(540, 549)"></g>
+          <!-- Table 8 -->
+          <g id="table-group-8" class="table-container" data-number="8" transform="translate(650, 549)"></g>
+
+          <!-- Table 9 -->
+          <g id="table-group-9" class="table-container" data-number="9" transform="translate(320, 451)"></g>
+          <!-- Table 10 -->
+          <g id="table-group-10" class="table-container" data-number="10" transform="translate(430, 451)"></g>
+          <!-- Table 11 -->
+          <g id="table-group-11" class="table-container" data-number="11" transform="translate(540, 451)"></g>
+          <!-- Table 12 -->
+          <g id="table-group-12" class="table-container" data-number="12" transform="translate(650, 451)"></g>
+
+          <!-- Table 13 -->
+          <g id="table-group-13" class="table-container" data-number="13" transform="translate(320, 353)"></g>
+          <!-- Table 14 -->
+          <g id="table-group-14" class="table-container" data-number="14" transform="translate(430, 353)"></g>
+          <!-- Table 15 -->
+          <g id="table-group-15" class="table-container" data-number="15" transform="translate(540, 353)"></g>
+          <!-- Table 16 -->
+          <g id="table-group-16" class="table-container" data-number="16" transform="translate(650, 353)"></g>
+
+          <!-- Table 17 (Norte Izquierda, junto a pista - Row 5) -->
+          <g id="table-group-17" class="table-container" data-number="17" transform="translate(320, 255)"></g>
+          <!-- Table 18 (Extremo Norte Izquierda, junto a pista - Row 6) -->
+          <g id="table-group-18" class="table-container" data-number="18" transform="translate(320, 175)"></g>
+
+          <!-- Table 19 (Norte Derecha, junto a pista - Row 5) -->
+          <g id="table-group-19" class="table-container" data-number="19" transform="translate(650, 255)"></g>
+          <!-- Table 20 (Extremo Norte Derecha, junto a pista - Row 6) -->
+          <g id="table-group-20" class="table-container" data-number="20" transform="translate(650, 175)"></g>
+        </g>
+
+      </svg>
+
+      <!-- FLOATING SCALE BAR -->
+      <div class="scale-bar">
+        <div class="scale-line-container">
+          <div class="scale-line"></div>
+          <span>6m</span>
+        </div>
+        <span>Escala Visual 1:100</span>
+      </div>
+
+      <!-- ZOOM & PAN CONTROLS -->
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomCanvas(1.2)" title="Acercar"><i class="fa-solid fa-plus"></i></button>
+        <button class="zoom-btn" onclick="zoomCanvas(0.8)" title="Alejar"><i class="fa-solid fa-minus"></i></button>
+        <button class="zoom-btn" onclick="resetCanvasView()" title="Centrar Plano"><i class="fa-solid fa-house"></i></button>
+      </div>
+
+      <!-- COORDINATES AND TOOLTIP MOUSE TRACKER -->
+      <div class="architect-tooltip" id="architect-tooltip"></div>
+    </main>
+
+    <!-- RIGHT DRAWER: Single Table Customizer -->
+    <aside class="detail-drawer" id="detail-drawer">
+      <div class="drawer-header">
+        <h2 id="drawer-title">Mesa 1</h2>
+        <button class="close-drawer-btn" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Seating layout shape -->
+      <div class="form-group">
+        <label>Forma de la Mesa</label>
+        <select class="form-select" id="table-shape" onchange="updateSelectedTableShape(this.value)">
+          <option value="square">Cuadrada (Recomendado)</option>
+          <option value="circle">Circular Tradicional</option>
+        </select>
+      </div>
+
+      <!-- Capacity density -->
+      <div class="form-group">
+        <label>Capacidad (Sillas)</label>
+        <select class="form-select" id="table-seats" onchange="updateSelectedTableSeats(parseInt(this.value))">
+          <option value="8">8 Comensales</option>
+          <option value="10">10 Comensales</option>
+          <option value="12">12 Comensales</option>
+        </select>
+      </div>
+
+      <!-- VIP/Priority Status -->
+      <div class="form-group">
+        <label>Estatus de Mesa</label>
+        <select class="form-select" id="table-status" onchange="updateSelectedTableStatus(this.value)">
+          <option value="normal">Estándar</option>
+          <option value="vip">Zona VIP (Borde Dorado)</option>
+          <option value="reserved">Reservado (Borde Rojo)</option>
+        </select>
+      </div>
+
+      <!-- Guest Allocation List -->
+      <div class="form-group">
+        <label id="guest-count-label">Invitados Asignados (0 / 10)</label>
+        <textarea class="form-textarea" id="table-guests" placeholder="Escribe un invitado por línea..." oninput="updateSelectedTableGuests(this.value)"></textarea>
+      </div>
+
+      <!-- Key Performance Metrics (Distance, Sightlines) -->
+      <div class="info-box">
+        <div><strong>Logística de la Mesa:</strong></div>
+        <div id="metric-dist-pista">Distancia a Pista: ~6.2 metros</div>
+        <div id="metric-dist-dj">Distancia a DJ: ~15.0 metros</div>
+        <div id="metric-dist-wc">Distancia a Baños: ~16.8 metros</div>
+        <div id="metric-dist-bar">Servicio de Bar: Directo & Eficiente</div>
+      </div>
+      
+      <button class="btn-secondary" style="border-color: var(--danger); color: var(--danger); margin-top: auto;" onclick="clearSelectedTable()">
+        <i class="fa-solid fa-trash-can"></i> Limpiar Mesa
+      </button>
+    </aside>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
