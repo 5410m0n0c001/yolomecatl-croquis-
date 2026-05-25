@@ -356,22 +356,46 @@
           <text x="875" y="90" class="svg-label-sub" text-anchor="middle">ZONA DE SERVICIO</text>
         </g>
 
-        <!-- LOBBY & RECEPTION -->
+        <!-- LOBBY & RECEPTION (Unified Reception Room with Pedestrian Access Corridor) -->
         <g id="g-lobby">
-          <!-- Left Reception booth -->
-          <rect x="300" y="700" width="140" height="60" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="2" />
-          <rect x="310" y="710" width="120" height="20" fill="#1f2937" stroke="var(--accent)" stroke-width="1" /> <!-- Counter desk -->
-          <circle cx="370" cy="745" r="8" class="svg-chair" /> <!-- Lobby stool -->
-          <text x="370" y="722" class="svg-label-sub" text-anchor="middle">RECEPCIÓN A</text>
+          <!-- Pasillo de Acceso Peatonal (Hallway before reception) -->
+          <rect x="270" y="755" width="480" height="25" fill="#282830" opacity="0.4" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+          <text x="510" y="772" class="svg-label-sub" text-anchor="middle" font-size="8" letter-spacing="0.05em">PASILLO DE ACCESO PEATONAL</text>
 
-          <!-- Right Reception booth -->
-          <rect x="580" y="700" width="140" height="60" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="2" />
-          <rect x="590" y="710" width="120" height="20" fill="#1f2937" stroke="var(--accent)" stroke-width="1" /> <!-- Counter desk -->
-          <circle cx="650" cy="745" r="8" class="svg-chair" /> <!-- Lobby stool -->
-          <text x="650" y="722" class="svg-label-sub" text-anchor="middle">RECEPCIÓN B</text>
+          <!-- Grand Reception Lobby (x=270 to 750, y=700 to 755) -->
+          <rect x="270" y="700" width="480" height="55" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+          
+          <!-- Desk A (Left Reception Desk) -->
+          <rect x="290" y="708" width="90" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
+          <circle cx="335" cy="735" r="6" class="svg-chair" />
+          <text x="335" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN A</text>
 
-          <text x="510" y="760" class="svg-label" text-anchor="middle">ACCESO PRINCIPAL PEATONAL</text>
-          <path d="M 510,775 L 510,715" fill="none" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#arrow)" />
+          <!-- Desk B (Right Reception Desk) -->
+          <rect x="620" y="708" width="90" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
+          <circle cx="665" cy="735" r="6" class="svg-chair" />
+          <text x="665" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN B</text>
+
+          <!-- Lobby Label -->
+          <text x="510" y="732" class="svg-label" text-anchor="middle" font-size="10" letter-spacing="0.1em">RECEPCIÓN PRINCIPAL</text>
+
+          <!-- ACCESO PRINCIPAL DOOR (From pedestrian hallway into reception) -->
+          <g transform="translate(510, 755)">
+            <rect x="-25" y="-2" width="50" height="4" fill="var(--svg-bg)" /> <!-- Gap in the wall -->
+            <!-- Door panels (open state) -->
+            <line x1="-25" y1="0" x2="-25" y2="-20" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <line x1="25" y1="0" x2="25" y2="-20" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <path d="M -25,-20 A 20,20 0 0,0 -5,0" class="svg-door-swing" />
+            <path d="M 25,-20 A 20,20 0 0,1 5,0" class="svg-door-swing" />
+            <text x="0" y="15" class="svg-label" text-anchor="middle" font-size="8">ACCESO PRINCIPAL</text>
+          </g>
+
+          <!-- DIRECT GARDEN DOOR FROM RECEPTION (Left wall of lobby, x=270, y=727) -->
+          <g transform="translate(270, 727)">
+            <rect x="-2" y="-15" width="4" height="30" fill="var(--svg-bg)" /> <!-- Gap -->
+            <line x1="0" y1="-15" x2="-15" y2="-15" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+            <path d="M -15,-15 A 15,15 0 0,0 0,0" class="svg-door-swing" />
+            <text x="18" y="4" class="svg-label-sub" text-anchor="start" font-size="7">AL JARDÍN</text>
+          </g>
         </g>
 
         <!-- RESTROOMS (Baños Damas & Caballeros) - Top Center behind stage -->
@@ -506,7 +530,7 @@
         <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
         <g id="g-circulation">
           <!-- Guest Path: Vehicular -> Pedestrian -> Lobby -> Salon -> Zona de Baile & Bathrooms via Stage sides (Blue) -->
-          <path id="path-guest-draw" d="M 910,780 L 910,740 L 510,740 L 510,705 L 510,220 M 510,740 L 250,740 L 220,740 L 220,600 C 220,530 130,530 130,520 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60 M 270,410 L 220,410 L 130,520" class="circulation-path circulation-guest" />
+          <path id="path-guest-draw" d="M 910,780 L 910,765 L 510,765 L 510,755 L 510,730 L 510,700 L 510,220 M 510,730 L 300,730 L 270,727 L 220,727 L 220,600 C 220,530 130,530 130,520 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60 M 270,410 L 220,410 L 130,520" class="circulation-path circulation-guest" />
           
           <!-- Service Path: Kitchen -> Bar -> Tables Norte & Salon (Green) -->
           <path id="path-service-draw" d="M 875,120 L 780,120 M 820,180 L 760,180 L 760,260 L 680,260 C 510,260 420,350 420,450" class="circulation-path circulation-service" />
