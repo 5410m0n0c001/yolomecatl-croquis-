@@ -1228,6 +1228,17 @@ input:checked + .slider:before {
     border-color: var(--accent-light);
     box-shadow: 0 4px 20px rgba(189, 160, 104, 0.5);
   }
+
+  /* Sidebar actions: remove bottom push on mobile, let them flow naturally */
+  .sidebar-actions {
+    margin-top: 1.5rem !important;
+    padding-bottom: 1.5rem;
+  }
+
+  /* Add large bottom padding to the scrollable drawer to clear dynamic mobile bars */
+  .sidebar {
+    padding-bottom: 5rem !important;
+  }
 }
 
 /* Ensure mobile buttons are hidden on desktop */
