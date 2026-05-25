@@ -223,36 +223,19 @@
           <!-- Green lawn space (Extended to pedestrian hallway height before reception) -->
           <rect x="20" y="20" width="230" height="740" class="zone-grass" />
           
-          <!-- Access pathway into garden from pedestrian walkway -->
-          <rect x="230" y="730" width="40" height="20" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5" />
+          <!-- Access pathway 2 into garden from horizontal pedestrian hallway (y=755-775) -->
+          <rect x="230" y="755" width="40" height="20" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5" />
           
+          <!-- Access pathway 1 into garden from reception door (y=700-720) -->
+          <rect x="230" y="700" width="40" height="15" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5" />
+
           <!-- Garden Stone Pathway -->
-          <path d="M 120,700 L 120,530 C 120,400 60,350 60,280 C 60,200 150,150 150,80 L 170,80 C 170,160 80,210 80,280 C 80,340 140,390 140,530 L 140,700 Z" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5"/>
+          <path d="M 120,740 L 120,530 C 120,400 60,350 60,280 C 60,200 150,150 150,80 L 170,80 C 170,160 80,210 80,280 C 80,340 140,390 140,530 L 140,740 Z" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5"/>
           
-          <!-- Capilla (Chapel) Structure - Lower Left -->
-          <g id="chapel-group">
-            <rect x="30" y="520" width="150" height="180" fill="rgba(0,0,0,0.2)" stroke="var(--svg-wall-stroke)" stroke-width="2" />
-            <!-- Chapel altar -->
-            <rect x="35" y="585" width="20" height="50" fill="#4b5563" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
-            <path d="M 40,610 L 50,610 M 45,600 L 45,620" stroke="#f3f4f6" stroke-width="2" fill="none" /> <!-- Altar Cross -->
-            
-            <!-- Chapel Benches -->
-            <g opacity="0.8">
-              <!-- Bench Row 1 -->
-              <rect x="80" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <rect x="80" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <!-- Bench Row 2 -->
-              <rect x="105" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <rect x="105" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <!-- Bench Row 3 -->
-              <rect x="130" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <rect x="130" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <!-- Bench Row 4 -->
-              <rect x="155" y="535" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-              <rect x="155" y="645" width="10" height="40" fill="#5c4033" stroke="#000" stroke-width="0.5" />
-            </g>
-            <text x="105" y="515" class="svg-label" text-anchor="middle">CAPILLA</text>
-          </g>
+          <!-- Decorative Trees in Garden (where Chapel used to be) -->
+          <circle cx="80" cy="560" r="18" class="svg-shrub" filter="url(#shadow)" />
+          <circle cx="140" cy="620" r="16" class="svg-shrub" filter="url(#shadow)" />
+          <circle cx="80" cy="660" r="15" class="svg-shrub" filter="url(#shadow)" />
 
           <!-- Cascada (Waterfall) Wall - Center Left -->
           <g id="waterfall-group">
@@ -365,10 +348,39 @@
           <!-- Grand Reception Lobby (x=270 to 750, y=700 to 755) -->
           <rect x="270" y="700" width="480" height="55" class="zone-lobby" stroke="var(--svg-wall-stroke)" stroke-width="2" />
           
+          <!-- Capilla (Chapel) Room next to Garden (Inside lobby block, x=270 to 370, y=715 to 755) -->
+          <g id="lobby-chapel">
+            <!-- Room divider walls -->
+            <line x1="370" y1="715" x2="370" y2="755" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <line x1="270" y1="715" x2="370" y2="715" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            
+            <!-- Chapel Label -->
+            <text x="320" y="738" class="svg-label" text-anchor="middle" font-size="9" letter-spacing="0.05em">CAPILLA</text>
+            
+            <!-- Altar inside chapel (left wall) -->
+            <rect x="275" y="730" width="8" height="10" fill="#4b5563" stroke="var(--svg-wall-stroke)" stroke-width="0.8" />
+            <line x1="279" y1="732" x2="279" y2="738" stroke="#f3f4f6" stroke-width="1" />
+            <line x1="277" y1="735" x2="281" y2="735" stroke="#f3f4f6" stroke-width="1" />
+            
+            <!-- Chapel benches -->
+            <!-- Row 1 -->
+            <rect x="295" y="720" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <rect x="295" y="738" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <!-- Row 2 -->
+            <rect x="315" y="720" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <rect x="315" y="738" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <!-- Row 3 -->
+            <rect x="335" y="720" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <rect x="335" y="738" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <!-- Row 4 -->
+            <rect x="355" y="720" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+            <rect x="355" y="738" width="5" height="12" fill="#5c4033" rx="0.5" stroke="#000" stroke-width="0.3" />
+          </g>
+          
           <!-- Desk A (Left Reception Desk) -->
-          <rect x="290" y="708" width="90" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
-          <circle cx="335" cy="735" r="6" class="svg-chair" />
-          <text x="335" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN A</text>
+          <rect x="390" y="708" width="80" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
+          <circle cx="430" cy="735" r="6" class="svg-chair" />
+          <text x="430" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN A</text>
 
           <!-- Desk B (Right Reception Desk) -->
           <rect x="620" y="708" width="90" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
@@ -376,7 +388,7 @@
           <text x="665" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN B</text>
 
           <!-- Lobby Label -->
-          <text x="510" y="732" class="svg-label" text-anchor="middle" font-size="10" letter-spacing="0.1em">RECEPCIÓN PRINCIPAL</text>
+          <text x="530" y="732" class="svg-label" text-anchor="middle" font-size="10" letter-spacing="0.1em">RECEPCIÓN PRINCIPAL</text>
 
           <!-- ACCESO PRINCIPAL DOOR (From pedestrian hallway into reception) -->
           <g transform="translate(510, 755)">
@@ -389,12 +401,18 @@
             <text x="0" y="15" class="svg-label" text-anchor="middle" font-size="8">ACCESO PRINCIPAL</text>
           </g>
 
-          <!-- DIRECT GARDEN DOOR FROM RECEPTION (Left wall of lobby, x=270, y=727) -->
-          <g transform="translate(270, 727)">
-            <rect x="-2" y="-15" width="4" height="30" fill="var(--svg-bg)" /> <!-- Gap -->
-            <line x1="0" y1="-15" x2="-15" y2="-15" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
-            <path d="M -15,-15 A 15,15 0 0,0 0,0" class="svg-door-swing" />
-            <text x="18" y="4" class="svg-label-sub" text-anchor="start" font-size="7">AL JARDÍN</text>
+          <!-- ACCESS 1: DIRECT GARDEN DOOR FROM RECEPTION (Left wall of lobby corridor, x=270, y=707) -->
+          <g transform="translate(270, 707)">
+            <rect x="-2" y="-7" width="4" height="14" fill="var(--svg-bg)" /> <!-- Gap -->
+            <line x1="0" y1="-7" x2="-7" y2="-7" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
+            <path d="M -7,-7 A 7,7 0 0,0 0,0" class="svg-door-swing" />
+            <text x="10" y="3" class="svg-label-sub" text-anchor="start" font-size="7">AL JARDÍN</text>
+          </g>
+
+          <!-- ACCESS 2: DIRECT GARDEN OPENING FROM PEDESTRIAN WALKWAY (Horizontal path, y=755 to 780, x=270) -->
+          <g id="access-2-gate">
+            <line x1="270" y1="755" x2="270" y2="780" stroke="none" /> <!-- Open corridor -->
+            <path d="M 270,767.5 L 250,767.5" fill="none" stroke="#4b5563" stroke-width="12" stroke-dasharray="2,2" opacity="0.6" />
           </g>
         </g>
 
@@ -459,14 +477,7 @@
             <path d="M 40,-35 A 35,35 0 0,1 5,0" class="svg-door-swing" />
           </g>
 
-          <!-- Garden sliding door (left, y=380 to 440) -->
-          <g transform="translate(270, 410)">
-            <rect x="-3" y="-30" width="6" height="60" fill="var(--svg-bg)" /> <!-- Gap -->
-            <!-- Sliding door lines -->
-            <line x1="0" y1="-28" x2="0" y2="28" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
-            <line x1="-3" y1="-28" x2="-3" y2="0" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
-            <line x1="3" y1="0" x2="3" y2="28" stroke="var(--svg-wall-stroke)" stroke-width="2.5" />
-          </g>
+
 
           <!-- Kitchen entrance doors (swinging into the vestibule) -->
           <g transform="translate(720, 220)">
@@ -526,17 +537,16 @@
 
           <text x="510" y="360" class="svg-label" text-anchor="middle" font-size="28" opacity="0.1" letter-spacing="0.2em">SALÓN DE EVENTOS</text>
         </g>
-
         <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
         <g id="g-circulation">
           <!-- Guest Path: Vehicular -> Pedestrian -> Lobby -> Salon -> Zona de Baile & Bathrooms via Stage sides (Blue) -->
-          <path id="path-guest-draw" d="M 910,780 L 910,765 L 510,765 L 510,755 L 510,730 L 510,700 L 510,220 M 510,730 L 300,730 L 270,727 L 220,727 L 220,600 C 220,530 130,530 130,520 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60 M 270,410 L 220,410 L 130,520" class="circulation-path circulation-guest" />
+          <path id="path-guest-draw" d="M 910,780 L 910,765 L 510,765 L 510,755 L 510,730 L 510,700 L 510,220 M 510,730 L 290,707 L 270,707 L 200,707 M 510,765 L 200,765 M 510,730 L 370,735 L 340,735 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60" class="circulation-path circulation-guest" />
           
           <!-- Service Path: Kitchen -> Bar -> Tables Norte & Salon (Green) -->
           <path id="path-service-draw" d="M 875,120 L 780,120 M 820,180 L 760,180 L 760,260 L 680,260 C 510,260 420,350 420,450" class="circulation-path circulation-service" />
 
-          <!-- Emergency Path: Salon Corners -> Left Garden Exit -> Bottom Street Exit (Red) -->
-          <path id="path-emergency-draw" d="M 285,95 L 285,410 L 250,410 M 735,95 L 735,150 L 770,150 M 285,685 L 320,700 L 510,700 L 510,780" class="circulation-path circulation-emergency" />
+          <!-- Emergency Path: Salon Corners -> Lobby -> Street Exit (Red) -->
+          <path id="path-emergency-draw" d="M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,780 M 735,95 L 735,685 L 700,705 L 510,705" class="circulation-path circulation-emergency" />
         </g>
 
         <!-- TABLES & SEATING LAYER (Interactive, populated via JS) -->
