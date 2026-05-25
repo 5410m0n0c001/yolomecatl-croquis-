@@ -1201,22 +1201,24 @@ input:checked + .slider:before {
     display: flex !important;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    position: absolute;
-    top: 1.15rem;
-    right: 1.15rem;
-    padding: 0.45rem 0.8rem;
-    border-radius: 20px;
+    gap: 0.5rem;
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin: 0.5rem 0 1.25rem 0;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
     background-color: var(--accent);
     border: 1px solid var(--accent);
     color: var(--bg-primary) !important;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
     z-index: 1010;
-    box-shadow: 0 4px 12px rgba(189, 160, 104, 0.25);
+    box-shadow: 0 4px 15px rgba(189, 160, 104, 0.3);
     animation: pulse-glow 2s infinite;
     transition: var(--transition);
   }
@@ -1224,7 +1226,7 @@ input:checked + .slider:before {
   .mobile-close-sidebar-btn:hover {
     background-color: var(--accent-light);
     border-color: var(--accent-light);
-    box-shadow: 0 4px 15px rgba(189, 160, 104, 0.45);
+    box-shadow: 0 4px 20px rgba(189, 160, 104, 0.5);
   }
 }
 
