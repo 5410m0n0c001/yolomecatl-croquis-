@@ -72,6 +72,23 @@
         <i class="fa-solid fa-xmark"></i> Cerrar Menú
       </button>
 
+      <!-- Layout / Distribución Selector -->
+      <div>
+        <h3 class="section-title">Distribución del Salón</h3>
+        <div class="layout-selector">
+          <button class="layout-btn active" id="layout-btn-A" onclick="setLayout('A')">
+            <i class="fa-solid fa-table-cells"></i>
+            <span class="layout-btn-label">Versión A</span>
+            <span class="layout-btn-sub">Pista central · 20 mesas</span>
+          </button>
+          <button class="layout-btn" id="layout-btn-B" onclick="setLayout('B')">
+            <i class="fa-solid fa-grip-lines-vertical"></i>
+            <span class="layout-btn-label">Versión B</span>
+            <span class="layout-btn-sub">Pista longitudinal · 17 mesas</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Theme Selector -->
       <div>
         <h3 class="section-title">Estilo del Plano</h3>
@@ -90,6 +107,7 @@
           </button>
         </div>
       </div>
+
 
       <!-- Live Statistics -->
       <div>

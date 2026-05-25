@@ -5,6 +5,7 @@
 
 // --- STATE MANAGEMENT ---
 let currentTheme = 'premium';
+let currentLayout = 'A';
 let globalDensity = 10;
 let selectedTableNum = null;
 let zoomScale = 1.0;
@@ -14,7 +15,7 @@ let isPanning = false;
 let startX = 0;
 let startY = 0;
 
-// Central coordinates for each table inside the SVG (1000x800 viewBox)
+// Central coordinates for each table — Layout A (original, 20 mesas)
 const tablePositions = {
   1: { cx: 320, cy: 647 },
   2: { cx: 430, cy: 647 },
@@ -42,17 +43,63 @@ const tablePositions = {
   20: { cx: 650, cy: 175 }
 };
 
+// Layout configurations: A = original, B = pista longitudinal central
+const layoutPositions = {
+  A: {
+    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+    tables: {
+      1: { cx: 320, cy: 647 }, 2: { cx: 430, cy: 647 },
+      3: { cx: 540, cy: 647 }, 4: { cx: 650, cy: 647 },
+      5: { cx: 320, cy: 549 }, 6: { cx: 430, cy: 549 },
+      7: { cx: 540, cy: 549 }, 8: { cx: 650, cy: 549 },
+      9: { cx: 320, cy: 451 }, 10: { cx: 430, cy: 451 },
+      11: { cx: 540, cy: 451 }, 12: { cx: 650, cy: 451 },
+      13: { cx: 320, cy: 353 }, 14: { cx: 430, cy: 353 },
+      15: { cx: 540, cy: 353 }, 16: { cx: 650, cy: 353 },
+      17: { cx: 320, cy: 255 }, 18: { cx: 320, cy: 175 },
+      19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 }
+    },
+    dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false }
+  },
+  B: {
+    // Pista longitudinal central: franja vertical de entrada (y=695) hasta escenario (y=155)
+    // Mesas izquierda (1-9): zona x=270-440
+    // Mesas derecha (10-17): zona x=580-750
+    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
+    tables: {
+      // Columna izquierda 1: x=315
+      1: { cx: 315, cy: 640 }, 2: { cx: 315, cy: 540 },
+      3: { cx: 315, cy: 440 }, 4: { cx: 315, cy: 340 },
+      5: { cx: 315, cy: 235 },
+      // Columna izquierda 2: x=400
+      6: { cx: 400, cy: 600 }, 7: { cx: 400, cy: 500 },
+      8: { cx: 400, cy: 400 }, 9: { cx: 400, cy: 300 },
+      // Columna derecha 1: x=605
+      10: { cx: 605, cy: 640 }, 11: { cx: 605, cy: 540 },
+      12: { cx: 605, cy: 440 }, 13: { cx: 605, cy: 340 },
+      14: { cx: 605, cy: 235 },
+      // Columna derecha 2: x=690
+      15: { cx: 690, cy: 600 }, 16: { cx: 690, cy: 500 },
+      17: { cx: 690, cy: 400 },
+      // Mesas 18-20 ocultas (fuera del area visible)
+      18: { cx: 315, cy: 175 }, 19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 }
+    },
+    dancefloor: { x: 445, y: 155, width: 130, height: 540, labelX: 510, labelY: 430, labelRotate: true }
+  }
+};
+
 // Initialize Table Data
 const tablesData = {};
 for (let i = 1; i <= 20; i++) {
   tablesData[i] = {
     number: i,
-    shape: 'square', // Defaulting to Square Tables as requested by user
-    seats: 10,       // Default seats
-    status: 'normal',// standard status
-    guests: [],      // Empty guest list
+    shape: 'square',
+    seats: 10,
+    status: 'normal',
+    guests: [],
     cx: tablePositions[i].cx,
-    cy: tablePositions[i].cy
+    cy: tablePositions[i].cy,
+    active: true
   };
 }
 
@@ -254,10 +301,18 @@ function renderTable(num) {
   group.appendChild(label);
 }
 
-// Render all tables in the event salon
+// Render all tables — only active ones
 function renderAllTables() {
+  const layout = layoutPositions[currentLayout];
   for (let i = 1; i <= 20; i++) {
-    renderTable(i);
+    const group = document.getElementById(`table-group-${i}`);
+    if (!group) continue;
+    if (layout.activeTables.includes(i)) {
+      group.style.display = 'inline';
+      renderTable(i);
+    } else {
+      group.style.display = 'none';
+    }
   }
 }
 
@@ -360,24 +415,21 @@ function updateSelectedTableStatus(status) {
 // Global Seat Density Selector
 function setGlobalDensity(seats) {
   globalDensity = seats;
-  
-  // Toggle Active Class in Sidebar Buttons
-  document.querySelectorAll('.density-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
+
+  document.querySelectorAll('.density-btn').forEach(btn => btn.classList.remove('active'));
   document.getElementById(`density-${seats}`).classList.add('active');
   document.getElementById('density-val').textContent = `${seats} personas`;
-  
-  // Apply globally to all tables
+
+  // Apply to ALL tables (including inactive, so state is preserved)
   for (let i = 1; i <= 20; i++) {
     tablesData[i].seats = seats;
   }
-  
+
   renderAllTables();
   updateGlobalMetrics();
-  
+
   if (selectedTableNum) {
-    selectTable(selectedTableNum); // Refresh drawer counts
+    selectTable(selectedTableNum);
   }
 }
 
@@ -413,16 +465,16 @@ function calculateLogisticsMetrics(data) {
 
 // Update live capacity dashboard in Sidebar
 function updateGlobalMetrics() {
+  const layout = layoutPositions[currentLayout];
+  const activeTables = layout.activeTables;
   let totalCapacity = 0;
-  let activeTablesCount = 0;
-  
-  for (let i = 1; i <= 20; i++) {
+
+  activeTables.forEach(i => {
     totalCapacity += tablesData[i].seats;
-    activeTablesCount++;
-  }
-  
+  });
+
   document.getElementById('metric-capacity').textContent = totalCapacity;
-  document.getElementById('metric-tables').textContent = `${activeTablesCount}/20`;
+  document.getElementById('metric-tables').textContent = `${activeTables.length}/${activeTables.length}`;
 }
 
 // --- DYNAMIC LAYER CONTROLLER ---
@@ -443,6 +495,60 @@ function toggleCirculation(pathType, isChecked) {
       path.classList.remove('active');
     }
   }
+}
+
+// --- LAYOUT / DISTRIBUTION SWITCHER ---
+function setLayout(version) {
+  currentLayout = version;
+
+  // Update sidebar button states
+  document.querySelectorAll('.layout-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`layout-btn-${version}`).classList.add('active');
+
+  const layout = layoutPositions[version];
+
+  // Reposition all table SVG groups
+  for (let i = 1; i <= 20; i++) {
+    const group = document.getElementById(`table-group-${i}`);
+    if (!group) continue;
+    const pos = layout.tables[i];
+    group.setAttribute('transform', `translate(${pos.cx}, ${pos.cy})`);
+    // Update internal data coords for distance calculations
+    tablesData[i].cx = pos.cx;
+    tablesData[i].cy = pos.cy;
+    tablesData[i].active = layout.activeTables.includes(i);
+  }
+
+  // Update dance floor SVG element
+  const df = layout.dancefloor;
+  const danceRect = document.querySelector('#dancefloor-group rect');
+  const danceLabel = document.querySelector('#dancefloor-group text');
+  if (danceRect) {
+    danceRect.setAttribute('x', df.x);
+    danceRect.setAttribute('y', df.y);
+    danceRect.setAttribute('width', df.width);
+    danceRect.setAttribute('height', df.height);
+  }
+  if (danceLabel) {
+    danceLabel.setAttribute('x', df.labelX);
+    danceLabel.setAttribute('y', df.labelY);
+    if (df.labelRotate) {
+      danceLabel.setAttribute('transform', `rotate(-90 ${df.labelX} ${df.labelY})`);
+      danceLabel.setAttribute('font-size', '14');
+    } else {
+      danceLabel.removeAttribute('transform');
+      danceLabel.setAttribute('font-size', '16');
+    }
+  }
+
+  // Close drawer if open since selected table might be inactive
+  if (selectedTableNum && !layout.activeTables.includes(selectedTableNum)) {
+    closeDrawer();
+  }
+
+  // Re-render all tables with new positions
+  renderAllTables();
+  updateGlobalMetrics();
 }
 
 // --- THEME ENGINE ---
