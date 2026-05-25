@@ -86,6 +86,9 @@ window.addEventListener('DOMContentLoaded', () => {
   
   // Setup SVG Drag-to-Pan listeners
   setupCanvasInteraction();
+
+  // Bind swipe to close gestures on mobile sidebar
+  setupSidebarSwipeGesture();
 });
 
 // Wrap layers in viewport group dynamically
@@ -574,4 +577,42 @@ function closeSidebarMobile() {
   if (toggleBtn) {
     toggleBtn.innerHTML = '<i class="fa-solid fa-bars"></i>';
   }
+}
+
+// Bind touch swipe-to-close gesture on mobile sidebar
+function setupSidebarSwipeGesture() {
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+  
+  let startX = 0;
+  let startY = 0;
+  let endX = 0;
+  let endY = 0;
+  
+  sidebar.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  sidebar.addEventListener('touchmove', (e) => {
+    endX = e.touches[0].clientX;
+    endY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  sidebar.addEventListener('touchend', () => {
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+    
+    // Swipe left: X coordinate decreases significantly (more than 50px)
+    // Also verify it's mostly a horizontal swipe (abs(diffX) > abs(diffY))
+    if (diffX < -50 && Math.abs(diffX) > Math.abs(diffY)) {
+      closeSidebarMobile();
+    }
+    
+    // Reset values
+    startX = 0;
+    startY = 0;
+    endX = 0;
+    endY = 0;
+  }, { passive: true });
 }
