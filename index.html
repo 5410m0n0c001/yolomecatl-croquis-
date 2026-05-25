@@ -220,8 +220,11 @@
 
         <!-- LANDSCAPING & GARDEN LAYER (Toggleable) -->
         <g id="g-garden">
-          <!-- Green lawn space -->
-          <rect x="20" y="20" width="230" height="680" class="zone-grass" />
+          <!-- Green lawn space (Extended to pedestrian hallway height before reception) -->
+          <rect x="20" y="20" width="230" height="740" class="zone-grass" />
+          
+          <!-- Access pathway into garden from pedestrian walkway -->
+          <rect x="230" y="730" width="40" height="20" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5" />
           
           <!-- Garden Stone Pathway -->
           <path d="M 120,700 L 120,530 C 120,400 60,350 60,280 C 60,200 150,150 150,80 L 170,80 C 170,160 80,210 80,280 C 80,340 140,390 140,530 L 140,700 Z" fill="#4b5563" opacity="0.6" stroke="#374151" stroke-width="0.5"/>
@@ -338,15 +341,15 @@
           <!-- Label inside -->
           <text x="745" y="225" class="svg-label-sub" text-anchor="middle" font-size="8" transform="rotate(-90 745 225)">ACCESO COCINA</text>
 
-          <!-- INTEGRATED BAR (Zona de Bar en el Muro del Salón - Rest of that Wall Line) -->
-          <!-- Wooden counter top at x=744 to 754, y=95 to 185 -->
-          <rect x="742" y="95" width="12" height="90" fill="#bda068" rx="2" stroke="#8b6e3c" stroke-width="0.5" filter="url(#shadow)" />
-          <!-- Circular Bar stools on the Salon side -->
-          <circle cx="730" cy="112" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
-          <circle cx="730" cy="140" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
-          <circle cx="730" cy="168" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
+          <!-- INTEGRATED BAR (Zona de Bar dentro de la Cocina - Muro Izquierdo de Cocina) -->
+          <!-- Wooden counter top at x=770 to 782, y=95 to 185 (inside kitchen) -->
+          <rect x="770" y="95" width="12" height="90" fill="#bda068" rx="2" stroke="#8b6e3c" stroke-width="0.5" filter="url(#shadow)" />
+          <!-- Circular Bar stools in the vertical service corridor -->
+          <circle cx="758" cy="112" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
+          <circle cx="758" cy="140" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
+          <circle cx="758" cy="168" r="5" fill="#4a2c16" stroke="#bda068" stroke-width="0.8" />
           <!-- Bar text -->
-          <text x="748" y="140" class="svg-label" text-anchor="middle" font-size="9" fill="var(--bg-primary)" transform="rotate(-90 748 140)">BARRA</text>
+          <text x="776" y="140" class="svg-label" text-anchor="middle" font-size="9" fill="var(--bg-primary)" transform="rotate(-90 776 140)">BARRA</text>
 
           <!-- Label -->
           <text x="875" y="75" class="svg-label" text-anchor="middle">COCINA & BAR</text>
@@ -502,11 +505,11 @@
 
         <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
         <g id="g-circulation">
-          <!-- Guest Path: Entrance -> Reception -> Salon -> Pista -> Garden -> Chapel (Blue) -->
-          <path id="path-guest-draw" d="M 510,780 L 510,735 C 510,720 370,720 370,700 L 370,680 C 370,660 510,650 510,550 L 510,250 M 510,630 C 400,630 320,600 320,500 L 320,410 L 250,410 L 130,410 L 130,520" class="circulation-path circulation-guest" />
+          <!-- Guest Path: Vehicular -> Pedestrian -> Lobby -> Salon -> Zona de Baile & Bathrooms via Stage sides (Blue) -->
+          <path id="path-guest-draw" d="M 910,780 L 910,740 L 510,740 L 510,705 L 510,220 M 510,740 L 250,740 L 220,740 L 220,600 C 220,530 130,530 130,520 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60 M 270,410 L 220,410 L 130,520" class="circulation-path circulation-guest" />
           
           <!-- Service Path: Kitchen -> Bar -> Tables Norte & Salon (Green) -->
-          <path id="path-service-draw" d="M 875,120 L 875,150 L 730,150 L 680,150 M 715,190 C 700,190 700,290 650,290 C 510,290 420,350 420,450" class="circulation-path circulation-service" />
+          <path id="path-service-draw" d="M 875,120 L 780,120 M 820,180 L 760,180 L 760,260 L 680,260 C 510,260 420,350 420,450" class="circulation-path circulation-service" />
 
           <!-- Emergency Path: Salon Corners -> Left Garden Exit -> Bottom Street Exit (Red) -->
           <path id="path-emergency-draw" d="M 285,95 L 285,410 L 250,410 M 735,95 L 735,150 L 770,150 M 285,685 L 320,700 L 510,700 L 510,780" class="circulation-path circulation-emergency" />

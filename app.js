@@ -379,10 +379,10 @@ function setGlobalDensity(seats) {
 function calculateLogisticsMetrics(data) {
   // Static scale: 10 SVG units = 1 meter
   // Coordinates critical points:
-  // Pista center: (510, 220)
+  // Zona de Baile center: (510, 220)
   // DJ stage center: (510, 110)
   // Restrooms center: (510, 50)
-  // Kitchen Bar: (720, 220)
+  // Kitchen Bar center: (776, 140)
   
   const distance = (x1, y1, x2, y2) => {
     const dx = x2 - x1;
@@ -393,7 +393,7 @@ function calculateLogisticsMetrics(data) {
   const distPista = distance(data.cx, data.cy, 510, 220);
   const distDJ = distance(data.cx, data.cy, 510, 110);
   const distWC = distance(data.cx, data.cy, 510, 50);
-  const distBar = distance(data.cx, data.cy, 720, 220);
+  const distBar = distance(data.cx, data.cy, 776, 140);
   
   metricDistPista.innerHTML = `Distancia a Zona de Baile: <strong>${distPista.toFixed(1)} m</strong>`;
   metricDistDJ.innerHTML = `Distancia a DJ: <strong>${distDJ.toFixed(1)} m</strong>`;
