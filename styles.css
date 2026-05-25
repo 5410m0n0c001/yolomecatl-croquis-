@@ -1176,13 +1176,47 @@ input:checked + .slider:before {
   }
 
   /* Adjust welcome popup on mobile */
+  .welcome-overlay {
+    padding: 1rem;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: max(2rem, env(safe-area-inset-top, 1rem));
+    overflow-y: auto;
+  }
+
   .welcome-box {
-    padding: 1.5rem;
+    padding: 1.25rem 1rem;
     width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 3rem);
+    overflow-y: auto;
+    gap: 1rem;
+    -webkit-overflow-scrolling: touch;
   }
 
   .welcome-logo {
-    font-size: 2.2rem;
+    font-size: 2rem;
+  }
+
+  .welcome-title {
+    font-size: 1rem;
+  }
+
+  .welcome-text {
+    font-size: 0.8rem;
+  }
+
+  /* Guarantee the button always shows — sticky at bottom of the box */
+  .welcome-btn {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4), 0 0 25px rgba(189, 160, 104, 0.4);
+    animation: pulse-glow 2s infinite;
   }
   @keyframes pulse-glow {
     0% {
