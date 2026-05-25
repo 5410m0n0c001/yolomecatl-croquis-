@@ -62,30 +62,36 @@ const layoutPositions = {
     dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false }
   },
   B: {
-    // Pista longitudinal central: franja vertical de entrada (y=695) hasta escenario (y=155)
-    // Mesas izquierda (1-9): zona x=270-440
-    // Mesas derecha (10-17): zona x=580-750
+    // Pista longitudinal central: franja vertical x=460-560, y=155-695
+    // Izquierda: 3 columnas x 3 filas = 9 mesas (1-9), col por col de abajo a arriba
+    // Derecha:   2 columnas x 4 filas = 8 mesas (10-17), col por col de abajo a arriba
     activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
     tables: {
-      // Columna izquierda 1: x=315
-      1: { cx: 315, cy: 640 }, 2: { cx: 315, cy: 540 },
-      3: { cx: 315, cy: 440 }, 4: { cx: 315, cy: 340 },
-      5: { cx: 315, cy: 235 },
-      // Columna izquierda 2: x=400
-      6: { cx: 400, cy: 600 }, 7: { cx: 400, cy: 500 },
-      8: { cx: 400, cy: 400 }, 9: { cx: 400, cy: 300 },
-      // Columna derecha 1: x=605
-      10: { cx: 605, cy: 640 }, 11: { cx: 605, cy: 540 },
-      12: { cx: 605, cy: 440 }, 13: { cx: 605, cy: 340 },
-      14: { cx: 605, cy: 235 },
-      // Columna derecha 2: x=690
-      15: { cx: 690, cy: 600 }, 16: { cx: 690, cy: 500 },
-      17: { cx: 690, cy: 400 },
-      // Mesas 18-20 ocultas (fuera del area visible)
-      18: { cx: 315, cy: 175 }, 19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 }
+      // --- LADO IZQUIERDO --- Cols x=305, 375, 445 | Filas y=590, 415, 240
+      1: { cx: 305, cy: 590 },  // col1 fila1 (abajo)
+      2: { cx: 305, cy: 415 },  // col1 fila2 (centro)
+      3: { cx: 305, cy: 240 },  // col1 fila3 (arriba)
+      4: { cx: 375, cy: 590 },  // col2 fila1
+      5: { cx: 375, cy: 415 },  // col2 fila2
+      6: { cx: 375, cy: 240 },  // col2 fila3
+      7: { cx: 445, cy: 590 },  // col3 fila1
+      8: { cx: 445, cy: 415 },  // col3 fila2
+      9: { cx: 445, cy: 240 },  // col3 fila3
+      // --- LADO DERECHO --- Cols x=590, 665 | Filas y=600, 470, 340, 210
+      10: { cx: 590, cy: 600 }, // col1 fila1 (abajo)
+      11: { cx: 590, cy: 470 }, // col1 fila2
+      12: { cx: 590, cy: 340 }, // col1 fila3
+      13: { cx: 590, cy: 210 }, // col1 fila4 (arriba)
+      14: { cx: 665, cy: 600 }, // col2 fila1
+      15: { cx: 665, cy: 470 }, // col2 fila2
+      16: { cx: 665, cy: 340 }, // col2 fila3
+      17: { cx: 665, cy: 210 }, // col2 fila4
+      // Mesas 18-20 inactivas en Layout B
+      18: { cx: 305, cy: 175 }, 19: { cx: 665, cy: 175 }, 20: { cx: 665, cy: 175 }
     },
-    dancefloor: { x: 445, y: 155, width: 130, height: 540, labelX: 510, labelY: 430, labelRotate: true }
+    dancefloor: { x: 462, y: 155, width: 96, height: 540, labelX: 510, labelY: 430, labelRotate: true }
   }
+
 };
 
 // Initialize Table Data
