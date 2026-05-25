@@ -395,7 +395,7 @@ function calculateLogisticsMetrics(data) {
   const distWC = distance(data.cx, data.cy, 510, 50);
   const distBar = distance(data.cx, data.cy, 720, 220);
   
-  metricDistPista.innerHTML = `Distancia a Pista: <strong>${distPista.toFixed(1)} m</strong>`;
+  metricDistPista.innerHTML = `Distancia a Zona de Baile: <strong>${distPista.toFixed(1)} m</strong>`;
   metricDistDJ.innerHTML = `Distancia a DJ: <strong>${distDJ.toFixed(1)} m</strong>`;
   metricDistWc.innerHTML = `Distancia a Baños: <strong>${distWC.toFixed(1)} m</strong>`;
   
