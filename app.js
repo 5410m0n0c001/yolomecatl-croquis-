@@ -152,6 +152,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Bind swipe to close gestures on mobile sidebar
   setupSidebarSwipeGesture();
+
+  // Parse URL query parameters for deep linking (e.g. ?layout=B&theme=cad-dark)
+  const urlParams = new URLSearchParams(window.location.search);
+  const layoutParam = urlParams.get('layout');
+  const themeParam = urlParams.get('theme');
+  
+  if (layoutParam && (layoutParam === 'A' || layoutParam === 'B')) {
+    setLayout(layoutParam);
+  }
+  if (themeParam && ['premium', 'cad-dark', 'cad-light', 'minimalist'].includes(themeParam)) {
+    setTheme(themeParam);
+  }
 });
 
 // Wrap layers in viewport group dynamically
