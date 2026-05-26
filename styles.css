@@ -1089,6 +1089,7 @@ input:checked + .slider:before {
   }
   
   html, body {
+    display: block !important; /* Reset flexbox for standard printing layout flow */
     background-color: #ffffff !important;
     color: #000000 !important;
     overflow: visible !important;
