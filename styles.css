@@ -1096,6 +1096,8 @@ input:checked + .slider:before {
     height: auto !important;
     width: 100% !important;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-print-color-adjust: exact !important; /* Force printing of background colors and fills */
+    print-color-adjust: exact !important;
   }
   
   .sidebar, .zoom-controls, .detail-drawer, .welcome-overlay, .scale-bar, .mobile-toggle-btn, .mobile-close-sidebar-btn, .sidebar-backdrop {
@@ -1110,12 +1112,9 @@ input:checked + .slider:before {
   }
   
   .canvas-area {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
+    display: block !important; /* Use block flow to avoid height collapse in flex containers on print engines */
     width: 100% !important;
     height: auto !important;
-    min-height: 100% !important;
     background-color: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1126,11 +1125,15 @@ input:checked + .slider:before {
   #event-svg {
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    max-height: 16cm !important;
+    height: 15.0cm !important; /* Guarantee absolute height in print rendering to prevent 0px rendering bugs */
     margin: 5px auto !important;
     display: block !important;
     transform: none !important;
+  }
+
+  .print-ficha-header, #event-svg, .print-ficha-footer {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   .print-ficha-header {
@@ -1196,7 +1199,7 @@ input:checked + .slider:before {
   
   .print-ficha-footer {
     width: 100%;
-    margin-top: auto;
+    margin-top: 15px !important;
     padding-top: 5px;
   }
   
