@@ -61,7 +61,12 @@ const layoutPositions = {
       19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 },
       21: { cx: 305, cy: 400 }
     },
-    dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false }
+    dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false },
+    paths: {
+      guest: "M 980,770 L 875,770 L 510,770 L 510,755 L 510,730 L 510,700 L 510,220 M 510,730 L 290,727 L 270,727 L 200,727 L 200,860 L 210,860 M 510,770 L 200,770 L 200,860 L 210,860 M 810,300 L 875,300 L 875,770 M 945,360 L 875,360 L 875,770 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60",
+      service: "M 875,120 L 780,120 M 820,180 L 760,180 L 760,250 M 875,340 L 875,280 L 755,280 L 720,280 M 760,250 L 760,260 L 680,260 C 510,260 420,350 420,450",
+      emergency: "M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,770 L 980,770 M 735,95 L 735,280 L 755,280 L 875,280 L 875,770 L 980,770 M 735,280 L 735,685 L 700,705 L 510,705"
+    }
   },
   B: {
     // Pista horizontal central: y=380-460
@@ -90,7 +95,12 @@ const layoutPositions = {
       18: { cx: 305, cy: 175 }, 19: { cx: 665, cy: 175 }, 20: { cx: 665, cy: 175 },
       21: { cx: 305, cy: 400 }
     },
-    dancefloor: { x: 350, y: 380, width: 380, height: 80, labelX: 540, labelY: 425, labelRotate: false }
+    dancefloor: { x: 350, y: 380, width: 380, height: 80, labelX: 540, labelY: 425, labelRotate: false },
+    paths: {
+      guest: "M 980,770 L 875,770 L 510,770 L 510,700 L 510,420 M 510,420 L 350,420 M 510,420 L 730,420 M 410,420 L 410,190 L 460,60 M 630,420 L 630,190 L 560,60 M 410,420 L 410,615 M 650,420 L 650,615 M 270,727 L 200,727 L 200,860 L 210,860",
+      service: "M 760,250 L 760,220 L 720,220 L 690,220 L 690,340 M 690,220 L 410,220 M 690,295 L 410,295 M 690,340 L 720,420 L 320,420 M 690,420 L 690,615 L 410,615 M 690,515 L 410,515",
+      emergency: "M 285,95 L 285,680 L 510,700 L 510,770 M 735,95 L 735,280 L 750,280 M 510,460 L 510,700"
+    }
   }
 };
 
@@ -540,7 +550,7 @@ function calculateLogisticsMetrics(data) {
   metricDistBar.innerHTML = `Servicio de Bar: <strong>${barQuality}</strong>`;
 }
 
-// Update live capacity dashboard in Sidebar
+// Update live capacity dashboard in Sidebar and PDF Print Header
 function updateGlobalMetrics() {
   const layout = layoutPositions[currentLayout];
   const activeTables = layout.activeTables;
@@ -552,6 +562,18 @@ function updateGlobalMetrics() {
 
   document.getElementById('metric-capacity').textContent = totalCapacity;
   document.getElementById('metric-tables').textContent = `${activeTables.length}/${activeTables.length}`;
+
+  // Update PDF Print Header metadata
+  const pLayoutName = document.getElementById('print-layout-name');
+  const pLayoutCapacity = document.getElementById('print-layout-capacity');
+  if (pLayoutName) {
+    pLayoutName.textContent = currentLayout === 'A'
+      ? 'Versión A (Distribución Estándar con Pista Central)'
+      : 'Versión B (Nueva Distribución con Mesa Imperial y 2° DJ)';
+  }
+  if (pLayoutCapacity) {
+    pLayoutCapacity.textContent = `${totalCapacity} Comensales`;
+  }
 }
 
 // --- DYNAMIC LAYER CONTROLLER ---
@@ -623,6 +645,14 @@ function setLayout(version) {
   if (dj2) {
     dj2.style.display = (version === 'B') ? 'inline' : 'none';
   }
+
+  // Update dynamic circulation paths coordinates
+  const pGuest = document.getElementById('path-guest-draw');
+  const pService = document.getElementById('path-service-draw');
+  const pEmergency = document.getElementById('path-emergency-draw');
+  if (pGuest && layout.paths) pGuest.setAttribute('d', layout.paths.guest);
+  if (pService && layout.paths) pService.setAttribute('d', layout.paths.service);
+  if (pEmergency && layout.paths) pEmergency.setAttribute('d', layout.paths.emergency);
 
   // Close drawer if open since selected table might be inactive
   if (selectedTableNum && !layout.activeTables.includes(selectedTableNum)) {

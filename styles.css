@@ -1259,6 +1259,28 @@ input:checked + .slider:before {
     fill: #111827 !important;
     stroke: none !important;
   }
+
+  /* Force circulation flows to show in printed PDF sheet */
+  .circulation-path {
+    opacity: 0.85 !important;
+    display: inline !important;
+    stroke-dasharray: 6,4 !important;
+  }
+  
+  .circulation-guest {
+    stroke: #0284c7 !important; /* Premium Blue for guests flow */
+    stroke-width: 3.5px !important;
+  }
+  
+  .circulation-service {
+    stroke: #16a34a !important; /* Premium Green for staff service flow */
+    stroke-width: 3.5px !important;
+  }
+  
+  .circulation-emergency {
+    stroke: #dc2626 !important; /* Premium Red for emergency exits */
+    stroke-width: 4.5px !important;
+  }
 }
 
 /* --- MOBILE RESPONSIVE UX/UI OPTIMIZATIONS --- */
