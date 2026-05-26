@@ -219,12 +219,44 @@
         <button class="btn-secondary" onclick="resetCanvasView()">
           <i class="fa-solid fa-compress"></i> Centrar Plano
         </button>
+        <a href="https://primaveraeventsgroup.com/salon-jardin-yolomecatl/" target="_blank" class="btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; width: 100%;">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Explorar Jardín Yolomecatl
+        </a>
       </div>
     </aside>
 
     <!-- CENTER CANVAS: Interactive architectural layout -->
     <main class="canvas-area" id="canvas-area">
       
+      <!-- Print Header for Commercial Datasheet (Visible only during printing) -->
+      <div class="print-ficha-header print-only">
+        <div class="print-header-top">
+          <img src="logo yolomecatl.png" alt="Logo Yolomecatl" class="print-logo">
+          <div class="print-header-title">
+            <h1>JARDÍN YOLOMECATL</h1>
+            <h2>DISEÑO ARQUITECTÓNICO E INGENIERÍA DE EVENTOS</h2>
+          </div>
+        </div>
+        <div class="print-info-grid">
+          <div class="print-info-card">
+            <strong>Distribución Seleccionada</strong>
+            <span id="print-layout-name">Versión A (Distribución Estándar)</span>
+          </div>
+          <div class="print-info-card">
+            <strong>Capacidad del Evento</strong>
+            <span id="print-layout-capacity">200 Comensales</span>
+          </div>
+          <div class="print-info-card">
+            <strong>Área Cubierta y Jardín</strong>
+            <span>576 m² / 322 m²</span>
+          </div>
+          <div class="print-info-card">
+            <strong>Plataforma de Eventos</strong>
+            <span>Primavera Events Group</span>
+          </div>
+        </div>
+      </div>
+
       <!-- SVG Architectural Design -->
       <svg id="event-svg" viewBox="0 0 1000 980" xmlns="http://www.w3.org/2000/svg">
         
@@ -654,6 +686,27 @@
             <text x="485" y="215" class="svg-label" text-anchor="middle" font-size="16" letter-spacing="0.15em">ZONA DE BAILE</text>
           </g>
 
+          <!-- SECOND DJ BOOTH (Layout B only) -->
+          <g id="dj2-group" style="display: none;">
+            <!-- Elevated/Enclosed DJ booth platform flush against right wall x=730 to 750, y=380 to 460 -->
+            <rect x="730" y="380" width="20" height="80" fill="rgba(0,0,0,0.15)" stroke="var(--svg-wall-stroke)" stroke-width="2" />
+            <!-- Console -->
+            <rect x="733" y="390" width="13" height="60" fill="#2d3748" stroke="var(--accent)" stroke-width="1" filter="url(#shadow)" />
+            <!-- Turntable details -->
+            <circle cx="739" cy="405" r="3.5" fill="#1a202c" stroke="#4a5568" stroke-width="0.3" />
+            <circle cx="739" cy="435" r="3.5" fill="#1a202c" stroke="#4a5568" stroke-width="0.3" />
+            <!-- Sound speakers flanking the booth -->
+            <rect x="714" y="380" width="14" height="14" fill="#1a202c" stroke="#4a5568" />
+            <line x1="714" y1="380" x2="728" y2="394" stroke="#4a5568" stroke-width="0.5" />
+            <line x1="728" y1="380" x2="714" y2="394" stroke="#4a5568" stroke-width="0.5" />
+            
+            <rect x="714" y="446" width="14" height="14" fill="#1a202c" stroke="#4a5568" />
+            <line x1="714" y1="446" x2="728" y2="460" stroke="#4a5568" stroke-width="0.5" />
+            <line x1="728" y1="446" x2="714" y2="460" stroke="#4a5568" stroke-width="0.5" />
+
+            <text x="744" y="420" class="svg-label-sub" text-anchor="middle" font-size="7" font-weight="bold" transform="rotate(-90 744 420)">SEGUNDO DJ</text>
+          </g>
+
           <text x="510" y="360" class="svg-label" text-anchor="middle" font-size="28" opacity="0.1" letter-spacing="0.2em">SALÓN DE EVENTOS</text>
         </g>
         <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
@@ -715,9 +768,22 @@
           <g id="table-group-19" class="table-container" data-number="19" transform="translate(650, 255)"></g>
           <!-- Table 20 (Extremo Norte Derecha, junto a pista - Row 6) -->
           <g id="table-group-20" class="table-container" data-number="20" transform="translate(650, 175)"></g>
+          
+          <!-- Table 21 (Mesa Imperial - Layout B only) -->
+          <g id="table-group-21" class="table-container" data-number="21" transform="translate(305, 400)"></g>
         </g>
 
       </svg>
+
+      <!-- Print Footer for Commercial Datasheet (Visible only during printing) -->
+      <div class="print-ficha-footer print-only">
+        <div class="print-footer-border"></div>
+        <div class="print-footer-content">
+          <span>Jardín Yolomecatl · Plano Técnico Oficial de Distribución</span>
+          <span>Explora más en: https://primaveraeventsgroup.com/salon-jardin-yolomecatl/</span>
+          <span>Página 1 de 1</span>
+        </div>
+      </div>
 
       <!-- FLOATING SCALE BAR -->
       <div class="scale-bar">
@@ -752,6 +818,7 @@
         <select class="form-select" id="table-shape" onchange="updateSelectedTableShape(this.value)">
           <option value="square">Cuadrada (Recomendado)</option>
           <option value="circle">Circular Tradicional</option>
+          <option value="imperial">Imperial Especial (Vertical)</option>
         </select>
       </div>
 
@@ -762,6 +829,7 @@
           <option value="8">8 Comensales</option>
           <option value="10">10 Comensales</option>
           <option value="12">12 Comensales</option>
+          <option value="50">50 Comensales (Mesa Imperial)</option>
         </select>
       </div>
 

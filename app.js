@@ -15,7 +15,7 @@ let isPanning = false;
 let startX = 0;
 let startY = 0;
 
-// Central coordinates for each table — Layout A (original, 20 mesas)
+/// Central coordinates for each table — Layout A (original, 20 mesas)
 const tablePositions = {
   1: { cx: 320, cy: 647 },
   2: { cx: 430, cy: 647 },
@@ -40,7 +40,8 @@ const tablePositions = {
   17: { cx: 320, cy: 255 },
   18: { cx: 320, cy: 175 },
   19: { cx: 650, cy: 255 },
-  20: { cx: 650, cy: 175 }
+  20: { cx: 650, cy: 175 },
+  21: { cx: 305, cy: 400 }
 };
 
 // Layout configurations: A = original, B = pista longitudinal central
@@ -57,54 +58,53 @@ const layoutPositions = {
       13: { cx: 320, cy: 353 }, 14: { cx: 430, cy: 353 },
       15: { cx: 540, cy: 353 }, 16: { cx: 650, cy: 353 },
       17: { cx: 320, cy: 255 }, 18: { cx: 320, cy: 175 },
-      19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 }
+      19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 },
+      21: { cx: 305, cy: 400 }
     },
     dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false }
   },
   B: {
-    // Pista longitudinal central: franja vertical x=460-560, y=155-695
-    // Izquierda: 3 columnas x 3 filas = 9 mesas (1-9), col por col de abajo a arriba
-    // Derecha:   2 columnas x 4 filas = 8 mesas (10-17), col por col de abajo a arriba
-    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
+    // Pista horizontal central: y=380-460
+    // Arriba: 9 mesas (3x3 grid)
+    // Abajo:  8 mesas (4x2 grid)
+    // Izquierda: Mesa Imperial (50 sillas, vertical)
+    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,21],
     tables: {
-      // --- LADO IZQUIERDO --- Cols x=305, 375, 445 | Filas y=590, 415, 240
-      1: { cx: 305, cy: 590 },  // col1 fila1 (abajo)
-      2: { cx: 305, cy: 415 },  // col1 fila2 (centro)
-      3: { cx: 305, cy: 240 },  // col1 fila3 (arriba)
-      4: { cx: 375, cy: 590 },  // col2 fila1
-      5: { cx: 375, cy: 415 },  // col2 fila2
-      6: { cx: 375, cy: 240 },  // col2 fila3
-      7: { cx: 445, cy: 590 },  // col3 fila1
-      8: { cx: 445, cy: 415 },  // col3 fila2
-      9: { cx: 445, cy: 240 },  // col3 fila3
-      // --- LADO DERECHO --- Cols x=590, 665 | Filas y=600, 470, 340, 210
-      10: { cx: 590, cy: 600 }, // col1 fila1 (abajo)
-      11: { cx: 590, cy: 470 }, // col1 fila2
-      12: { cx: 590, cy: 340 }, // col1 fila3
-      13: { cx: 590, cy: 210 }, // col1 fila4 (arriba)
-      14: { cx: 665, cy: 600 }, // col2 fila1
-      15: { cx: 665, cy: 470 }, // col2 fila2
-      16: { cx: 665, cy: 340 }, // col2 fila3
-      17: { cx: 665, cy: 210 }, // col2 fila4
-      // Mesas 18-20 inactivas en Layout B
-      18: { cx: 305, cy: 175 }, 19: { cx: 665, cy: 175 }, 20: { cx: 665, cy: 175 }
+      1: { cx: 410, cy: 190 },
+      2: { cx: 410, cy: 265 },
+      3: { cx: 410, cy: 340 },
+      4: { cx: 520, cy: 190 },
+      5: { cx: 520, cy: 265 },
+      6: { cx: 520, cy: 340 },
+      7: { cx: 630, cy: 190 },
+      8: { cx: 630, cy: 265 },
+      9: { cx: 630, cy: 340 },
+      10: { cx: 410, cy: 515 },
+      11: { cx: 410, cy: 615 },
+      12: { cx: 490, cy: 515 },
+      13: { cx: 490, cy: 615 },
+      14: { cx: 570, cy: 515 },
+      15: { cx: 570, cy: 615 },
+      16: { cx: 650, cy: 515 },
+      17: { cx: 650, cy: 615 },
+      18: { cx: 305, cy: 175 }, 19: { cx: 665, cy: 175 }, 20: { cx: 665, cy: 175 },
+      21: { cx: 305, cy: 400 }
     },
-    dancefloor: { x: 462, y: 155, width: 96, height: 540, labelX: 510, labelY: 430, labelRotate: true }
+    dancefloor: { x: 350, y: 380, width: 380, height: 80, labelX: 540, labelY: 425, labelRotate: false }
   }
-
 };
 
 // Initialize Table Data
 const tablesData = {};
-for (let i = 1; i <= 20; i++) {
+for (let i = 1; i <= 21; i++) {
   tablesData[i] = {
     number: i,
-    shape: 'square',
-    seats: 10,
+    shape: i === 21 ? 'imperial' : 'square',
+    seats: i === 21 ? 50 : 10,
     status: 'normal',
     guests: [],
-    cx: tablePositions[i].cx,
-    cy: tablePositions[i].cy,
+    cx: tablePositions[i] ? tablePositions[i].cx : 305,
+    cy: tablePositions[i] ? tablePositions[i].cy : 400,
     active: true
   };
 }
@@ -186,7 +186,15 @@ function renderTable(num) {
   let tableEl;
   const halfSize = 21; // 42 width, 21 radius
   
-  if (tableData.shape === 'square') {
+  if (tableData.shape === 'imperial') {
+    // Imperial table shape: a long vertical rectangle!
+    tableEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    tableEl.setAttribute('x', -11);
+    tableEl.setAttribute('y', -240);
+    tableEl.setAttribute('width', 22);
+    tableEl.setAttribute('height', 480);
+    tableEl.setAttribute('rx', 4);
+  } else if (tableData.shape === 'square') {
     tableEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     tableEl.setAttribute('x', -halfSize);
     tableEl.setAttribute('y', -halfSize);
@@ -202,6 +210,7 @@ function renderTable(num) {
   
   // Style classes
   let classList = ['svg-table-block'];
+  if (tableData.shape === 'imperial') classList.push('imperial');
   if (tableData.status === 'vip') classList.push('vip');
   if (tableData.status === 'reserved') classList.push('reserved');
   if (isSelected) classList.push('active-selected');
@@ -228,7 +237,54 @@ function renderTable(num) {
   const chairW = 8;
   const chairH = 8;
   
-  if (tableData.shape === 'circle') {
+  if (tableData.shape === 'imperial') {
+    const paddingX = 17;
+    
+    // Top chair
+    const chairTop = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    chairTop.setAttribute('x', -chairW / 2);
+    chairTop.setAttribute('y', -252);
+    chairTop.setAttribute('width', chairW);
+    chairTop.setAttribute('height', chairH);
+    chairTop.setAttribute('rx', 1);
+    chairTop.setAttribute('class', 'svg-chair imperial-chair');
+    chairsGroup.appendChild(chairTop);
+    
+    // Bottom chair
+    const chairBottom = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    chairBottom.setAttribute('x', -chairW / 2);
+    chairBottom.setAttribute('y', 244);
+    chairBottom.setAttribute('width', chairW);
+    chairBottom.setAttribute('height', chairH);
+    chairBottom.setAttribute('rx', 1);
+    chairBottom.setAttribute('class', 'svg-chair imperial-chair');
+    chairsGroup.appendChild(chairBottom);
+    
+    // Side chairs
+    const sideChairsCount = Math.floor((numChairs - 2) / 2); // default 24
+    const step = 460 / (sideChairsCount - 1);
+    for (let c = 0; c < sideChairsCount; c++) {
+      const cy = -230 + c * step;
+      
+      const chairL = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      chairL.setAttribute('x', -paddingX - chairW / 2);
+      chairL.setAttribute('y', cy - chairH / 2);
+      chairL.setAttribute('width', chairW);
+      chairL.setAttribute('height', chairH);
+      chairL.setAttribute('rx', 1);
+      chairL.setAttribute('class', 'svg-chair imperial-chair');
+      chairsGroup.appendChild(chairL);
+      
+      const chairR = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      chairR.setAttribute('x', paddingX - chairW / 2);
+      chairR.setAttribute('y', cy - chairH / 2);
+      chairR.setAttribute('width', chairW);
+      chairR.setAttribute('height', chairH);
+      chairR.setAttribute('rx', 1);
+      chairR.setAttribute('class', 'svg-chair imperial-chair');
+      chairsGroup.appendChild(chairR);
+    }
+  } else if (tableData.shape === 'circle') {
     // Round table: Evenly space chairs in a circular ring
     for (let s = 0; s < numChairs; s++) {
       const angle = (s * 2 * Math.PI) / numChairs;
@@ -303,14 +359,20 @@ function renderTable(num) {
   // Table Number Annotation
   const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
   label.setAttribute('class', 'svg-label-table');
-  label.textContent = num;
+  if (tableData.shape === 'imperial') {
+    label.textContent = "M.I.";
+    label.setAttribute('font-size', '10');
+    label.setAttribute('font-weight', 'bold');
+  } else {
+    label.textContent = num;
+  }
   group.appendChild(label);
 }
 
 // Render all tables — only active ones
 function renderAllTables() {
   const layout = layoutPositions[currentLayout];
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 21; i++) {
     const group = document.getElementById(`table-group-${i}`);
     if (!group) continue;
     if (layout.activeTables.includes(i)) {
@@ -427,8 +489,11 @@ function setGlobalDensity(seats) {
   document.getElementById('density-val').textContent = `${seats} personas`;
 
   // Apply to ALL tables (including inactive, so state is preserved)
-  for (let i = 1; i <= 20; i++) {
-    tablesData[i].seats = seats;
+  for (let i = 1; i <= 21; i++) {
+    // Keep Mesa Imperial's capacity as 50 or custom unless user explicitly wants to overwrite it
+    if (i !== 21) {
+      tablesData[i].seats = seats;
+    }
   }
 
   renderAllTables();
@@ -442,11 +507,6 @@ function setGlobalDensity(seats) {
 // Calculate Dynamic Logistics details for Info Box
 function calculateLogisticsMetrics(data) {
   // Static scale: 10 SVG units = 1 meter
-  // Coordinates critical points:
-  // Zona de Baile center: (510, 220)
-  // DJ stage center: (510, 110)
-  // Restrooms center: (510, 50)
-  // Kitchen Bar center: (776, 140)
   
   const distance = (x1, y1, x2, y2) => {
     const dx = x2 - x1;
@@ -454,13 +514,24 @@ function calculateLogisticsMetrics(data) {
     return Math.sqrt(dx*dx + dy*dy) / 10; // Convert to meters
   };
   
-  const distPista = distance(data.cx, data.cy, 510, 220);
-  const distDJ = distance(data.cx, data.cy, 510, 110);
+  const df = layoutPositions[currentLayout].dancefloor;
+  const dfCenterX = df.x + df.width / 2;
+  const dfCenterY = df.y + df.height / 2;
+  
+  const distPista = distance(data.cx, data.cy, dfCenterX, dfCenterY);
+  
+  // Calculate distance to closest DJ stage
+  let distDJ = distance(data.cx, data.cy, 485, 110); // DJ Stage 1 (top center)
+  if (currentLayout === 'B') {
+    const distDJ2 = distance(data.cx, data.cy, 740, 420); // DJ Stage 2 (right wall)
+    distDJ = Math.min(distDJ, distDJ2);
+  }
+  
   const distWC = distance(data.cx, data.cy, 510, 50);
   const distBar = distance(data.cx, data.cy, 776, 140);
   
   metricDistPista.innerHTML = `Distancia a Zona de Baile: <strong>${distPista.toFixed(1)} m</strong>`;
-  metricDistDJ.innerHTML = `Distancia a DJ: <strong>${distDJ.toFixed(1)} m</strong>`;
+  metricDistDJ.innerHTML = `Distancia a DJ más cercano: <strong>${distDJ.toFixed(1)} m</strong>`;
   metricDistWc.innerHTML = `Distancia a Baños: <strong>${distWC.toFixed(1)} m</strong>`;
   
   let barQuality = 'Directo & Eficiente';
@@ -514,7 +585,7 @@ function setLayout(version) {
   const layout = layoutPositions[version];
 
   // Reposition all table SVG groups
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 21; i++) {
     const group = document.getElementById(`table-group-${i}`);
     if (!group) continue;
     const pos = layout.tables[i];
@@ -545,6 +616,12 @@ function setLayout(version) {
       danceLabel.removeAttribute('transform');
       danceLabel.setAttribute('font-size', '16');
     }
+  }
+
+  // Toggle DJ 2 area visibility
+  const dj2 = document.getElementById('dj2-group');
+  if (dj2) {
+    dj2.style.display = (version === 'B') ? 'inline' : 'none';
   }
 
   // Close drawer if open since selected table might be inactive

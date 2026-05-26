@@ -763,6 +763,25 @@ input:checked + .slider:before {
   transition: var(--transition);
 }
 
+/* Mesa Imperial Styles */
+.svg-table-block.imperial {
+  stroke: var(--accent);
+  stroke-width: 2;
+  fill: rgba(189, 160, 104, 0.15);
+  filter: drop-shadow(0 0 10px rgba(189, 160, 104, 0.35));
+}
+
+.svg-table-block.imperial:hover {
+  fill: rgba(189, 160, 104, 0.3);
+  stroke-width: 3;
+}
+
+.imperial-chair {
+  fill: var(--accent-light) !important;
+  stroke: var(--accent) !important;
+  stroke-width: 0.5px !important;
+}
+
 .svg-car {
   fill: #374151;
   stroke: #4b5563;
@@ -1050,49 +1069,195 @@ input:checked + .slider:before {
 }
 
 /* Print/Export Styling (Clean Blueprint Layout) */
+.print-only {
+  display: none;
+}
+
 @media print {
+  .print-only {
+    display: block !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Page margins and orientation */
+  @page {
+    size: letter landscape;
+    margin: 0.6cm;
+  }
+  
   body {
     background-color: #ffffff !important;
     color: #000000 !important;
-    height: auto !important;
     overflow: visible !important;
+    height: auto !important;
+    width: 100% !important;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
   }
   
-  .sidebar, .zoom-controls, .detail-drawer, .welcome-overlay, .scale-bar {
+  .sidebar, .zoom-controls, .detail-drawer, .welcome-overlay, .scale-bar, .mobile-toggle-btn, .mobile-close-sidebar-btn, .sidebar-backdrop {
     display: none !important;
   }
   
   .app-container {
+    display: block !important;
     width: 100% !important;
     height: auto !important;
-    display: block !important;
+    background-color: #ffffff !important;
   }
   
   .canvas-area {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
     width: 100% !important;
-    height: 100vh !important;
+    height: calc(100vh - 1.2cm) !important;
     background-color: #ffffff !important;
-    page-break-after: always;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
   
   #event-svg {
-    transform: none !important;
+    flex-grow: 1 !important;
     width: 100% !important;
-    height: 100% !important;
+    max-height: 70vh !important;
+    margin: 5px auto !important;
+    display: block !important;
+    transform: none !important;
   }
   
-  /* Force CAD Light theme for prints */
+  .print-ficha-header {
+    width: 100%;
+    border-bottom: 2px solid #111827;
+    padding-bottom: 6px;
+    margin-bottom: 5px;
+  }
+  
+  .print-header-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 4px;
+  }
+  
+  .print-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+  }
+  
+  .print-header-title h1 {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    margin: 0 !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.2 !important;
+  }
+  
+  .print-header-title h2 {
+    font-size: 8px !important;
+    font-weight: 600 !important;
+    color: #4b5563 !important;
+    margin: 0 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    line-height: 1.2 !important;
+  }
+  
+  .print-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 6px;
+  }
+  
+  .print-info-card {
+    font-size: 9px;
+    color: #1f2937;
+    line-height: 1.3;
+  }
+  
+  .print-info-card strong {
+    display: block;
+    color: #4b5563;
+    font-size: 7.5px;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+    letter-spacing: 0.03em;
+  }
+  
+  .print-ficha-footer {
+    width: 100%;
+    margin-top: auto;
+    padding-top: 5px;
+  }
+  
+  .print-footer-border {
+    border-top: 1px solid #e5e7eb;
+    margin-bottom: 4px;
+  }
+  
+  .print-footer-content {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7.5px;
+    color: #6b7280;
+  }
+  
+  /* Force clean blueprint colors for CAD in print */
   :root {
     --svg-bg: #ffffff !important;
     --svg-grid: none !important;
-    --svg-wall-stroke: #000000 !important;
+    --svg-wall-stroke: #111827 !important;
     --svg-wall-fill: none !important;
     --svg-table-bg: #ffffff !important;
-    --svg-table-stroke: #000000 !important;
+    --svg-table-stroke: #111827 !important;
     --svg-chair-bg: #ffffff !important;
-    --svg-chair-stroke: #000000 !important;
-    --svg-text: #000000 !important;
-    --svg-text-num: #000000 !important;
+    --svg-chair-stroke: #111827 !important;
+    --svg-text: #111827 !important;
+    --svg-text-num: #111827 !important;
+    --accent: #b91c1c !important; /* Premium crimson indicator in print */
+  }
+  
+  .svg-grid-line {
+    stroke: rgba(0, 0, 0, 0.04) !important;
+  }
+  
+  .zone-grass {
+    fill: #fafafa !important;
+    stroke: #e5e5e5 !important;
+  }
+  
+  .zone-water {
+    fill: #f0fdf4 !important; /* faint tint */
+    stroke: #bbf7d0 !important;
+  }
+  
+  .zone-pista {
+    fill: #fffbeb !important;
+    stroke: #fde68a !important;
+  }
+  
+  .zone-lobby, .zone-kitchen, .zone-bathroom, .zone-parking {
+    fill: #fafafa !important;
+    stroke: #e5e5e5 !important;
+  }
+  
+  /* Highlight Mesa Imperial differently */
+  .svg-table-block.imperial {
+    stroke: #111827 !important;
+    stroke-width: 1.5px !important;
+    fill: #f5f5f5 !important;
+  }
+  
+  .imperial-chair {
+    fill: #111827 !important;
+    stroke: none !important;
   }
 }
 
