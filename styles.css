@@ -1212,8 +1212,15 @@ input:checked + .slider:before {
     color: #6b7280;
   }
   
-  /* Force clean blueprint colors for CAD in print */
-  :root {
+  /* Force clean blueprint colors for CAD in print (overriding theme specific variables) */
+  html, body, [data-theme] {
+    --bg-primary: #ffffff !important;
+    --bg-secondary: #ffffff !important;
+    --border-color: #e5e7eb !important;
+    --text-primary: #111827 !important;
+    --text-secondary: #4b5563 !important;
+    --accent: #b91c1c !important;
+    --accent-light: #ef4444 !important;
     --svg-bg: #ffffff !important;
     --svg-grid: none !important;
     --svg-wall-stroke: #111827 !important;
@@ -1224,8 +1231,15 @@ input:checked + .slider:before {
     --svg-chair-stroke: #111827 !important;
     --svg-text: #111827 !important;
     --svg-text-num: #111827 !important;
-    --accent: #b91c1c !important; /* Premium crimson indicator in print */
+    --svg-grass: #fafafa !important;
+    --svg-water: #eff6ff !important;
+    --svg-pista: #fffbeb !important;
+    --svg-lobby: #fafafa !important;
+    --svg-kitchen: #fafafa !important;
+    --svg-bathroom: #fafafa !important;
+    --svg-parking: #fafafa !important;
   }
+  
   
   .svg-grid-line {
     stroke: rgba(0, 0, 0, 0.04) !important;
