@@ -157,12 +157,17 @@ window.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const layoutParam = urlParams.get('layout');
   const themeParam = urlParams.get('theme');
+  const emulateParam = urlParams.get('emulate-print');
   
   if (layoutParam && (layoutParam === 'A' || layoutParam === 'B')) {
     setLayout(layoutParam);
   }
   if (themeParam && ['premium', 'cad-dark', 'cad-light', 'minimalist'].includes(themeParam)) {
     setTheme(themeParam);
+  }
+  if (emulateParam === 'true') {
+    document.body.classList.add('emulate-print');
+    resetCanvasView();
   }
 });
 
