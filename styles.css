@@ -1088,6 +1088,11 @@ input:checked + .slider:before {
     margin: 0.6cm;
   }
   
+  html, body, #event-svg, svg, svg * {
+    -webkit-print-color-adjust: exact !important; /* Force printing of background colors and fills */
+    print-color-adjust: exact !important;
+  }
+  
   html, body {
     display: block !important; /* Reset flexbox for standard printing layout flow */
     background-color: #ffffff !important;
@@ -1096,8 +1101,6 @@ input:checked + .slider:before {
     height: auto !important;
     width: 100% !important;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-    -webkit-print-color-adjust: exact !important; /* Force printing of background colors and fills */
-    print-color-adjust: exact !important;
   }
   
   .sidebar, .zoom-controls, .detail-drawer, .welcome-overlay, .scale-bar, .mobile-toggle-btn, .mobile-close-sidebar-btn, .sidebar-backdrop {
@@ -1369,7 +1372,7 @@ input:checked + .slider:before {
 }
 
 /* --- MOBILE RESPONSIVE UX/UI OPTIMIZATIONS --- */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   /* Layout stacks vertically, map is full screen absolute */
   .app-container {
     flex-direction: column;
