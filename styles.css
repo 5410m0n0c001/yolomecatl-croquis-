@@ -1088,7 +1088,7 @@ input:checked + .slider:before {
     margin: 0.6cm;
   }
   
-  body {
+  html, body {
     background-color: #ffffff !important;
     color: #000000 !important;
     overflow: visible !important;
@@ -1113,18 +1113,20 @@ input:checked + .slider:before {
     flex-direction: column !important;
     justify-content: space-between !important;
     width: 100% !important;
-    height: calc(100vh - 1.2cm) !important;
+    height: auto !important;
+    min-height: 100% !important;
     background-color: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
   
   #event-svg {
-    flex-grow: 1 !important;
     width: 100% !important;
-    max-height: 70vh !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 16cm !important;
     margin: 5px auto !important;
     display: block !important;
     transform: none !important;
