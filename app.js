@@ -858,3 +858,51 @@ window.addEventListener('beforeprint', () => {
   resetCanvasView();
 });
 
+// --- NATIVE SHARING & TOAST SYSTEM (Primavera UX Extension) ---
+function sharePlan() {
+  const shareData = {
+    title: 'Planificador de Eventos - Jardín Yolomecatl',
+    text: '¡Mira la distribución interactiva de mesas y comensales en el Jardín Yolomecatl organizada con Primavera Events Group!',
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData)
+      .then(() => {
+        showToast('<i class="fa-solid fa-circle-check" style="color: var(--success);"></i> ¡Plano compartido con éxito!');
+      })
+      .catch((err) => {
+        // If user cancelled, don't show clipboard toast, just print in log
+        if (err.name !== 'AbortError') {
+          copyLinkFallback();
+        }
+      });
+  } else {
+    copyLinkFallback();
+  }
+}
+
+function copyLinkFallback() {
+  navigator.clipboard.writeText(window.location.href)
+    .then(() => {
+      showToast('<i class="fa-solid fa-copy" style="color: var(--accent);"></i> ¡Enlace copiado al portapapeles!');
+    })
+    .catch(() => {
+      showToast('<i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> No se pudo copiar el enlace.');
+    });
+}
+
+let toastTimeout = null;
+function showToast(messageHtml) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+
+  toast.innerHTML = messageHtml;
+  toast.classList.add('show');
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+

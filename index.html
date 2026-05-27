@@ -213,7 +213,10 @@
 
       <!-- Actions -->
       <div class="sidebar-actions">
-        <button class="btn-primary" onclick="window.print()">
+        <button class="btn-primary" onclick="sharePlan()" id="btn-share" style="background-color: var(--accent); color: #ffffff;">
+          <i class="fa-solid fa-share-nodes"></i> Compartir Plano
+        </button>
+        <button class="btn-secondary" onclick="window.print()">
           <i class="fa-solid fa-print"></i> Exportar Ficha Comercial
         </button>
         <button class="btn-secondary" onclick="resetCanvasView()">
@@ -864,6 +867,9 @@
     </aside>
 
   </div>
+
+  <!-- Toast notification container -->
+  <div id="toast" class="toast-notification"></div>
 
   <script src="app.js?v=2.2"></script>
 </body>

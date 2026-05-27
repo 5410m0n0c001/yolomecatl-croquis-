@@ -3,46 +3,46 @@
    Premium CSS Design System & Theme Engine
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Default Theme: Premium Render */
-  --bg-primary: #121316;
-  --bg-secondary: #1a1c23;
-  --bg-card: rgba(30, 32, 42, 0.7);
+  /* Default Theme: Premium Render (Primavera Events Ecosystem) */
+  --bg-primary: #021526;       /* Midnight Navy from official page */
+  --bg-secondary: #072136;     /* Companion Slate Blue */
+  --bg-card: rgba(11, 37, 59, 0.75);
   --border-color: rgba(255, 255, 255, 0.08);
   --text-primary: #f3f4f6;
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
   
-  --accent: #bda068; /* Luxury Gold */
-  --accent-light: #d4af37;
-  --accent-glow: rgba(189, 160, 104, 0.15);
+  --accent: #F05A7E;           /* Romantic Coral Rose from official page */
+  --accent-light: #ff7e9d;
+  --accent-glow: rgba(240, 90, 126, 0.15);
   
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
   --info: #3b82f6;
 
-  /* SVG Specific Styles (Premium Render default) */
-  --svg-bg: #14161d;
-  --svg-grid: rgba(255, 255, 255, 0.03);
-  --svg-wall-stroke: #2e313d;
-  --svg-wall-fill: #1f222b;
-  --svg-wall-inner: #1a1d24;
+  /* SVG Specific Styles (Premium Render Primavera Theme) */
+  --svg-bg: #021526;
+  --svg-grid: rgba(240, 90, 126, 0.04);
+  --svg-wall-stroke: #1a3246;
+  --svg-wall-fill: #0b253b;
+  --svg-wall-inner: #072136;
   
-  --svg-grass: #1b2f21;
-  --svg-water: #1b3d54;
-  --svg-pista: #472b15;
-  --svg-lobby: #282830;
-  --svg-kitchen: #252833;
-  --svg-bathroom: #222530;
-  --svg-parking: #1d1e24;
+  --svg-grass: #12281a;
+  --svg-water: #1b3a4b;
+  --svg-pista: #2a1b12;
+  --svg-lobby: #0c263c;
+  --svg-kitchen: #092135;
+  --svg-bathroom: #081d2f;
+  --svg-parking: #051829;
   
-  --svg-table-bg: #2e241c;
-  --svg-table-stroke: #bda068;
-  --svg-chair-bg: #40342a;
-  --svg-chair-stroke: #8b6e3c;
+  --svg-table-bg: #0b253b;
+  --svg-table-stroke: #F05A7E;
+  --svg-chair-bg: #071b2d;
+  --svg-chair-stroke: rgba(240, 90, 126, 0.5);
   
   --svg-text: #f3f4f6;
   --svg-text-num: #ffffff;
@@ -165,7 +165,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1834,4 +1834,58 @@ body.emulate-print .circulation-service {
 body.emulate-print .circulation-emergency {
   stroke: #dc2626 !important;
   stroke-width: 4.5px !important;
+}
+
+/* --- PREMIUM SHARE BUTTON & TOAST NOTIFICATION STYLING --- */
+.toast-notification {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translate(-50%, 100px);
+  background-color: #072136;
+  color: #f3f4f6;
+  padding: 0.85rem 1.75rem;
+  border-radius: 50px;
+  border: 1px solid var(--accent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--accent-glow);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.toast-notification.show {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+/* Micro-interaction on buttons inside sidebar action */
+.sidebar-actions button {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-actions button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.sidebar-actions button:active::after {
+  width: 300px;
+  height: 300px;
 }
