@@ -3,6 +3,8 @@
  * Technical CAD Interactivity & Render Engine
  */
 
+import { init3D, destroy3D, syncWithData, selectElement3D, resetCamera3D, toggleCirculation3D } from "./visualizer3d.js";
+
 // --- STATE MANAGEMENT ---
 let currentTheme = 'premium';
 let currentLayout = 'A';
@@ -152,6 +154,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Bind swipe to close gestures on mobile sidebar
   setupSidebarSwipeGesture();
+
+  // Registrar listeners para conmutadores de vista 2D/3D
+  const btn2d = document.getElementById('btn-view-2d');
+  const btn3d = document.getElementById('btn-view-3d');
+  if (btn2d && btn3d) {
+    btn2d.addEventListener('click', () => setViewMode('2d'));
+    btn3d.addEventListener('click', () => setViewMode('3d'));
+  }
+
+  const btnResetCam = document.getElementById('btn-reset-cam-3d');
+  if (btnResetCam) {
+    btnResetCam.addEventListener('click', () => {
+      if (activeView === '3d') {
+        resetCamera3D();
+      }
+    });
+  }
 
   // Parse URL query parameters for deep linking (e.g. ?layout=B&theme=cad-dark)
   const urlParams = new URLSearchParams(window.location.search);
@@ -439,6 +458,10 @@ function selectTable(num) {
   
   // Calculate relative distances for logistics info box
   calculateLogisticsMetrics(data);
+  
+  if (activeView === '3d') {
+    selectElement3D(num);
+  }
 }
 
 function closeDrawer() {
@@ -447,6 +470,9 @@ function closeDrawer() {
     const prev = selectedTableNum;
     selectedTableNum = null;
     renderTable(prev);
+  }
+  if (activeView === '3d') {
+    selectElement3D(null);
   }
 }
 
@@ -481,6 +507,10 @@ function clearSelectedTable() {
   updateGuestCountLabel(0, tablesData[selectedTableNum].seats);
   renderTable(selectedTableNum);
   updateGlobalMetrics();
+  
+  if (activeView === '3d') {
+    syncWithData(tablesData, currentLayout, selectedTableNum);
+  }
 }
 
 // Shape Customizer
@@ -488,6 +518,10 @@ function updateSelectedTableShape(shape) {
   if (!selectedTableNum) return;
   tablesData[selectedTableNum].shape = shape;
   renderTable(selectedTableNum);
+  
+  if (activeView === '3d') {
+    syncWithData(tablesData, currentLayout, selectedTableNum);
+  }
 }
 
 // Seat Capacity Customizer
@@ -497,6 +531,10 @@ function updateSelectedTableSeats(seats) {
   renderTable(selectedTableNum);
   updateGuestCountLabel(tablesData[selectedTableNum].guests.length, seats);
   updateGlobalMetrics();
+  
+  if (activeView === '3d') {
+    syncWithData(tablesData, currentLayout, selectedTableNum);
+  }
 }
 
 // Status Customizer
@@ -505,6 +543,10 @@ function updateSelectedTableStatus(status) {
   tablesData[selectedTableNum].status = status;
   renderTable(selectedTableNum);
   updateGlobalMetrics();
+  
+  if (activeView === '3d') {
+    syncWithData(tablesData, currentLayout, selectedTableNum);
+  }
 }
 
 // Global Seat Density Selector
@@ -528,6 +570,10 @@ function setGlobalDensity(seats) {
 
   if (selectedTableNum) {
     selectTable(selectedTableNum);
+  }
+  
+  if (activeView === '3d') {
+    syncWithData(tablesData, currentLayout, selectedTableNum);
   }
 }
 
@@ -611,6 +657,10 @@ function toggleCirculation(pathType, isChecked) {
       path.classList.remove('active');
     }
   }
+  
+  if (activeView === '3d') {
+    toggleCirculation3D(pathType, isChecked);
+  }
 }
 
 // --- LAYOUT / DISTRIBUTION SWITCHER ---
@@ -679,6 +729,10 @@ function setLayout(version) {
   // Re-render all tables with new positions
   renderAllTables();
   updateGlobalMetrics();
+  
+  if (activeView === '3d') {
+    syncWithData(tablesData, currentLayout, selectedTableNum);
+  }
 }
 
 // --- THEME ENGINE ---
@@ -905,4 +959,65 @@ function showToast(messageHtml) {
     toast.classList.remove('show');
   }, 3000);
 }
+
+// --- 3D VIEW TOGGLE ENGINE ---
+let activeView = '2d';
+
+function setViewMode(mode) {
+  if (activeView === mode) return;
+  activeView = mode;
+
+  const btn2d = document.getElementById('btn-view-2d');
+  const btn3d = document.getElementById('btn-view-3d');
+  const container2d = document.getElementById('container-2d');
+  const container3d = document.getElementById('container-3d');
+
+  if (mode === '3d') {
+    if (btn2d && btn3d && container2d && container3d) {
+      btn3d.classList.add('active');
+      btn2d.classList.remove('active');
+      container3d.classList.add('active');
+      container2d.classList.remove('active');
+    }
+
+    // Inicializar el visor 3D
+    init3D(container3d, tablesData, currentLayout, selectedTableNum);
+  } else {
+    if (btn2d && btn3d && container2d && container3d) {
+      btn2d.classList.add('active');
+      btn3d.classList.remove('active');
+      container2d.classList.add('active');
+      container3d.classList.remove('active');
+    }
+
+    // Destruir el motor 3D y liberar memoria
+    destroy3D();
+
+    // Re-renderizar mesas 2D por si acaso
+    renderAllTables();
+    if (selectedTableNum) {
+      selectTable(selectedTableNum);
+    }
+  }
+}
+
+// Exponer funciones globales al objeto window para mantener compatibilidad con inline handlers de index.html
+window.closeWelcome = closeWelcome;
+window.closeSidebarMobile = closeSidebarMobile;
+window.toggleSidebarMobile = toggleSidebarMobile;
+window.setLayout = setLayout;
+window.setTheme = setTheme;
+window.setGlobalDensity = setGlobalDensity;
+window.sharePlan = sharePlan;
+window.resetCanvasView = resetCanvasView;
+window.zoomCanvas = zoomCanvas;
+window.closeDrawer = closeDrawer;
+window.clearSelectedTable = clearSelectedTable;
+window.toggleLayer = toggleLayer;
+window.toggleCirculation = toggleCirculation;
+window.updateSelectedTableShape = updateSelectedTableShape;
+window.updateSelectedTableSeats = updateSelectedTableSeats;
+window.updateSelectedTableStatus = updateSelectedTableStatus;
+window.updateSelectedTableGuests = updateSelectedTableGuests;
+window.setViewMode = setViewMode;
 

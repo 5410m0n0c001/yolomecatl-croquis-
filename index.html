@@ -72,6 +72,19 @@
         <i class="fa-solid fa-xmark"></i> Cerrar Menú
       </button>
 
+      <!-- Visualización Selector -->
+      <div>
+        <h3 class="section-title">Visualización</h3>
+        <div class="view-toggle-group">
+          <button class="btn-toggle active" id="btn-view-2d" title="Vista en Planta 2D">
+            <i class="fa-solid fa-map"></i> Vista 2D
+          </button>
+          <button class="btn-toggle" id="btn-view-3d" title="Proyección Realista 3D">
+            <i class="fa-solid fa-cube"></i> Vista 3D
+          </button>
+        </div>
+      </div>
+
       <!-- Layout / Distribución Selector -->
       <div>
         <h3 class="section-title">Distribución del Salón</h3>
@@ -231,8 +244,10 @@
     <!-- CENTER CANVAS: Interactive architectural layout -->
     <main class="canvas-area" id="canvas-area">
       
-      <!-- Print Header for Commercial Datasheet (Visible only during printing) -->
-      <div class="print-ficha-header print-only">
+      <!-- Vista 2D (SVG) -->
+      <div id="container-2d" class="canvas-container active">
+        <!-- Print Header for Commercial Datasheet (Visible only during printing) -->
+        <div class="print-ficha-header print-only">
         <div class="print-header-top">
           <img src="logo yolomecatl.png" alt="Logo Yolomecatl" class="print-logo">
           <div class="print-header-title">
@@ -806,6 +821,19 @@
 
       <!-- COORDINATES AND TOOLTIP MOUSE TRACKER -->
       <div class="architect-tooltip" id="architect-tooltip"></div>
+      </div>
+
+      <!-- Vista 3D (WebGL) -->
+      <div id="container-3d" class="canvas-container">
+        <!-- Three.js Canvas se insertará aquí -->
+        
+        <div class="canvas-hud">
+          <span class="hud-scale"><i class="fa-solid fa-arrows-spin"></i> Clic Izq: Rotar | Clic Der: Desplazar | Rueda: Zoom</span>
+          <button id="btn-reset-cam-3d" class="hud-btn" title="Restaurar Cámara 3D">
+            <i class="fa-solid fa-camera"></i> Cámara Defecto
+          </button>
+        </div>
+      </div>
     </main>
 
     <!-- RIGHT DRAWER: Single Table Customizer -->
@@ -871,6 +899,10 @@
   <!-- Toast notification container -->
   <div id="toast" class="toast-notification"></div>
 
-  <script src="app.js?v=3.0"></script>
+  <!-- Carga de librerías Three.js mediante CDN para soporte 3D fotorrealista -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script type="module" src="app.js?v=3.0"></script>
 </body>
 </html>
