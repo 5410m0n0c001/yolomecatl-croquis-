@@ -30,7 +30,7 @@
   <meta name="twitter:image" content="https://5410m0n0c001.github.io/yolomecatl-croquis-/og_image.png">
   <meta name="twitter:image:alt" content="Yolomecatl Salón de Eventos - Planificador Interactivo de Eventos">
 
-  <link rel="stylesheet" href="styles.css?v=3.1">
+  <link rel="stylesheet" href="styles.css?v=3.2">
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -92,12 +92,12 @@
           <button class="layout-btn active" id="layout-btn-A" onclick="setLayout('A')">
             <i class="fa-solid fa-table-cells"></i>
             <span class="layout-btn-label">Versión A</span>
-            <span class="layout-btn-sub">Pista central · 20 mesas</span>
+            <span class="layout-btn-sub">Pista central · 21 mesas</span>
           </button>
           <button class="layout-btn" id="layout-btn-B" onclick="setLayout('B')">
             <i class="fa-solid fa-grip-lines-vertical"></i>
             <span class="layout-btn-label">Versión B</span>
-            <span class="layout-btn-sub">Pista longitudinal · 17 mesas</span>
+            <span class="layout-btn-sub">Pista longitudinal · 22 mesas</span>
           </button>
         </div>
       </div>
@@ -798,8 +798,11 @@
           <!-- Table 20 (Intermedio Columna 3) -->
           <g id="table-group-20" class="table-container" data-number="20" transform="translate(540, 402)"></g>
           
-          <!-- Table 21 (Intermedio Columna 4 / Mesa Imperial en Layout B) -->
+          <!-- Table 21 (Intermedio Columna 4) -->
           <g id="table-group-21" class="table-container" data-number="21" transform="translate(650, 402)"></g>
+          
+          <!-- Table 22 (Mesa Imperial - Layout B only) -->
+          <g id="table-group-22" class="table-container" data-number="22" transform="translate(305, 400)"></g>
         </g>
 
       </svg>
@@ -914,6 +917,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-  <script type="module" src="app.js?v=3.1"></script>
+  <script type="module" src="app.js?v=3.2"></script>
 </body>
 </html>

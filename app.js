@@ -43,7 +43,8 @@ const tablePositions = {
   18: { cx: 320, cy: 304 },
   19: { cx: 430, cy: 402 },
   20: { cx: 540, cy: 402 },
-  21: { cx: 650, cy: 402 }
+  21: { cx: 650, cy: 402 },
+  22: { cx: 305, cy: 400 }
 };
 
 // Layout configurations: A = original, B = pista longitudinal central
@@ -61,7 +62,8 @@ const layoutPositions = {
       15: { cx: 540, cy: 353 }, 16: { cx: 650, cy: 353 },
       17: { cx: 320, cy: 255 }, 18: { cx: 320, cy: 304 },
       19: { cx: 430, cy: 402 }, 20: { cx: 540, cy: 402 },
-      21: { cx: 650, cy: 402 }
+      21: { cx: 650, cy: 402 },
+      22: { cx: 305, cy: 400 }
     },
     dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false },
     paths: {
@@ -75,7 +77,7 @@ const layoutPositions = {
     // Arriba: 9 mesas (3x3 grid)
     // Abajo:  8 mesas (4x2 grid)
     // Izquierda: Mesa Imperial (50 sillas, vertical)
-    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,21],
+    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
     tables: {
       1: { cx: 410, cy: 190 },
       2: { cx: 410, cy: 265 },
@@ -94,8 +96,11 @@ const layoutPositions = {
       15: { cx: 570, cy: 615 },
       16: { cx: 650, cy: 515 },
       17: { cx: 650, cy: 615 },
-      18: { cx: 305, cy: 175 }, 19: { cx: 665, cy: 175 }, 20: { cx: 665, cy: 175 },
-      21: { cx: 305, cy: 400 }
+      18: { cx: 410, cy: 565 },
+      19: { cx: 490, cy: 565 },
+      20: { cx: 570, cy: 565 },
+      21: { cx: 650, cy: 565 },
+      22: { cx: 305, cy: 400 }
     },
     dancefloor: { x: 350, y: 380, width: 380, height: 80, labelX: 540, labelY: 425, labelRotate: false },
     paths: {
@@ -108,11 +113,11 @@ const layoutPositions = {
 
 // Initialize Table Data
 const tablesData = {};
-for (let i = 1; i <= 21; i++) {
+for (let i = 1; i <= 22; i++) {
   tablesData[i] = {
     number: i,
-    shape: 'square', // Initialize all as square on load
-    seats: 10,
+    shape: i === 22 ? 'imperial' : 'square',
+    seats: i === 22 ? 50 : 10,
     status: 'normal',
     guests: [],
     cx: tablePositions[i] ? tablePositions[i].cx : 305,
@@ -418,7 +423,7 @@ function renderTable(num) {
 // Render all tables — only active ones
 function renderAllTables() {
   const layout = layoutPositions[currentLayout];
-  for (let i = 1; i <= 21; i++) {
+  for (let i = 1; i <= 22; i++) {
     const group = document.getElementById(`table-group-${i}`);
     if (!group) continue;
     if (layout.activeTables.includes(i)) {
@@ -558,9 +563,9 @@ function setGlobalDensity(seats) {
   document.getElementById('density-val').textContent = `${seats} personas`;
 
   // Apply to ALL tables (including inactive, so state is preserved)
-  for (let i = 1; i <= 21; i++) {
+  for (let i = 1; i <= 22; i++) {
     // Keep Mesa Imperial's capacity as 50 or custom unless user explicitly wants to overwrite it
-    if (i !== 21) {
+    if (i !== 22) {
       tablesData[i].seats = seats;
     }
   }
@@ -673,17 +678,8 @@ function setLayout(version) {
 
   const layout = layoutPositions[version];
 
-  // Dynamically set shape and seats for Table 21 based on layout version
-  if (version === 'B') {
-    tablesData[21].shape = 'imperial';
-    tablesData[21].seats = 50;
-  } else {
-    tablesData[21].shape = 'square';
-    tablesData[21].seats = 10;
-  }
-
   // Reposition all table SVG groups
-  for (let i = 1; i <= 21; i++) {
+  for (let i = 1; i <= 22; i++) {
     const group = document.getElementById(`table-group-${i}`);
     if (!group) continue;
     const pos = layout.tables[i];
