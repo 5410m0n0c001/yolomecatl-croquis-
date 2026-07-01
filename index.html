@@ -232,6 +232,17 @@
         <button class="btn-secondary" onclick="window.print()">
           <i class="fa-solid fa-print"></i> Exportar Ficha Comercial
         </button>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%;">
+          <button class="btn-secondary" onclick="exportToJSON()" id="btn-export-json" title="Exportar plano a archivo JSON" style="padding: 0.6rem 0.4rem; font-size: 0.75rem;">
+            <i class="fa-solid fa-file-export"></i> Exportar JSON
+          </button>
+          <button class="btn-secondary" onclick="triggerImportJSON()" id="btn-import-json" title="Importar plano desde archivo JSON" style="padding: 0.6rem 0.4rem; font-size: 0.75rem;">
+            <i class="fa-solid fa-file-import"></i> Importar JSON
+          </button>
+        </div>
+        <input type="file" id="import-json-file" accept=".json" style="display: none;" onchange="importFromJSON(this)">
+
         <button class="btn-secondary" onclick="resetCanvasView()">
           <i class="fa-solid fa-compress"></i> Centrar Plano
         </button>
@@ -779,16 +790,16 @@
 
           <!-- Table 17 (Norte Izquierda, junto a pista - Row 5) -->
           <g id="table-group-17" class="table-container" data-number="17" transform="translate(320, 255)"></g>
-          <!-- Table 18 (Extremo Norte Izquierda, junto a pista - Row 6) -->
-          <g id="table-group-18" class="table-container" data-number="18" transform="translate(320, 175)"></g>
+          <!-- Table 18 (Intermedio Columna 1) -->
+          <g id="table-group-18" class="table-container" data-number="18" transform="translate(320, 304)"></g>
 
-          <!-- Table 19 (Norte Derecha, junto a pista - Row 5) -->
-          <g id="table-group-19" class="table-container" data-number="19" transform="translate(650, 255)"></g>
-          <!-- Table 20 (Extremo Norte Derecha, junto a pista - Row 6) -->
-          <g id="table-group-20" class="table-container" data-number="20" transform="translate(650, 175)"></g>
+          <!-- Table 19 (Intermedio Columna 2) -->
+          <g id="table-group-19" class="table-container" data-number="19" transform="translate(430, 402)"></g>
+          <!-- Table 20 (Intermedio Columna 3) -->
+          <g id="table-group-20" class="table-container" data-number="20" transform="translate(540, 402)"></g>
           
-          <!-- Table 21 (Mesa Imperial - Layout B only) -->
-          <g id="table-group-21" class="table-container" data-number="21" transform="translate(305, 400)"></g>
+          <!-- Table 21 (Intermedio Columna 4 / Mesa Imperial en Layout B) -->
+          <g id="table-group-21" class="table-container" data-number="21" transform="translate(650, 402)"></g>
         </g>
 
       </svg>

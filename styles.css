@@ -1081,6 +1081,18 @@ input:checked + .slider:before {
   .no-print {
     display: none !important;
   }
+
+  .canvas-container {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: none !important;
+  }
+
+  .canvas-container.active {
+    display: block !important;
+  }
   
   /* Page margins and orientation */
   @page {
@@ -1664,6 +1676,18 @@ body.emulate-print .app-container {
   width: 100% !important;
   height: auto !important;
   background-color: #ffffff !important;
+}
+
+body.emulate-print .canvas-container {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: none !important;
+}
+
+body.emulate-print .canvas-container.active {
+  display: block !important;
 }
 
 body.emulate-print .canvas-area {

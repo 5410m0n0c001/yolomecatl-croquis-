@@ -40,16 +40,16 @@ const tablePositions = {
   16: { cx: 650, cy: 353 },
   
   17: { cx: 320, cy: 255 },
-  18: { cx: 320, cy: 175 },
-  19: { cx: 650, cy: 255 },
-  20: { cx: 650, cy: 175 },
-  21: { cx: 305, cy: 400 }
+  18: { cx: 320, cy: 304 },
+  19: { cx: 430, cy: 402 },
+  20: { cx: 540, cy: 402 },
+  21: { cx: 650, cy: 402 }
 };
 
 // Layout configurations: A = original, B = pista longitudinal central
 const layoutPositions = {
   A: {
-    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
     tables: {
       1: { cx: 320, cy: 647 }, 2: { cx: 430, cy: 647 },
       3: { cx: 540, cy: 647 }, 4: { cx: 650, cy: 647 },
@@ -59,9 +59,9 @@ const layoutPositions = {
       11: { cx: 540, cy: 451 }, 12: { cx: 650, cy: 451 },
       13: { cx: 320, cy: 353 }, 14: { cx: 430, cy: 353 },
       15: { cx: 540, cy: 353 }, 16: { cx: 650, cy: 353 },
-      17: { cx: 320, cy: 255 }, 18: { cx: 320, cy: 175 },
-      19: { cx: 650, cy: 255 }, 20: { cx: 650, cy: 175 },
-      21: { cx: 305, cy: 400 }
+      17: { cx: 320, cy: 255 }, 18: { cx: 320, cy: 304 },
+      19: { cx: 430, cy: 402 }, 20: { cx: 540, cy: 402 },
+      21: { cx: 650, cy: 402 }
     },
     dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false },
     paths: {
@@ -111,8 +111,8 @@ const tablesData = {};
 for (let i = 1; i <= 21; i++) {
   tablesData[i] = {
     number: i,
-    shape: i === 21 ? 'imperial' : 'square',
-    seats: i === 21 ? 50 : 10,
+    shape: 'square', // Initialize all as square on load
+    seats: 10,
     status: 'normal',
     guests: [],
     cx: tablePositions[i] ? tablePositions[i].cx : 305,
@@ -673,6 +673,15 @@ function setLayout(version) {
 
   const layout = layoutPositions[version];
 
+  // Dynamically set shape and seats for Table 21 based on layout version
+  if (version === 'B') {
+    tablesData[21].shape = 'imperial';
+    tablesData[21].seats = 50;
+  } else {
+    tablesData[21].shape = 'square';
+    tablesData[21].seats = 10;
+  }
+
   // Reposition all table SVG groups
   for (let i = 1; i <= 21; i++) {
     const group = document.getElementById(`table-group-${i}`);
@@ -1001,6 +1010,92 @@ function setViewMode(mode) {
   }
 }
 
+// --- JSON IMPORT / EXPORT SYSTEM ---
+function exportToJSON() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+    version: "1.0",
+    currentLayout,
+    currentTheme,
+    globalDensity,
+    tablesData
+  }, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+  downloadAnchor.setAttribute("download", `yolomecatl_layout_${dateStr}_${timeStr}.json`);
+  
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  
+  showToast('<i class="fa-solid fa-circle-check" style="color: var(--success);"></i> ¡Configuración exportada con éxito!');
+}
+
+function triggerImportJSON() {
+  document.getElementById('import-json-file').click();
+}
+
+function importFromJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      if (!data || !data.tablesData) {
+        throw new Error("Formato JSON inválido");
+      }
+      
+      // Update global states
+      if (data.currentLayout) {
+        setLayout(data.currentLayout);
+      }
+      if (data.currentTheme) {
+        setTheme(data.currentTheme);
+      }
+      if (data.globalDensity) {
+        setGlobalDensity(data.globalDensity);
+      }
+      
+      // Update tablesData
+      Object.keys(data.tablesData).forEach(key => {
+        const tableNum = parseInt(key);
+        if (tablesData[tableNum] && data.tablesData[key]) {
+          const importData = data.tablesData[key];
+          tablesData[tableNum].shape = importData.shape || tablesData[tableNum].shape;
+          tablesData[tableNum].seats = importData.seats || tablesData[tableNum].seats;
+          tablesData[tableNum].status = importData.status || tablesData[tableNum].status;
+          tablesData[tableNum].guests = importData.guests || [];
+        }
+      });
+      
+      // Sync views
+      renderAllTables();
+      updateGlobalMetrics();
+      
+      if (selectedTableNum) {
+        selectTable(selectedTableNum);
+      }
+      
+      if (activeView === '3d') {
+        syncWithData(tablesData, currentLayout, selectedTableNum);
+      }
+      
+      showToast('<i class="fa-solid fa-file-circle-check" style="color: var(--success);"></i> ¡Configuración importada con éxito!');
+    } catch (err) {
+      console.error(err);
+      showToast('<i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Error al importar: archivo inválido.');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
 // Exponer funciones globales al objeto window para mantener compatibilidad con inline handlers de index.html
 window.closeWelcome = closeWelcome;
 window.closeSidebarMobile = closeSidebarMobile;
@@ -1020,4 +1115,7 @@ window.updateSelectedTableSeats = updateSelectedTableSeats;
 window.updateSelectedTableStatus = updateSelectedTableStatus;
 window.updateSelectedTableGuests = updateSelectedTableGuests;
 window.setViewMode = setViewMode;
+window.exportToJSON = exportToJSON;
+window.triggerImportJSON = triggerImportJSON;
+window.importFromJSON = importFromJSON;
 

@@ -1242,9 +1242,9 @@ export function syncWithData(tablesData, layout, selectedTableNum) {
   }
   
   // 2. Identificar mesas activas según el layout seleccionado
-  // Versión A tiene mesas 1 a 20. Versión B tiene 1 a 17 + 21 (Imperial).
+  // Versión A tiene mesas 1 a 21. Versión B tiene 1 a 17 + 21 (Imperial).
   const activeTablesList = (layout === 'A')
-    ? [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+    ? [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
     : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,21];
   
   // 3. Eliminar mesas 3D que ya no están activas en el layout
