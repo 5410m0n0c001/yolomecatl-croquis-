@@ -14,7 +14,7 @@
     elements: [],
     terrain: { w: 100, h: 98 },
     selectedId: null,
-    activeView: '3d',
+    activeView: '2d',
     useGrid: true,
     history: [],
     historyIndex: -1,
@@ -2505,10 +2505,7 @@
   function init() {
     console.log('[App] Initializing Universal Venue Planner...');
 
-    // If on mobile, default view is 3D
-    if (window.innerWidth < 768) {
-      AppState.activeView = '3d';
-    }
+    // Default to 2D view on all devices
 
     // Load saved state
     var hadSaved = loadFromLocalStorage();
