@@ -1,1117 +1,2692 @@
-/**
- * Yolomecatl - Planificador y Visualizador de Eventos
- * Technical CAD Interactivity & Render Engine
- */
+// ============================================================
+// app.js — Universal Venue Floor Plan Builder
+// Primavera Events Group
+// Standalone, no ES modules. Loads after: elements-db.js, editor2d.js, visualizer3d.js
+// ============================================================
 
-import { init3D, destroy3D, syncWithData, selectElement3D, resetCamera3D, toggleCirculation3D } from "./visualizer3d.js";
+(function () {
+  'use strict';
 
-// --- STATE MANAGEMENT ---
-let currentTheme = 'premium';
-let currentLayout = 'A';
-let globalDensity = 10;
-let selectedTableNum = null;
-let zoomScale = 1.0;
-let panX = 0;
-let panY = 0;
-let isPanning = false;
-let startX = 0;
-let startY = 0;
-
-/// Central coordinates for each table — Layout A (original, 20 mesas)
-const tablePositions = {
-  1: { cx: 320, cy: 647 },
-  2: { cx: 430, cy: 647 },
-  3: { cx: 540, cy: 647 },
-  4: { cx: 650, cy: 647 },
-  
-  5: { cx: 320, cy: 549 },
-  6: { cx: 430, cy: 549 },
-  7: { cx: 540, cy: 549 },
-  8: { cx: 650, cy: 549 },
-  
-  9: { cx: 320, cy: 451 },
-  10: { cx: 430, cy: 451 },
-  11: { cx: 540, cy: 451 },
-  12: { cx: 650, cy: 451 },
-  
-  13: { cx: 320, cy: 353 },
-  14: { cx: 430, cy: 353 },
-  15: { cx: 540, cy: 353 },
-  16: { cx: 650, cy: 353 },
-  
-  17: { cx: 320, cy: 255 },
-  18: { cx: 320, cy: 304 },
-  19: { cx: 430, cy: 402 },
-  20: { cx: 540, cy: 402 },
-  21: { cx: 650, cy: 402 },
-  22: { cx: 305, cy: 400 }
-};
-
-// Layout configurations: A = original, B = pista longitudinal central
-const layoutPositions = {
-  A: {
-    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
-    tables: {
-      1: { cx: 320, cy: 647 }, 2: { cx: 430, cy: 647 },
-      3: { cx: 540, cy: 647 }, 4: { cx: 650, cy: 647 },
-      5: { cx: 320, cy: 549 }, 6: { cx: 430, cy: 549 },
-      7: { cx: 540, cy: 549 }, 8: { cx: 650, cy: 549 },
-      9: { cx: 320, cy: 451 }, 10: { cx: 430, cy: 451 },
-      11: { cx: 540, cy: 451 }, 12: { cx: 650, cy: 451 },
-      13: { cx: 320, cy: 353 }, 14: { cx: 430, cy: 353 },
-      15: { cx: 540, cy: 353 }, 16: { cx: 650, cy: 353 },
-      17: { cx: 320, cy: 255 }, 18: { cx: 320, cy: 304 },
-      19: { cx: 430, cy: 402 }, 20: { cx: 540, cy: 402 },
-      21: { cx: 650, cy: 402 },
-      22: { cx: 305, cy: 400 }
-    },
-    dancefloor: { x: 385, y: 150, width: 200, height: 130, labelX: 485, labelY: 215, labelRotate: false },
-    paths: {
-      guest: "M 980,770 L 875,770 L 510,770 L 510,755 L 510,730 L 510,700 M 510,770 L 200,770 L 200,860 L 210,860 M 510,730 L 290,727 L 270,727 L 200,727 L 200,860 L 210,860 M 810,300 L 875,300 M 945,360 L 875,360 M 285,150 L 735,150 L 735,690 L 285,690 L 285,150 M 375,150 L 375,690 M 485,150 L 485,690 M 595,150 L 595,690 M 285,300 L 735,300 M 285,400 L 735,400 M 285,500 L 735,500 M 285,600 L 735,600 M 375,250 C 310,250 310,250 310,60 L 440,60 M 595,250 C 690,250 690,250 690,60 L 580,60",
-      service: "M 980,770 L 875,770 L 875,280 L 750,280 L 735,280 M 735,280 L 720,280 L 720,220 L 760,220 L 760,180 L 720,180 M 690,150 L 690,690 M 690,175 L 285,175 M 690,255 L 285,255 M 690,353 L 285,353 M 690,451 L 285,451 M 690,549 L 285,549 M 690,647 L 285,647 M 375,175 L 375,647 M 485,175 L 485,647 M 595,175 L 595,647 M 690,175 L 590,175 L 590,80 M 375,175 L 345,175 L 345,80 M 590,80 L 590,60 L 580,60 M 345,80 L 345,60 L 440,60 M 690,690 L 510,700 L 270,727 L 200,727 L 200,860 L 210,860",
-      emergency: "M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,770 L 980,770 M 735,95 L 735,280 L 755,280 L 875,280 L 875,770 L 980,770 M 735,280 L 735,685 L 700,705 L 510,705"
+  // ══════════════════════════════════════════════════════════
+  // GLOBAL STATE
+  // ══════════════════════════════════════════════════════════
+  window.AppState = {
+    elements: [],
+    terrain: { w: 100, h: 98 },
+    selectedId: null,
+    activeView: '3d',
+    useGrid: true,
+    history: [],
+    historyIndex: -1,
+    pendingType: null,
+    layers: {
+      estructuras:      true,
+      techos:           false,
+      accesos:          true,
+      mobiliario:       true,
+      entretenimiento:  true,
+      decoracion:       true,
+      proveedores:      true,
+      flujo_invitados:  true,
+      flujo_proveedores: true,
+      flujo_staff:      true
     }
-  },
-  B: {
-    // Pista horizontal central: y=380-460
-    // Arriba: 9 mesas (3x3 grid)
-    // Abajo:  8 mesas (4x2 grid)
-    // Izquierda: Mesa Imperial (50 sillas, vertical)
-    activeTables: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
-    tables: {
-      1: { cx: 410, cy: 190 },
-      2: { cx: 410, cy: 265 },
-      3: { cx: 410, cy: 340 },
-      4: { cx: 520, cy: 190 },
-      5: { cx: 520, cy: 265 },
-      6: { cx: 520, cy: 340 },
-      7: { cx: 630, cy: 190 },
-      8: { cx: 630, cy: 265 },
-      9: { cx: 630, cy: 340 },
-      10: { cx: 410, cy: 515 },
-      11: { cx: 410, cy: 615 },
-      12: { cx: 490, cy: 515 },
-      13: { cx: 490, cy: 615 },
-      14: { cx: 570, cy: 515 },
-      15: { cx: 570, cy: 615 },
-      16: { cx: 650, cy: 515 },
-      17: { cx: 650, cy: 615 },
-      18: { cx: 410, cy: 565 },
-      19: { cx: 490, cy: 565 },
-      20: { cx: 570, cy: 565 },
-      21: { cx: 650, cy: 565 },
-      22: { cx: 305, cy: 400 }
-    },
-    dancefloor: { x: 350, y: 380, width: 380, height: 80, labelX: 540, labelY: 425, labelRotate: false },
-    paths: {
-      guest: "M 980,770 L 875,770 L 510,770 L 510,755 L 510,730 L 510,700 M 510,770 L 200,770 L 200,860 L 210,860 M 510,730 L 290,727 L 270,727 L 200,727 L 200,860 L 210,860 M 810,300 L 875,300 M 945,360 L 875,360 M 355,150 L 285,150 L 285,650 L 355,650 L 355,150 M 355,150 L 735,150 L 735,690 L 355,690 L 355,150 M 465,150 L 465,690 M 575,150 L 575,690 M 355,265 L 735,265 M 355,515 L 735,515 M 355,615 L 735,615 M 355,420 L 730,420 M 465,265 C 310,265 310,250 310,60 L 440,60 M 575,265 C 690,265 690,250 690,60 L 580,60",
-      service: "M 980,770 L 875,770 L 875,280 L 750,280 L 735,280 M 735,280 L 720,280 L 720,220 L 760,220 L 760,180 L 720,180 M 735,280 L 735,420 L 740,420 M 690,150 L 690,690 M 690,190 L 285,190 M 690,265 L 285,265 M 690,340 L 285,340 M 690,420 L 285,420 M 690,515 L 285,515 M 690,615 L 285,615 M 355,190 L 355,615 M 465,190 L 465,615 M 575,190 L 575,615 M 690,190 L 590,190 L 590,80 M 355,190 L 345,190 L 345,80 M 590,80 L 590,60 L 580,60 M 345,80 L 345,60 L 440,60 M 690,690 L 510,700 L 270,727 L 200,727 L 200,860 L 210,860",
-      emergency: "M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,770 L 980,770 M 735,95 L 735,280 L 755,280 L 875,280 L 875,770 L 980,770 M 735,280 L 735,685 L 700,705 L 510,705"
-    }
-  }
-};
-
-// Initialize Table Data
-const tablesData = {};
-for (let i = 1; i <= 22; i++) {
-  tablesData[i] = {
-    number: i,
-    shape: i === 22 ? 'imperial' : 'square',
-    seats: i === 22 ? 50 : 10,
-    status: 'normal',
-    guests: [],
-    cx: tablePositions[i] ? tablePositions[i].cx : 305,
-    cy: tablePositions[i] ? tablePositions[i].cy : 400,
-    active: true
   };
-}
 
-// --- DOM ELEMENTS ---
-const svgElement = document.getElementById('event-svg');
-const detailDrawer = document.getElementById('detail-drawer');
-const drawerTitle = document.getElementById('drawer-title');
-const tableShapeSelect = document.getElementById('table-shape');
-const tableSeatsSelect = document.getElementById('table-seats');
-const tableStatusSelect = document.getElementById('table-status');
-const tableGuestsTextarea = document.getElementById('table-guests');
-const guestCountLabel = document.getElementById('guest-count-label');
-const welcomeOverlay = document.getElementById('welcome-overlay');
-
-// Distance Metrics placeholders
-const metricDistPista = document.getElementById('metric-dist-pista');
-const metricDistDJ = document.getElementById('metric-dist-dj');
-const metricDistWc = document.getElementById('metric-dist-wc');
-const metricDistBar = document.getElementById('metric-dist-bar');
-
-// --- INIT APP ---
-window.addEventListener('DOMContentLoaded', () => {
-  // Wrap all visual layers in a main viewport group for easy zoom/pan
-  wrapLayersInViewport();
+  var LS_KEY = 'primavera_universal_planner';
+  var _idCounter = 1;
+  var _tableCounter = 0;
   
-  // Render chairs for all tables initially
-  renderAllTables();
-  
-  // Calculate and display starting total capacity
-  updateGlobalMetrics();
-  
-  // Setup SVG Drag-to-Pan listeners
-  setupCanvasInteraction();
+  var _supabase = null;
+  var SB_URL_KEY = 'primavera_supabase_url';
+  var SB_ANON_KEY = 'primavera_supabase_key';
 
-  // Bind swipe to close gestures on mobile sidebar
-  setupSidebarSwipeGesture();
-
-  // Registrar listeners para conmutadores de vista 2D/3D
-  const btn2d = document.getElementById('btn-view-2d');
-  const btn3d = document.getElementById('btn-view-3d');
-  if (btn2d && btn3d) {
-    btn2d.addEventListener('click', () => setViewMode('2d'));
-    btn3d.addEventListener('click', () => setViewMode('3d'));
+  // ══════════════════════════════════════════════════════════
+  // UTILITY
+  // ══════════════════════════════════════════════════════════
+  function uid() {
+    return 'el_' + Date.now() + '_' + (_idCounter++);
   }
 
-  const btnResetCam = document.getElementById('btn-reset-cam-3d');
-  if (btnResetCam) {
-    btnResetCam.addEventListener('click', () => {
-      if (activeView === '3d') {
-        resetCamera3D();
+  function deepClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function $(sel, ctx) {
+    return (ctx || document).querySelector(sel);
+  }
+
+  function $$(sel, ctx) {
+    return Array.prototype.slice.call((ctx || document).querySelectorAll(sel));
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // TOAST NOTIFICATIONS
+  // ══════════════════════════════════════════════════════════
+  function showToast(message, type) {
+    type = type || 'info';
+    var colors = {
+      info:    '#3b82f6',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error:   '#ef4444'
+    };
+    var icons = {
+      info:    'ℹ',
+      success: '✓',
+      warning: '⚠',
+      error:   '✕'
+    };
+
+    var container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.style.cssText = [
+        'position:fixed',
+        'bottom:24px',
+        'right:24px',
+        'z-index:99999',
+        'display:flex',
+        'flex-direction:column',
+        'gap:8px',
+        'pointer-events:none'
+      ].join(';');
+      document.body.appendChild(container);
+    }
+
+    var toast = document.createElement('div');
+    toast.style.cssText = [
+      'background:' + colors[type],
+      'color:#fff',
+      'padding:10px 16px',
+      'border-radius:8px',
+      'font-size:14px',
+      'font-family:sans-serif',
+      'box-shadow:0 4px 16px rgba(0,0,0,0.35)',
+      'display:flex',
+      'align-items:center',
+      'gap:8px',
+      'pointer-events:auto',
+      'animation:toastIn 0.25s ease',
+      'max-width:320px'
+    ].join(';');
+    toast.innerHTML = '<span style="font-size:16px">' + (icons[type] || '•') + '</span>' +
+                      '<span>' + message + '</span>';
+
+    container.appendChild(toast);
+
+    setTimeout(function () {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(function () {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 350);
+    }, 3000);
+  }
+
+  // Inject toast animation
+  (function () {
+    var style = document.createElement('style');
+    style.textContent = '@keyframes toastIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }';
+    document.head.appendChild(style);
+  })();
+
+  // ══════════════════════════════════════════════════════════
+  // HISTORY (UNDO/REDO)
+  // ══════════════════════════════════════════════════════════
+  function saveHistory() {
+    var s = AppState;
+    // Truncate forward history
+    s.history = s.history.slice(0, s.historyIndex + 1);
+    s.history.push(deepClone(s.elements));
+    if (s.history.length > 60) s.history.shift();
+    s.historyIndex = s.history.length - 1;
+  }
+
+  function undo() {
+    var s = AppState;
+    if (s.historyIndex <= 0) {
+      showToast('No hay más acciones para deshacer.', 'warning');
+      return;
+    }
+    s.historyIndex--;
+    s.elements = deepClone(s.history[s.historyIndex]);
+    s.selectedId = null;
+    _refresh();
+    updateCounters();
+    showToast('Deshecho', 'info');
+  }
+
+  function redo() {
+    var s = AppState;
+    if (s.historyIndex >= s.history.length - 1) {
+      showToast('No hay más acciones para rehacer.', 'warning');
+      return;
+    }
+    s.historyIndex++;
+    s.elements = deepClone(s.history[s.historyIndex]);
+    s.selectedId = null;
+    _refresh();
+    updateCounters();
+    showToast('Rehecho', 'info');
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // ELEMENT CRUD
+  // ══════════════════════════════════════════════════════════
+  function addElement(type, x, y) {
+    var cat = window.getCatalogEntry ? window.getCatalogEntry(type) : null;
+    if (!cat) {
+      showToast('Elemento desconocido: ' + type, 'error');
+      return null;
+    }
+
+    // Imperial table: prompt for tablones
+    if (type === 'table_imperial') {
+      _promptImperial(x, y);
+      return null;
+    }
+
+    _tableCounter++;
+    var isMesa = cat.defaultChairs > 0 || type.startsWith('table_') || type === 'lounge_set';
+    var elem = {
+      id: uid(),
+      type: type,
+      category: cat.category,
+      name: cat.name,
+      x: x,
+      y: y,
+      w: cat.defaultW,
+      h: cat.defaultH,
+      rotation: 0,
+      color: cat.color,
+      chairs: cat.defaultChairs,
+      editable: true,
+      removable: true,
+      layer: cat.layer || cat.category,
+      mesaConfig: {
+        mesaNum: isMesa ? _tableCounter : 0,
+        capacidadMax: null,
+        mantelColor: (type.indexOf('campirana') > -1 || type.indexOf('marble') > -1) ? 'sin_mantel' : 'blanco',
+        caminoColor: 'dorado',
+        caminoAcomodo: 'diagonal',
+        servilletaColorCorazon: 'dorado',
+        servilletaColorCorbata: 'champagne',
+        servilletaColorOtros: 'blanco',
+        servilletaDoblez: ['corazon', 'corbata'],
+        cubiertos: 'plateado',
+        platoBase: 'ninguno',
+        platoTrinche: 'redondo_blanco',
+        cristal: 'cubero',
+        copasColor: 'transparente',
+        cristal2: 'ninguno',
+        copasColor2: 'transparente',
+        tipoSilla: 'tiffany',
+        menu: '',
+        arregloFloralTipo: 'bajo',
+        arregloFloralAcomodo: 'diagonal',
+        ensambleTipo: 'angosto'
+      }
+    };
+
+    saveHistory();
+    AppState.elements.push(elem);
+    _refresh();
+    updateCounters();
+    selectElement(elem.id);
+    showToast(cat.name + ' agregado.', 'success');
+    return elem;
+  }
+
+  function _promptImperial(x, y) {
+    var modal = document.createElement('div');
+    modal.style.cssText = [
+      'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.7)',
+      'z-index:50000', 'display:flex', 'align-items:center', 'justify-content:center'
+    ].join(';');
+
+    var box = document.createElement('div');
+    box.style.cssText = [
+      'background:#1e293b', 'border:1px solid #334155', 'border-radius:12px',
+      'padding:28px 32px', 'min-width:300px', 'font-family:sans-serif', 'color:#e2e8f0'
+    ].join(';');
+
+    box.innerHTML = [
+      '<h3 style="margin:0 0 16px;color:#c9a96e;font-size:18px">Mesa Imperial</h3>',
+      '<p style="margin:0 0 14px;font-size:14px;color:#94a3b8">¿Cuántos tablones? <br><small>(mínimo 2 — cada tablón = 2.4m, 10 personas)</small></p>',
+      '<input id="imperial-tablones" type="number" min="2" max="20" value="3" style="width:100%;padding:8px 12px;background:#0f172a;border:1px solid #475569;border-radius:6px;color:#fff;font-size:16px;box-sizing:border-box;">',
+      '<div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">',
+      '<button id="imperial-cancel" style="padding:8px 18px;background:#374151;color:#e2e8f0;border:none;border-radius:6px;cursor:pointer;font-size:14px">Cancelar</button>',
+      '<button id="imperial-ok" style="padding:8px 18px;background:#c9a96e;color:#1e293b;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700">Agregar</button>',
+      '</div>'
+    ].join('');
+
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+
+    var inp = box.querySelector('#imperial-tablones');
+    inp.focus();
+    inp.select();
+
+    box.querySelector('#imperial-cancel').onclick = function () { modal.remove(); };
+    box.querySelector('#imperial-ok').onclick = function () {
+      var n = Math.max(2, parseInt(inp.value, 10) || 3);
+      modal.remove();
+      _createImperial(n, x, y);
+    };
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') box.querySelector('#imperial-ok').click();
+      if (e.key === 'Escape') box.querySelector('#imperial-cancel').click();
+    });
+  }
+
+  function _createImperial(tablones, x, y) {
+    var cat = window.getCatalogEntry('table_imperial');
+    _tableCounter++;
+    var elem = {
+      id: uid(),
+      type: 'table_imperial',
+      category: 'mobiliario',
+      name: 'Mesa Imperial',
+      x: x,
+      y: y,
+      w: tablones * 2.4,
+      h: 0.8,
+      rotation: 0,
+      color: cat ? cat.color : '#5c3d2e',
+      chairs: tablones * 10,
+      tablones: tablones,
+      editable: true,
+      removable: true,
+      layer: 'mobiliario',
+      mesaConfig: {
+        mantelColor: 'blanco',
+        caminoColor: 'dorado',
+        caminoAcomodo: 'diagonal',
+        servilletaColorCorazon: 'dorado',
+        servilletaColorCorbata: 'champagne',
+        servilletaColorOtros: 'blanco',
+        servilletaDoblez: ['corazon', 'corbata'],
+        cubiertos: 'plateado',
+        platoBase: 'ninguno',
+        platoTrinche: 'redondo_blanco',
+        cristal: 'cubero',
+        copasColor: 'transparente',
+        tipoSilla: 'tiffany',
+        menu: '',
+        mesaNum: _tableCounter,
+        capacidadMax: null,
+        arregloFloralTipo: 'bajo',
+        arregloFloralAcomodo: 'diagonal',
+        ensambleTipo: 'angosto'
+      }
+    };
+    saveHistory();
+    AppState.elements.push(elem);
+    _refresh();
+    updateCounters();
+    selectElement(elem.id);
+    showToast('Mesa Imperial (' + tablones + ' tablones) agregada.', 'success');
+  }
+
+  function removeElement(id) {
+    var idx = AppState.elements.findIndex(function (e) { return e.id === id; });
+    if (idx === -1) return;
+    saveHistory();
+    AppState.elements.splice(idx, 1);
+    if (AppState.selectedId === id) {
+      AppState.selectedId = null;
+      deselectAll();
+    }
+    _refresh();
+    updateCounters();
+    showToast('Elemento eliminado.', 'warning');
+  }
+
+  function updateElement(id, changes) {
+    var elem = AppState.elements.find(function (e) { return e.id === id; });
+    if (!elem) return;
+    Object.assign(elem, changes);
+    _refresh();
+    updateCounters();
+  }
+
+  function selectElement(id) {
+    AppState.selectedId = id;
+    var elem = AppState.elements.find(function (e) { return e.id === id; });
+
+    if (window.Editor2D) window.Editor2D.select(id);
+    if (window.Visualizer3D) window.Visualizer3D.select(id);
+
+    if (elem) {
+      _populateInspector(elem);
+    }
+    _updateInspectorVisibility(!!elem);
+  }
+
+  function deselectAll() {
+    AppState.selectedId = null;
+    if (window.Editor2D) window.Editor2D.deselect();
+    if (window.Visualizer3D) window.Visualizer3D.deselect();
+    _updateInspectorVisibility(false);
+  }
+
+  function duplicateElement(id) {
+    var src = AppState.elements.find(function (e) { return e.id === id; });
+    if (!src) return;
+    saveHistory();
+    var copy = deepClone(src);
+    copy.id = uid();
+    copy.x = Math.min(src.x + 1.5, AppState.terrain.w - src.w / 2);
+    copy.y = Math.min(src.y + 1.5, AppState.terrain.h - src.h / 2);
+    if (copy.mesaConfig) {
+      _tableCounter++;
+      copy.mesaConfig.mesaNum = _tableCounter;
+    }
+    AppState.elements.push(copy);
+    _refresh();
+    updateCounters();
+    selectElement(copy.id);
+    showToast('Elemento duplicado.', 'success');
+  }
+
+  function rotateElement(id, deg) {
+    var elem = AppState.elements.find(function (e) { return e.id === id; });
+    if (!elem) return;
+    saveHistory();
+    elem.rotation = ((elem.rotation || 0) + (deg || 45)) % 360;
+    _refresh();
+    updateInspectorField('inp-rotation', elem.rotation);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // REFRESH — update both 2D and 3D views
+  // ══════════════════════════════════════════════════════════
+  function _refresh() {
+    if (window.Editor2D) window.Editor2D.update(AppState.elements);
+    if (window.Visualizer3D) window.Visualizer3D.sync(AppState.elements);
+    if (AppState.selectedId) window.Editor2D && window.Editor2D.select(AppState.selectedId);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // COUNTERS
+  // ══════════════════════════════════════════════════════════
+  function updateCounters() {
+    var totalGuests = 0;
+    var totalCapacity = 0;
+    var tableCounts = {};
+
+    AppState.elements.forEach(function (elem) {
+      var t = elem.type;
+      
+      // Calculate capacity and occupancy
+      var isTable = t.startsWith('table_') || t === 'lounge_set';
+      var isDecorativeTable = ['table_cake', 'table_gifts', 'table_candy', 'table_shots', 'table_buffet'].indexOf(t) !== -1;
+      if (isTable && !isDecorativeTable) {
+        if (elem.chairs) totalGuests += elem.chairs;
+        
+        var cap = 10;
+        if (elem.mesaConfig && elem.mesaConfig.capacidadMax !== undefined && elem.mesaConfig.capacidadMax !== null && elem.mesaConfig.capacidadMax !== '') {
+          cap = parseInt(elem.mesaConfig.capacidadMax, 10);
+        } else if (t === 'table_imperial') {
+          var tablones = elem.tablones || Math.max(2, Math.round(elem.w / 2.4));
+          cap = tablones * 10;
+        }
+        totalCapacity += cap;
+      } else if (elem.chairs) {
+        totalGuests += elem.chairs;
+        totalCapacity += elem.chairs;
+      }
+      
+      tableCounts[t] = (tableCounts[t] || 0) + 1;
+    });
+
+    var guestEl = document.getElementById('counter-guests');
+    if (guestEl) {
+      guestEl.textContent = totalGuests + ' / ' + totalCapacity;
+    }
+
+    var tableEl = document.getElementById('counter-tables');
+    if (tableEl) {
+      var tableTotal = 0;
+      var excludedTables = ['table_gifts', 'table_candy', 'table_shots', 'table_buffet'];
+      Object.keys(tableCounts).forEach(function (k) {
+        if ((k.startsWith('table_') || k === 'lounge_set') && excludedTables.indexOf(k) === -1) {
+          tableTotal += tableCounts[k];
+        }
+      });
+      tableEl.textContent = tableTotal;
+    }
+
+    var imperialEl = document.getElementById('counter-imperial');
+    if (imperialEl) {
+      imperialEl.textContent = tableCounts['table_imperial'] || 0;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // INSPECTOR
+  // ══════════════════════════════════════════════════════════
+  function renderGuestListEditor(elem) {
+    var guestsListEl = document.getElementById('mesa-invitados-list');
+    if (!guestsListEl) return;
+    
+    var maxCapacity = (elem.mesaConfig && elem.mesaConfig.capacidadMax) ? elem.mesaConfig.capacidadMax : (elem.type === 'table_imperial' ? ((elem.tablones || 4) * 10) : 10);
+    var invitados = elem.mesaConfig.invitados || [];
+    
+    var html = '';
+    html += '<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;">';
+    if (invitados.length === 0) {
+      html += '  <span style="color:#64748b; font-size:12px;">No hay invitados asignados a esta mesa.</span>';
+    } else {
+      invitados.forEach(function (guest, idx) {
+        html += '  <div class="guest-edit-row" data-index="' + idx + '" style="display:flex; align-items:center; gap:6px;">';
+        html += '    <input type="text" class="guest-name-input form-input" value="' + guest.nombre + '" style="flex:1; padding:4px 8px; font-size:12px; background:#0f172a; border:1px solid #334155; color:#fff; border-radius:4px;" placeholder="Nombre" />';
+        html += '    <input type="number" class="guest-passes-input form-input" min="1" max="' + maxCapacity + '" value="' + guest.pases + '" style="width:50px; padding:4px; font-size:12px; background:#0f172a; border:1px solid #334155; color:#fff; border-radius:4px; text-align:center;" />';
+        html += '    <button class="guest-delete-btn" style="padding:4px 8px; background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.3); color:#f43f5e; border-radius:4px; cursor:pointer;" title="Eliminar"><i class="fa-solid fa-trash"></i></button>';
+        html += '  </div>';
+      });
+    }
+    html += '</div>';
+    html += '<button id="btn-add-guest" style="width:100%; padding:6px; background:rgba(244,63,94,0.1); color:#f43f5e; border:1px dashed #f43f5e; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">';
+    html += '  <i class="fa-solid fa-plus"></i> Agregar Invitado';
+    html += '</button>';
+    
+    guestsListEl.innerHTML = html;
+    
+    var rows = guestsListEl.querySelectorAll('.guest-edit-row');
+    rows.forEach(function (row) {
+      var idx = parseInt(row.dataset.index, 10);
+      var nameInp = row.querySelector('.guest-name-input');
+      var passesInp = row.querySelector('.guest-passes-input');
+      var delBtn = row.querySelector('.guest-delete-btn');
+      
+      nameInp.oninput = function () {
+        invitados[idx].nombre = nameInp.value;
+      };
+      
+      nameInp.onchange = function () {
+        saveHistory();
+      };
+      
+      passesInp.onchange = function () {
+        var v = parseInt(passesInp.value, 10);
+        if (isNaN(v) || v < 1) v = 1;
+        
+        var otherSum = 0;
+        invitados.forEach(function (g, gIdx) {
+          if (gIdx !== idx) otherSum += g.pases;
+        });
+        
+        if (otherSum + v > maxCapacity) {
+          showToast('¡Capacidad excedida! El límite de la mesa es de ' + maxCapacity + ' personas.', 'warning');
+          v = maxCapacity - otherSum;
+          if (v < 1) v = 1;
+          passesInp.value = v;
+        }
+        
+        saveHistory();
+        invitados[idx].pases = v;
+        elem.chairs = invitados.reduce(function (sum, g) { return sum + g.pases; }, 0);
+        updateCounters();
+        _refresh();
+      };
+      
+      delBtn.onclick = function () {
+        saveHistory();
+        invitados.splice(idx, 1);
+        elem.chairs = invitados.reduce(function (sum, g) { return sum + g.pases; }, 0);
+        updateCounters();
+        _refresh();
+        renderGuestListEditor(elem);
+      };
+    });
+    
+    var addBtn = guestsListEl.querySelector('#btn-add-guest');
+    if (addBtn) {
+      addBtn.onclick = function () {
+        var currentSum = invitados.reduce(function (sum, g) { return sum + g.pases; }, 0);
+        if (currentSum >= maxCapacity) {
+          showToast('¡Mesa llena! No se pueden agregar más invitados a esta mesa.', 'warning');
+          return;
+        }
+        
+        saveHistory();
+        invitados.push({ nombre: 'Nuevo Invitado', pases: 1 });
+        elem.chairs = invitados.reduce(function (sum, g) { return sum + g.pases; }, 0);
+        updateCounters();
+        _refresh();
+        renderGuestListEditor(elem);
+      };
+    }
+  }
+
+  function renderNapkinSlots(elem) {
+    var container = document.getElementById('mesa-servilletas-config-container');
+    if (!container) return;
+    
+    if (!elem || !elem.mesaConfig) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    var cfg = elem.mesaConfig;
+    
+    var activeFolds = [];
+    if (Array.isArray(cfg.servilletaDoblez)) {
+      activeFolds = cfg.servilletaDoblez;
+    } else if (typeof cfg.servilletaDoblez === 'string' && cfg.servilletaDoblez) {
+      activeFolds = [cfg.servilletaDoblez];
+    }
+    
+    var slots = [
+      { type: activeFolds[0] || 'ninguno', color: '' },
+      { type: activeFolds[1] || 'ninguno', color: '' },
+      { type: activeFolds[2] || 'ninguno', color: '' }
+    ];
+    
+    slots.forEach(function (slot) {
+      if (slot.type !== 'ninguno') {
+        var foldKey = 'servilletaColor_' + slot.type;
+        var defaultColor = 'blanco';
+        if (slot.type === 'corazon') defaultColor = cfg.servilletaColorCorazon || 'dorado';
+        else if (slot.type === 'corbata') defaultColor = cfg.servilletaColorCorbata || 'champagne';
+        else if (slot.type === 'default') defaultColor = cfg.servilletaColorOtros || 'blanco';
+        
+        slot.color = cfg[foldKey] || defaultColor;
+      } else {
+        slot.color = 'blanco';
+      }
+    });
+    
+    var foldOptions = [
+      { value: 'ninguno', label: 'Ninguno' },
+      { value: 'corazon', label: 'Corazón' },
+      { value: 'corbata', label: 'Corbata' },
+      { value: 'loto', label: 'Loto' },
+      { value: 'vela', label: 'Vela' },
+      { value: 'abanico', label: 'Abanico' },
+      { value: 'piramide', label: 'Pirámide' }
+    ];
+    
+    var colorOptions = [
+      { value: 'blanco', label: 'Blanco' },
+      { value: 'dorado', label: 'Dorado' },
+      { value: 'champagne', label: 'Champagne' },
+      { value: 'negro', label: 'Negro' },
+      { value: 'caqui', label: 'Caqui' },
+      { value: 'azul_marino', label: 'Azul Marino' },
+      { value: 'arena', label: 'Arena' },
+      { value: 'chocolate', label: 'Chocolate' },
+      { value: 'palo_de_rosa', label: 'Palo de Rosa' },
+      { value: 'rojo', label: 'Rojo' },
+      { value: 'verde_olivo', label: 'Verde Olivo' },
+      { value: 'azul_rey', label: 'Azul Rey' },
+      { value: 'rosa_mexicano', label: 'Rosa Mexicano' }
+    ];
+    
+    var html = '';
+    slots.forEach(function (slot, idx) {
+      var slotNum = idx + 1;
+      html += '<div style="background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 10px;">';
+      html += '  <div style="font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">';
+      html += '    <i class="fa-solid fa-cookie"></i> Doblez de Servilleta ' + slotNum;
+      html += '  </div>';
+      
+      html += '  <div class="form-group" style="margin-bottom: 6px;">';
+      html += '    <label class="form-label" style="font-size:11px; color:#cbd5e1; margin-bottom:2px;">Tipo de Doblez</label>';
+      html += '    <select class="form-input napkin-slot-type" data-slot="' + idx + '" style="font-size:12px; padding:6px 10px; background:#1e293b; border:1px solid #475569; color:#fff; border-radius:4px; width:100%; box-sizing:border-box;">';
+      foldOptions.forEach(function (opt) {
+        var selected = opt.value === slot.type ? ' selected' : '';
+        html += '      <option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
+      });
+      html += '    </select>';
+      html += '  </div>';
+      
+      var colorHiddenStyle = slot.type === 'ninguno' ? ' style="margin-bottom: 0; display:none;"' : ' style="margin-bottom: 0;"';
+      html += '  <div class="form-group napkin-slot-color-wrapper" data-slot="' + idx + '"' + colorHiddenStyle + '>';
+      html += '    <label class="form-label" style="font-size:11px; color:#cbd5e1; margin-bottom:2px;">Color de Servilleta</label>';
+      html += '    <select class="form-input napkin-slot-color" data-slot="' + idx + '" style="font-size:12px; padding:6px 10px; background:#1e293b; border:1px solid #475569; color:#fff; border-radius:4px; width:100%; box-sizing:border-box;">';
+      colorOptions.forEach(function (opt) {
+        var selected = opt.value === slot.color ? ' selected' : '';
+        html += '      <option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
+      });
+      html += '    </select>';
+      html += '  </div>';
+      
+      html += '</div>';
+    });
+    
+    container.innerHTML = html;
+    
+    container.querySelectorAll('.napkin-slot-type').forEach(function (select) {
+      select.onchange = function () {
+        saveHistory();
+        var sIdx = parseInt(select.getAttribute('data-slot'), 10);
+        var selectedType = select.value;
+        
+        var wrapper = container.querySelector('.napkin-slot-color-wrapper[data-slot="' + sIdx + '"]');
+        if (wrapper) {
+          if (selectedType === 'ninguno') {
+            wrapper.style.display = 'none';
+          } else {
+            wrapper.style.display = '';
+          }
+        }
+        
+        _saveSlotsToConfig();
+      };
+    });
+    
+    container.querySelectorAll('.napkin-slot-color').forEach(function (select) {
+      select.onchange = function () {
+        saveHistory();
+        _saveSlotsToConfig();
+      };
+    });
+    
+    function _saveSlotsToConfig() {
+      var newFolds = [];
+      for (var i = 0; i < 3; i++) {
+        var typeSel = container.querySelector('.napkin-slot-type[data-slot="' + i + '"]');
+        var colorSel = container.querySelector('.napkin-slot-color[data-slot="' + i + '"]');
+        if (typeSel && typeSel.value !== 'ninguno') {
+          var t = typeSel.value;
+          var c = colorSel ? colorSel.value : 'blanco';
+          newFolds.push(t);
+          
+          var foldKey = 'servilletaColor_' + t;
+          cfg[foldKey] = c;
+          
+          if (t === 'corazon') cfg.servilletaColorCorazon = c;
+          else if (t === 'corbata') cfg.servilletaColorCorbata = c;
+          else if (t === 'default') cfg.servilletaColorOtros = c;
+        }
+      }
+      cfg.servilletaDoblez = newFolds;
+      _refresh();
+    }
+  }
+
+  function _populateInspector(elem) {
+    function setVal(id, v) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!v;
+      else el.value = (v !== undefined && v !== null) ? v : '';
+    }
+
+    setVal('inspector-name', elem.name);
+    setVal('inspector-x', parseFloat(elem.x).toFixed(2));
+    setVal('inspector-y', parseFloat(elem.y).toFixed(2));
+    setVal('inspector-w', parseFloat(elem.w).toFixed(2));
+    setVal('inspector-h', parseFloat(elem.h).toFixed(2));
+    setVal('inspector-rotation', elem.rotation || 0);
+    setVal('inspector-color', elem.color || '#888888');
+    setVal('inspector-elevation', elem.elevation || 0);
+    
+    var disp = document.getElementById('color-hex-display');
+    if (disp) disp.textContent = (elem.color || '#888888').toUpperCase();
+
+    setVal('inspector-chairs', elem.chairs || 0);
+    setVal('inspector-elevation', elem.elevation || 0.0);
+
+    var chairsInp = document.getElementById('inspector-chairs');
+    if (chairsInp) {
+      var isTable = elem.type.startsWith('table_') || elem.type === 'lounge_set';
+      if (isTable && elem.type !== 'table_imperial') {
+        var maxCap = (elem.mesaConfig && elem.mesaConfig.capacidadMax) ? elem.mesaConfig.capacidadMax : 10;
+        chairsInp.setAttribute('max', maxCap.toString());
+      } else {
+        chairsInp.removeAttribute('max');
+      }
+    }
+
+    // Salon specific settings
+    var salonSettings = document.getElementById('inspector-salon-settings');
+    if (salonSettings) {
+      if (elem.type === 'salon') {
+        salonSettings.classList.remove('hidden');
+        setVal('inspector-salon-type', elem.salonType || 'muros');
+      } else {
+        salonSettings.classList.add('hidden');
+      }
+    }
+
+    // Imperial tablones row (hidden unless imperial table)
+    var tablonRow = document.getElementById('mesa-tablones-row');
+    var ensambleRow = document.getElementById('mesa-ensamble-row');
+    if (elem.type === 'table_imperial') {
+      if (tablonRow) {
+        tablonRow.classList.remove('hidden');
+        setVal('mesa-num-tablones', elem.tablones || 3);
+      }
+      if (ensambleRow) {
+        ensambleRow.classList.remove('hidden');
+        setVal('mesa-ensamble-tipo', (elem.mesaConfig && elem.mesaConfig.ensambleTipo) || 'angosto');
+      }
+    } else {
+      if (tablonRow) tablonRow.classList.add('hidden');
+      if (ensambleRow) ensambleRow.classList.add('hidden');
+    }
+
+    // Mesa config
+    var hasMesa = !!(elem.mesaConfig);
+    var tabMesaBtn = document.getElementById('tab-mesa');
+    if (tabMesaBtn) {
+      tabMesaBtn.style.display = hasMesa ? '' : 'none';
+      if (hasMesa) {
+        tabMesaBtn.click();
+      } else if (tabMesaBtn.classList.contains('active')) {
+        var tabPropsBtn = document.getElementById('tab-settings');
+        if (tabPropsBtn) tabPropsBtn.click();
+      }
+    }
+
+    if (hasMesa && elem.mesaConfig) {
+      setVal('mesa-numero', elem.mesaConfig.mesaNum || 0);
+      
+      var mantelSelect = document.getElementById('mesa-mantel-color');
+      if (mantelSelect) {
+        var val = elem.mesaConfig.mantelColor || 'blanco';
+        var toRemove = [];
+        for (var i = 0; i < mantelSelect.options.length; i++) {
+          var opt = mantelSelect.options[i];
+          if (opt.value.startsWith('#') || opt.text.indexOf('Personalizado') === 0) {
+            toRemove.push(opt);
+          }
+        }
+        toRemove.forEach(function (opt) { opt.remove(); });
+
+        var optionExists = Array.from(mantelSelect.options).some(function (opt) { return opt.value === val; });
+        if (!optionExists && val.startsWith('#')) {
+          var opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = 'Personalizado (' + val + ')';
+          mantelSelect.add(opt);
+        }
+        mantelSelect.value = val;
+      }
+      setVal('mesa-capacidad-max', elem.mesaConfig.capacidadMax || '');
+      setVal('mesa-camino-color', elem.mesaConfig.caminoColor || 'ninguno');
+      setVal('mesa-camino-acomodo', elem.mesaConfig.caminoAcomodo || 'centro');
+      renderNapkinSlots(elem);
+      setVal('mesa-cubiertos', elem.mesaConfig.cubiertos || 'plateado');
+      setVal('mesa-plato-base', elem.mesaConfig.platoBase || 'ninguno');
+      setVal('mesa-plato-trinche', elem.mesaConfig.platoTrinche || 'redondo_blanco');
+      setVal('mesa-cristal', elem.mesaConfig.cristal || 'standard');
+      setVal('mesa-copas-color', elem.mesaConfig.copasColor || 'transparente');
+      setVal('mesa-cristal2', elem.mesaConfig.cristal2 || 'ninguno');
+      setVal('mesa-copas-color2', elem.mesaConfig.copasColor2 || 'transparente');
+      setVal('mesa-silla-tipo', elem.mesaConfig.tipoSilla || 'tiffany');
+      setVal('mesa-menu', elem.mesaConfig.menu || '');
+      setVal('mesa-floral-tipo', elem.mesaConfig.arregloFloralTipo || 'ninguno');
+      setVal('mesa-floral-acomodo', elem.mesaConfig.arregloFloralAcomodo || 'ninguno');
+
+      if (!elem.mesaConfig.invitados) elem.mesaConfig.invitados = [];
+      renderGuestListEditor(elem);
+    }
+
+    // Type badge
+    var typeBadge = document.getElementById('inspector-type');
+    if (typeBadge) {
+      var cat = window.getCatalogEntry ? window.getCatalogEntry(elem.type) : null;
+      typeBadge.textContent = (cat ? cat.name : elem.type) + (elem.type === 'table_imperial' ? ' (' + (elem.tablones || 3) + ' tablones)' : '');
+    }
+  }
+
+  function _updateInspectorVisibility(hasElem) {
+    var panel = document.getElementById('inspector-empty');
+    var content = document.getElementById('inspector-panel');
+    if (panel) panel.style.display = hasElem ? 'none' : '';
+    if (content) content.style.display = hasElem ? '' : 'none';
+
+    // Mobile slide-in
+    var sidebarRight = document.getElementById('sidebar-right');
+    if (sidebarRight && window.innerWidth < 768) {
+      if (hasElem) sidebarRight.classList.add('open');
+      else sidebarRight.classList.remove('open');
+    }
+  }
+
+  function updateInspectorField(id, value) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = !!value;
+    else el.value = value;
+  }
+
+  function _wireInspector() {
+    function onInpChange(id, fn) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function () {
+        var sid = AppState.selectedId;
+        if (!sid) return;
+        fn(sid, el);
+      });
+      el.addEventListener('change', function () {
+        var sid = AppState.selectedId;
+        if (!sid) return;
+        fn(sid, el);
+      });
+    }
+
+    onInpChange('inspector-name', function (id, el) {
+      updateElement(id, { name: el.value });
+      showToast('Nombre actualizado.', 'info');
+    });
+
+    onInpChange('inspector-x', function (id, el) {
+      var v = parseFloat(el.value);
+      if (!isNaN(v)) updateElement(id, { x: v });
+    });
+    onInpChange('inspector-y', function (id, el) {
+      var v = parseFloat(el.value);
+      if (!isNaN(v)) updateElement(id, { y: v });
+    });
+    onInpChange('inspector-w', function (id, el) {
+      var v = parseFloat(el.value);
+      if (!isNaN(v) && v > 0) {
+        saveHistory();
+        updateElement(id, { w: v });
+      }
+    });
+    onInpChange('inspector-h', function (id, el) {
+      var v = parseFloat(el.value);
+      if (!isNaN(v) && v > 0) { saveHistory(); updateElement(id, { h: v }); }
+    });
+    onInpChange('inspector-rotation', function (id, el) {
+      var v = parseFloat(el.value);
+      if (!isNaN(v)) updateElement(id, { rotation: v });
+    });
+    onInpChange('inspector-color', function (id, el) {
+      var elem = AppState.elements.find(function (e) { return e.id === id; });
+      var updates = { color: el.value };
+      if (elem && elem.mesaConfig) {
+        elem.mesaConfig.mantelColor = el.value;
+        var selectEl = document.getElementById('mesa-mantel-color');
+        if (selectEl) {
+          var optionExists = Array.from(selectEl.options).some(function (opt) { return opt.value === el.value; });
+          if (!optionExists) {
+            var opt = document.createElement('option');
+            opt.value = el.value;
+            opt.textContent = 'Personalizado (' + el.value + ')';
+            selectEl.add(opt);
+          }
+          selectEl.value = el.value;
+        }
+      }
+      updateElement(id, updates);
+      var disp = document.getElementById('color-hex-display');
+      if (disp) disp.textContent = el.value.toUpperCase();
+    });
+    onInpChange('inspector-chairs', function (id, el) {
+      var v = parseInt(el.value, 10);
+      if (!isNaN(v) && v >= 0) {
+        var elem = AppState.elements.find(function (e) { return e.id === id; });
+        if (elem) {
+          var isTable = elem.type.startsWith('table_') || elem.type === 'lounge_set';
+          if (isTable && elem.type !== 'table_imperial' && v > 10) {
+            v = 10;
+            el.value = 10;
+          }
+          saveHistory();
+          updateElement(id, { chairs: v });
+          updateCounters();
+        }
+      }
+    });
+    onInpChange('inspector-elevation', function (id, el) {
+      var v = parseFloat(el.value);
+      if (!isNaN(v)) {
+        saveHistory();
+        updateElement(id, { elevation: v });
+      }
+    });
+    onInpChange('inspector-salon-type', function (id, el) {
+      saveHistory();
+      updateElement(id, { salonType: el.value });
+    });
+
+    // Imperial tablones
+    onInpChange('mesa-num-tablones', function (id, el) {
+      var n = Math.max(2, parseInt(el.value, 10) || 3);
+      saveHistory();
+      updateElement(id, { tablones: n, w: n * 2.4, chairs: n * 10 });
+      updateInspectorField('inspector-w', (n * 2.4).toFixed(2));
+      updateInspectorField('inspector-chairs', n * 10);
+      updateCounters();
+    });
+
+    // Mesa config
+    function mesaInp(id, field) {
+      onInpChange(id, function (eid, el) {
+        var elem = AppState.elements.find(function (e) { return e.id === eid; });
+        if (!elem || !elem.mesaConfig) return;
+        var val = el.type === 'checkbox' ? el.checked : el.value;
+        elem.mesaConfig[field] = val;
+        
+        if (field === 'ensambleTipo') {
+          if (val === 'angosto') {
+            elem.h = 1.6;
+            updateInspectorField('inspector-h', 1.6);
+          } else if (val === 'ancho') {
+            elem.w = 2.4;
+            elem.h = (elem.tablones || 4) * 0.8;
+            updateInspectorField('inspector-w', 2.4);
+            updateInspectorField('inspector-h', elem.h);
+          }
+        }
+        
+        if (field === 'mantelColor') {
+          var colorMap = {
+            blanco: '#ffffff',
+            marfil: '#fffff0',
+            negro: '#18181b',
+            caqui: '#c3b091',
+            azul_marino: '#0f172a',
+            arena: '#e5e5e5',
+            chocolate: '#3b2314',
+            dorado: '#d4af37',
+            palo_de_rosa: '#d39e9e',
+            rojo: '#ef4444',
+            verde: '#10b981',
+            amarillo: '#f59e0b'
+          };
+          if (val === 'sin_mantel') {
+            var cat = window.getCatalogEntry ? window.getCatalogEntry(elem.type) : null;
+            elem.color = (cat && cat.color) ? cat.color : '#888888';
+          } else if (colorMap[val]) {
+            elem.color = colorMap[val];
+          } else if (val.startsWith('#')) {
+            elem.color = val;
+          }
+          var colorPicker = document.getElementById('inspector-color');
+          if (colorPicker) colorPicker.value = elem.color;
+          var disp = document.getElementById('color-hex-display');
+          if (disp) disp.textContent = elem.color.toUpperCase();
+        }
+        
+        _refresh();
+      });
+    }
+    onInpChange('mesa-capacidad-max', function (id, el) {
+      var elem = AppState.elements.find(function (e) { return e.id === id; });
+      if (!elem || !elem.mesaConfig) return;
+      saveHistory();
+      var v = parseInt(el.value, 10);
+      if (isNaN(v) || v < 1) {
+        elem.mesaConfig.capacidadMax = null;
+      } else {
+        elem.mesaConfig.capacidadMax = v;
+        if (elem.chairs > v) {
+          showToast('La cantidad de sillas se ajustó al nuevo límite de capacidad.', 'warning');
+          elem.chairs = v;
+          updateInspectorField('inspector-chairs', v);
+        }
+      }
+      updateCounters();
+      _refresh();
+      renderGuestListEditor(elem);
+    });
+
+
+
+    mesaInp('mesa-numero', 'mesaNum');
+    mesaInp('mesa-mantel-color', 'mantelColor');
+    mesaInp('mesa-camino-color', 'caminoColor');
+    mesaInp('mesa-camino-acomodo', 'caminoAcomodo');
+    mesaInp('mesa-cubiertos', 'cubiertos');
+    mesaInp('mesa-plato-base', 'platoBase');
+    mesaInp('mesa-plato-trinche', 'platoTrinche');
+    mesaInp('mesa-cristal', 'cristal');
+    mesaInp('mesa-copas-color', 'copasColor');
+    mesaInp('mesa-cristal2', 'cristal2');
+    mesaInp('mesa-copas-color2', 'copasColor2');
+    mesaInp('mesa-silla-tipo', 'tipoSilla');
+    mesaInp('mesa-menu', 'menu');
+    mesaInp('mesa-floral-tipo', 'arregloFloralTipo');
+    mesaInp('mesa-floral-acomodo', 'arregloFloralAcomodo');
+    mesaInp('mesa-ensamble-tipo', 'ensambleTipo');
+
+    // Action buttons
+    var btnRotate = document.getElementById('btn-rotate-90');
+    if (btnRotate) btnRotate.onclick = function () {
+      if (AppState.selectedId) rotateElement(AppState.selectedId, 90);
+    };
+
+    var btnDuplicate = document.getElementById('btn-duplicate-element');
+    if (btnDuplicate) btnDuplicate.onclick = function () {
+      if (AppState.selectedId) duplicateElement(AppState.selectedId);
+    };
+
+    var btnDelete = document.getElementById('btn-delete-element');
+    if (btnDelete) btnDelete.onclick = function () {
+      if (AppState.selectedId) {
+        if (confirm('¿Eliminar este elemento?')) removeElement(AppState.selectedId);
+      }
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // TOOLBOX
+  // ══════════════════════════════════════════════════════════
+  function _buildToolbox() {
+    var container = document.getElementById('toolbox-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var cats = ['estructuras', 'accesos', 'mobiliario', 'entretenimiento', 'decoracion', 'proveedores'];
+
+    cats.forEach(function (cat) {
+      var catMeta = window.ELEMENT_CATEGORIES[cat] || { label: cat, icon: 'fa-cube', color: '#888' };
+      var items = window.ELEMENTS_CATALOG.filter(function (e) { return e.category === cat; });
+
+      var section = document.createElement('div');
+      section.className = 'toolbox-section';
+      section.dataset.category = cat;
+
+      var header = document.createElement('div');
+      header.className = 'toolbox-cat-header';
+      header.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;user-select:none;background:rgba(255,255,255,0.04);border-radius:6px;margin-bottom:4px;';
+      header.innerHTML = '<i class="fas ' + catMeta.icon + '" style="color:' + catMeta.color + ';width:16px;text-align:center"></i>' +
+                         '<span style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">' + catMeta.label + '</span>' +
+                         '<span class="cat-badge" style="margin-left:auto;font-size:10px;background:#334155;color:#94a3b8;border-radius:999px;padding:1px 6px">' + items.length + '</span>' +
+                         '<i class="fas fa-chevron-down cat-chevron" style="font-size:10px;color:#64748b;margin-left:4px;transition:transform 0.2s"></i>';
+
+      var grid = document.createElement('div');
+      grid.className = 'toolbox-grid';
+      grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:2px 0 8px;';
+
+      items.forEach(function (item) {
+        var card = document.createElement('div');
+        card.className = 'toolbox-card';
+        card.dataset.type = item.type;
+        card.style.cssText = [
+          'display:flex', 'flex-direction:column', 'align-items:center', 'justify-content:center',
+          'gap:4px', 'padding:10px 6px', 'background:#1e293b', 'border:1px solid #334155',
+          'border-radius:8px', 'cursor:pointer', 'transition:all 0.15s', 'text-align:center',
+          'user-select:none'
+        ].join(';');
+
+        card.innerHTML = '<i class="fas ' + item.icon + '" style="font-size:18px;color:' + item.color + '"></i>' +
+                         '<span style="font-size:10px;color:#cbd5e1;line-height:1.3;max-width:72px">' + item.name + '</span>';
+
+        card.addEventListener('mouseenter', function () {
+          card.style.background = '#2d3f54';
+          card.style.borderColor = item.color;
+          card.style.transform = 'scale(1.03)';
+        });
+        card.addEventListener('mouseleave', function () {
+          card.style.background = AppState.pendingType === item.type ? '#1e3a5f' : '#1e293b';
+          card.style.borderColor = AppState.pendingType === item.type ? item.color : '#334155';
+          card.style.transform = '';
+        });
+        card.addEventListener('click', function () {
+          _setPendingType(item.type, item.color, card);
+        });
+
+        grid.appendChild(card);
+      });
+
+      // Collapse toggle
+      var collapsed = false;
+      header.addEventListener('click', function () {
+        collapsed = !collapsed;
+        grid.style.display = collapsed ? 'none' : 'grid';
+        var chev = header.querySelector('.cat-chevron');
+        if (chev) chev.style.transform = collapsed ? 'rotate(-90deg)' : '';
+      });
+
+      section.appendChild(header);
+      section.appendChild(grid);
+      container.appendChild(section);
+    });
+  }
+
+  var _lastPendingCard = null;
+  var _lastPendingColor = null;
+
+  function _setPendingType(type, color, card) {
+    // Switch to 2D view for editing/placing
+    if (window.App_setView) {
+      window.App_setView('2d');
+    }
+
+    var banner = document.getElementById('placement-banner');
+    var bannerTxt = document.getElementById('placement-banner-text');
+
+    // Deselect previous card
+    if (_lastPendingCard) {
+      _lastPendingCard.style.background = '#1e293b';
+      _lastPendingCard.style.borderColor = '#334155';
+      _lastPendingCard.style.outline = '';
+    }
+
+    if (AppState.pendingType === type || !type) {
+      // Toggle off / cancel placement
+      AppState.pendingType = null;
+      _lastPendingCard = null;
+      _updateCanvasCursor(false);
+      if (banner) banner.classList.add('hidden');
+      if (type) showToast('Colocación cancelada.', 'info');
+      return;
+    }
+
+    AppState.pendingType = type;
+    _lastPendingCard = card;
+    _lastPendingColor = color;
+
+    if (card) {
+      card.style.background = '#1e3a5f';
+      card.style.borderColor = color || '#c9a96e';
+      card.style.outline = '2px solid ' + (color || '#c9a96e');
+    }
+    _updateCanvasCursor(true);
+
+    var cat = window.getCatalogEntry ? window.getCatalogEntry(type) : null;
+    var name = cat ? cat.name : type;
+    
+    // Update and show placement banner
+    if (banner && bannerTxt) {
+      bannerTxt.textContent = 'Modo Colocación: Haz clic en el terreno para colocar "' + name + '".';
+      banner.classList.remove('hidden');
+    }
+    showToast('Haz clic en el plano para colocar: ' + name, 'info');
+  }
+
+  function _updateCanvasCursor(crosshair) {
+    var svgEl = document.getElementById('svg-canvas');
+    if (svgEl) svgEl.style.cursor = crosshair ? 'crosshair' : '';
+    var c3d = document.getElementById('canvas-3d');
+    if (c3d) c3d.style.cursor = crosshair ? 'crosshair' : '';
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // SEARCH / FILTER TOOLBOX
+  // ══════════════════════════════════════════════════════════
+  function _wireSearch() {
+    var inp = document.getElementById('search-elements');
+    if (!inp) return;
+    inp.addEventListener('input', function () {
+      var q = inp.value.toLowerCase().trim();
+      var cards = $$('.toolbox-card');
+      cards.forEach(function (c) {
+        var name = (c.querySelector('span') || {}).textContent || '';
+        var type = c.dataset.type || '';
+        var match = !q || name.toLowerCase().includes(q) || type.toLowerCase().includes(q);
+        c.style.display = match ? '' : 'none';
+      });
+      // Show/hide sections based on visible cards
+      $$('.toolbox-section').forEach(function (sec) {
+        var visible = sec.querySelectorAll('.toolbox-card:not([style*="display: none"])').length > 0;
+        sec.style.display = visible ? '' : 'none';
+      });
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // VIEW SWITCHER (2D ↔ 3D)
+  // ══════════════════════════════════════════════════════════
+  function _wireViewSwitcher() {
+    var btn2d = document.getElementById('btn-view-2d');
+    var btn3d = document.getElementById('btn-view-3d');
+    var container2d = document.getElementById('container-2d');
+    var container3d = document.getElementById('container-3d');
+    var _3dInitialized = false;
+
+    function _lazyInit3D() {
+      if (_3dInitialized) return;
+      var canvas3d = document.getElementById('canvas-3d');
+      if (canvas3d && window.Visualizer3D && typeof THREE !== 'undefined') {
+        window.Visualizer3D.init(
+          canvas3d,
+          function () { return AppState.elements; },
+          function () { return AppState; }
+        );
+        _3dInitialized = true;
+      } else if (!window.Visualizer3D) {
+        console.warn('[App] Visualizer3D not loaded.');
+      } else if (typeof THREE === 'undefined') {
+        console.warn('[App] THREE.js not loaded — 3D view unavailable.');
+      }
+    }
+
+    function setView(view) {
+      AppState.activeView = view;
+      var brightnessGroup = document.getElementById('topbar-brightness-group');
+      if (view === '2d') {
+        if (container2d) container2d.style.display = 'block';
+        if (container3d) container3d.style.display = 'none';
+        if (btn2d) { btn2d.classList.add('active'); }
+        if (btn3d) { btn3d.classList.remove('active'); }
+        if (brightnessGroup) brightnessGroup.style.display = 'none';
+      } else {
+        if (container2d) container2d.style.display = 'none';
+        if (container3d) container3d.style.display = 'block';
+        if (btn3d) { btn3d.classList.add('active'); }
+        if (btn2d) { btn2d.classList.remove('active'); }
+        if (brightnessGroup) brightnessGroup.style.display = 'flex';
+        // Esperar un frame para que el browser calcule el layout
+        // y el canvas tenga dimensiones reales antes de inicializar Three.js
+        requestAnimationFrame(function () {
+          _lazyInit3D();
+          if (window.Visualizer3D && _3dInitialized) {
+            window.Visualizer3D.sync(AppState.elements);
+            window.Visualizer3D.resize();
+            // Segundo resize por si hay layout tardío
+            setTimeout(function () {
+              if (window.Visualizer3D) window.Visualizer3D.resize();
+            }, 100);
+          }
+        });
+      }
+    }
+
+    // Expose internally for auto-switching
+    window.App_setView = setView;
+
+    if (btn2d) btn2d.onclick = function () { setView('2d'); };
+    if (btn3d) btn3d.onclick = function () { setView('3d'); };
+
+    // Initialize to default view
+    setView(AppState.activeView);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // LAYOUT SWITCHER
+  // ══════════════════════════════════════════════════════════
+  var _currentLayoutMode = 'vertical';
+
+  function setLayoutMode(mode) {
+    _currentLayoutMode = mode;
+
+    var btnVer = document.getElementById('btn-layout-ver');
+    var btnHor = document.getElementById('btn-layout-hor');
+    if (btnVer && btnHor) {
+      if (mode === 'vertical') {
+        btnVer.classList.add('active');
+        btnHor.classList.remove('active');
+      } else {
+        btnHor.classList.add('active');
+        btnVer.classList.remove('active');
+      }
+    }
+
+    saveHistory();
+
+    // Clear selection and load preset layout A or B
+    if (window.Editor2D) window.Editor2D.deselect();
+    AppState.selectedId = null;
+
+    if (mode === 'vertical') {
+      _loadLayoutData(window.LAYOUT_A);
+    } else {
+      _loadLayoutData(window.LAYOUT_B);
+    }
+
+    _refresh();
+    updateCounters();
+
+    if (AppState.selectedId) {
+      var elem = AppState.elements.find(function (e) { return e.id === AppState.selectedId; });
+      if (elem) _populateInspector(elem);
+    }
+
+    showToast('Acomodo cambiado a ' + (mode === 'vertical' ? 'Versión A (Pista Central)' : 'Versión B (Mesa Imperial)'), 'success');
+  }
+
+  function _wireLayoutSwitcher() {
+    var btnVer = document.getElementById('btn-layout-ver');
+    var btnHor = document.getElementById('btn-layout-hor');
+    if (btnVer) {
+      btnVer.onclick = function () {
+        setLayoutMode('vertical');
+      };
+    }
+    if (btnHor) {
+      btnHor.onclick = function () {
+        setLayoutMode('horizontal');
+      };
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // LIGHTING
+  // ══════════════════════════════════════════════════════════
+  function _wireLighting() {
+    var modes = ['day', 'night', 'gala'];
+    modes.forEach(function (mode) {
+      var btn = document.getElementById('btn-light-' + mode);
+      if (!btn) return;
+      btn.onclick = function () {
+        if (window.Visualizer3D) window.Visualizer3D.setLighting(mode);
+        $$('.lighting-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        showToast('Iluminación: ' + mode, 'info');
+      };
+    });
+  }
+
+  function _wireBrightnessSlider() {
+    var slider = document.getElementById('light-intensity-slider');
+    var valDisp = document.getElementById('light-intensity-val');
+    if (!slider) return;
+    slider.addEventListener('input', function () {
+      var v = parseFloat(slider.value);
+      if (valDisp) valDisp.textContent = v.toFixed(2);
+      if (window.Visualizer3D) {
+        window.Visualizer3D.setExposure(v);
       }
     });
   }
 
-  // Parse URL query parameters for deep linking (e.g. ?layout=B&theme=cad-dark)
-  const urlParams = new URLSearchParams(window.location.search);
-  const layoutParam = urlParams.get('layout');
-  const themeParam = urlParams.get('theme');
-  const emulateParam = urlParams.get('emulate-print');
-  
-  if (layoutParam && (layoutParam === 'A' || layoutParam === 'B')) {
-    setLayout(layoutParam);
-  }
-  if (themeParam && ['premium', 'cad-dark', 'cad-light', 'minimalist'].includes(themeParam)) {
-    setTheme(themeParam);
-  }
-  if (emulateParam === 'true') {
-    document.body.classList.add('emulate-print');
-    resetCanvasView();
-  }
-});
-
-// Wrap layers in viewport group dynamically
-function wrapLayersInViewport() {
-  const svg = document.getElementById('event-svg');
-  const viewport = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  viewport.setAttribute('id', 'main-viewport');
-  
-  // Move all children except <defs> into the viewport group
-  const children = Array.from(svg.children);
-  children.forEach(child => {
-    if (child.tagName !== 'defs') {
-      viewport.appendChild(child);
-    }
-  });
-  
-  svg.appendChild(viewport);
-}
-
-// Close Welcome Splash
-function closeWelcome() {
-  welcomeOverlay.style.opacity = '0';
-  setTimeout(() => {
-    welcomeOverlay.style.display = 'none';
-  }, 500);
-}
-
-// --- TABLE RENDERING ENGINE ---
-// Renders the table top + chairs around it dynamically inside the SVG table group
-function renderTable(num) {
-  const tableData = tablesData[num];
-  const group = document.getElementById(`table-group-${num}`);
-  if (!group) return;
-  
-  // Clear existing content in group
-  group.innerHTML = '';
-  
-  // Apply select highlights
-  const isSelected = (selectedTableNum === num);
-  
-  // Create Main Table Element
-  let tableEl;
-  const halfSize = 21; // 42 width, 21 radius
-  
-  if (tableData.shape === 'imperial') {
-    // Imperial table shape: a long vertical rectangle!
-    tableEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    tableEl.setAttribute('x', -11);
-    tableEl.setAttribute('y', -240);
-    tableEl.setAttribute('width', 22);
-    tableEl.setAttribute('height', 480);
-    tableEl.setAttribute('rx', 4);
-  } else if (tableData.shape === 'square') {
-    tableEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    tableEl.setAttribute('x', -halfSize);
-    tableEl.setAttribute('y', -halfSize);
-    tableEl.setAttribute('width', halfSize * 2);
-    tableEl.setAttribute('height', halfSize * 2);
-    tableEl.setAttribute('rx', 4);
-  } else {
-    tableEl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    tableEl.setAttribute('cx', 0);
-    tableEl.setAttribute('cy', 0);
-    tableEl.setAttribute('r', halfSize);
-  }
-  
-  // Style classes
-  let classList = ['svg-table-block'];
-  if (tableData.shape === 'imperial') classList.push('imperial');
-  if (tableData.status === 'vip') classList.push('vip');
-  if (tableData.status === 'reserved') classList.push('reserved');
-  if (isSelected) classList.push('active-selected');
-  tableEl.setAttribute('class', classList.join(' '));
-  
-  // Click handler to select table
-  tableEl.addEventListener('click', (e) => {
-    e.stopPropagation();
-    selectTable(num);
-  });
-  
-  // Hover effects on table tooltip
-  tableEl.addEventListener('mousemove', (e) => showTooltip(e, num));
-  tableEl.addEventListener('mouseleave', hideTooltip);
-
-  group.appendChild(tableEl);
-  
-  // Render Chairs around the table
-  const chairsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  chairsGroup.setAttribute('class', 'chairs-group');
-  
-  const numChairs = tableData.seats;
-  const chairR = 30; // Radius distance of chair from center
-  const chairW = 8;
-  const chairH = 8;
-  
-  if (tableData.shape === 'imperial') {
-    const paddingX = 17;
-    
-    // Top chair
-    const chairTop = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    chairTop.setAttribute('x', -chairW / 2);
-    chairTop.setAttribute('y', -252);
-    chairTop.setAttribute('width', chairW);
-    chairTop.setAttribute('height', chairH);
-    chairTop.setAttribute('rx', 1);
-    chairTop.setAttribute('class', 'svg-chair imperial-chair');
-    chairsGroup.appendChild(chairTop);
-    
-    // Bottom chair
-    const chairBottom = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    chairBottom.setAttribute('x', -chairW / 2);
-    chairBottom.setAttribute('y', 244);
-    chairBottom.setAttribute('width', chairW);
-    chairBottom.setAttribute('height', chairH);
-    chairBottom.setAttribute('rx', 1);
-    chairBottom.setAttribute('class', 'svg-chair imperial-chair');
-    chairsGroup.appendChild(chairBottom);
-    
-    // Side chairs
-    const sideChairsCount = Math.floor((numChairs - 2) / 2); // default 24
-    const step = 460 / (sideChairsCount - 1);
-    for (let c = 0; c < sideChairsCount; c++) {
-      const cy = -230 + c * step;
-      
-      const chairL = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      chairL.setAttribute('x', -paddingX - chairW / 2);
-      chairL.setAttribute('y', cy - chairH / 2);
-      chairL.setAttribute('width', chairW);
-      chairL.setAttribute('height', chairH);
-      chairL.setAttribute('rx', 1);
-      chairL.setAttribute('class', 'svg-chair imperial-chair');
-      chairsGroup.appendChild(chairL);
-      
-      const chairR = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      chairR.setAttribute('x', paddingX - chairW / 2);
-      chairR.setAttribute('y', cy - chairH / 2);
-      chairR.setAttribute('width', chairW);
-      chairR.setAttribute('height', chairH);
-      chairR.setAttribute('rx', 1);
-      chairR.setAttribute('class', 'svg-chair imperial-chair');
-      chairsGroup.appendChild(chairR);
-    }
-  } else if (tableData.shape === 'circle') {
-    // Round table: Evenly space chairs in a circular ring
-    for (let s = 0; s < numChairs; s++) {
-      const angle = (s * 2 * Math.PI) / numChairs;
-      const cx = chairR * Math.cos(angle);
-      const cy = chairR * Math.sin(angle);
-      
-      const chair = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      chair.setAttribute('cx', cx);
-      chair.setAttribute('cy', cy);
-      chair.setAttribute('r', 4);
-      chair.setAttribute('class', 'svg-chair');
-      chairsGroup.appendChild(chair);
-    }
-  } else {
-    // Square table: Symmetrical chair distribution on four edges
-    // Distribution vectors based on seating capacity
-    let chairsConfig = []; // Coordinates relative to center
-    const padding = 26; // Distance from table edge
-    
-    if (numChairs === 8) {
-      // 2 chairs per side
-      chairsConfig = [
-        // Top Side (y = -padding)
-        { x: -10, y: -padding }, { x: 10, y: -padding },
-        // Bottom Side (y = padding)
-        { x: -10, y: padding }, { x: 10, y: padding },
-        // Left Side (x = -padding)
-        { x: -padding, y: -10 }, { x: -padding, y: 10 },
-        // Right Side (x = padding)
-        { x: padding, y: -10 }, { x: padding, y: 10 }
-      ];
-    } else if (numChairs === 10) {
-      // 3 chairs on Top/Bottom, 2 on Left/Right
-      chairsConfig = [
-        // Top Side
-        { x: -14, y: -padding }, { x: 0, y: -padding }, { x: 14, y: -padding },
-        // Bottom Side
-        { x: -14, y: padding }, { x: 0, y: padding }, { x: 14, y: padding },
-        // Left Side
-        { x: -padding, y: -10 }, { x: -padding, y: 10 },
-        // Right Side
-        { x: padding, y: -10 }, { x: padding, y: 10 }
-      ];
-    } else {
-      // 12 chairs (3 chairs per side)
-      chairsConfig = [
-        // Top Side
-        { x: -14, y: -padding }, { x: 0, y: -padding }, { x: 14, y: -padding },
-        // Bottom Side
-        { x: -14, y: padding }, { x: 0, y: padding }, { x: 14, y: padding },
-        // Left Side
-        { x: -padding, y: -14 }, { x: -padding, y: 0 }, { x: -padding, y: 14 },
-        // Right Side
-        { x: padding, y: -14 }, { x: padding, y: 0 }, { x: padding, y: 14 }
-      ];
-    }
-    
-    chairsConfig.forEach(pos => {
-      const chair = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      chair.setAttribute('x', pos.x - chairW / 2);
-      chair.setAttribute('y', pos.y - chairH / 2);
-      chair.setAttribute('width', chairW);
-      chair.setAttribute('height', chairH);
-      chair.setAttribute('rx', 1);
-      chair.setAttribute('class', 'svg-chair');
-      chairsGroup.appendChild(chair);
+  // ══════════════════════════════════════════════════════════
+  // LAYER TOGGLES
+  // ══════════════════════════════════════════════════════════
+  function _wireLayerToggles() {
+    var cats = [
+      'estructuras', 'techos', 'accesos', 'mobiliario', 'entretenimiento', 'decoracion', 'proveedores',
+      'flujo_invitados', 'flujo_proveedores', 'flujo_staff'
+    ];
+    cats.forEach(function (cat) {
+      var cb = document.getElementById('layer-toggle-' + cat);
+      if (!cb) return;
+      cb.addEventListener('change', function () {
+        AppState.layers[cat] = cb.checked;
+        if (window.Editor2D) window.Editor2D.setLayerVisibility(cat, cb.checked);
+        
+        // Sync 3D circulation path visibility
+        if (window.Visualizer3D && cat.startsWith('flujo_')) {
+          var flowType = cat.replace('flujo_', '');
+          if (flowType === 'invitados') flowType = 'guest';
+          if (flowType === 'proveedores' || flowType === 'staff') flowType = 'service';
+          window.Visualizer3D.toggleCirculation3D(flowType, cb.checked);
+        }
+        
+        _refresh();
+      });
+      cb.checked = AppState.layers[cat] !== false;
     });
   }
-  
-  group.appendChild(chairsGroup);
-  
-  // Table Number Annotation
-  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  label.setAttribute('class', 'svg-label-table');
-  if (tableData.shape === 'imperial') {
-    label.textContent = "M.I.";
-    label.setAttribute('font-size', '10');
-    label.setAttribute('font-weight', 'bold');
-  } else {
-    label.textContent = num;
-  }
-  group.appendChild(label);
-}
 
-// Render all tables — only active ones
-function renderAllTables() {
-  const layout = layoutPositions[currentLayout];
-  for (let i = 1; i <= 22; i++) {
-    const group = document.getElementById(`table-group-${i}`);
-    if (!group) continue;
-    if (layout.activeTables.includes(i)) {
-      group.style.display = 'inline';
-      renderTable(i);
-    } else {
-      group.style.display = 'none';
-    }
-  }
-}
+  // ══════════════════════════════════════════════════════════
+  // ZOOM BUTTONS
+  // ══════════════════════════════════════════════════════════
+  function _wireZoomButtons() {
+    var btnIn = document.getElementById('zoom-in');
+    var btnOut = document.getElementById('zoom-out');
+    var btnReset = document.getElementById('zoom-reset');
 
-// --- SELECTION & INTERACTION ---
-function selectTable(num) {
-  // Deselect previous
-  const prevSelected = selectedTableNum;
-  selectedTableNum = num;
-  
-  if (prevSelected) renderTable(prevSelected);
-  renderTable(num); // Highlight new selection
-  
-  // Open Right side drawer
-  detailDrawer.classList.add('open');
-  
-  // Close mobile sidebar if open to prevent UI clashing
-  closeSidebarMobile();
-  
-  // Populate Drawer Fields
-  const data = tablesData[num];
-  drawerTitle.textContent = `Configuración: Mesa ${num}`;
-  tableShapeSelect.value = data.shape;
-  tableSeatsSelect.value = data.seats.toString();
-  tableStatusSelect.value = data.status;
-  tableGuestsTextarea.value = data.guests.join('\n');
-  
-  // Update guest assigned numbers
-  updateGuestCountLabel(data.guests.length, data.seats);
-  
-  // Calculate relative distances for logistics info box
-  calculateLogisticsMetrics(data);
-  
-  if (activeView === '3d') {
-    selectElement3D(num);
-  }
-}
-
-function closeDrawer() {
-  detailDrawer.classList.remove('open');
-  if (selectedTableNum) {
-    const prev = selectedTableNum;
-    selectedTableNum = null;
-    renderTable(prev);
-  }
-  if (activeView === '3d') {
-    selectElement3D(null);
-  }
-}
-
-// Handle Guest Names Textarea input
-function updateSelectedTableGuests(textValue) {
-  if (!selectedTableNum) return;
-  
-  // Split input by new line, filtering empty lines
-  const guestList = textValue.split('\n').map(g => g.trim()).filter(g => g.length > 0);
-  tablesData[selectedTableNum].guests = guestList;
-  
-  // Update guest label count
-  updateGuestCountLabel(guestList.length, tablesData[selectedTableNum].seats);
-}
-
-function updateGuestCountLabel(current, max) {
-  guestCountLabel.textContent = `Invitados Asignados (${current} / ${max})`;
-  if (current > max) {
-    guestCountLabel.style.color = 'var(--danger)';
-  } else {
-    guestCountLabel.style.color = 'var(--text-secondary)';
-  }
-}
-
-// Clear table settings
-function clearSelectedTable() {
-  if (!selectedTableNum) return;
-  tablesData[selectedTableNum].guests = [];
-  tablesData[selectedTableNum].status = 'normal';
-  tableStatusSelect.value = 'normal';
-  tableGuestsTextarea.value = '';
-  updateGuestCountLabel(0, tablesData[selectedTableNum].seats);
-  renderTable(selectedTableNum);
-  updateGlobalMetrics();
-  
-  if (activeView === '3d') {
-    syncWithData(tablesData, currentLayout, selectedTableNum);
-  }
-}
-
-// Shape Customizer
-function updateSelectedTableShape(shape) {
-  if (!selectedTableNum) return;
-  tablesData[selectedTableNum].shape = shape;
-  renderTable(selectedTableNum);
-  
-  if (activeView === '3d') {
-    syncWithData(tablesData, currentLayout, selectedTableNum);
-  }
-}
-
-// Seat Capacity Customizer
-function updateSelectedTableSeats(seats) {
-  if (!selectedTableNum) return;
-  tablesData[selectedTableNum].seats = seats;
-  renderTable(selectedTableNum);
-  updateGuestCountLabel(tablesData[selectedTableNum].guests.length, seats);
-  updateGlobalMetrics();
-  
-  if (activeView === '3d') {
-    syncWithData(tablesData, currentLayout, selectedTableNum);
-  }
-}
-
-// Status Customizer
-function updateSelectedTableStatus(status) {
-  if (!selectedTableNum) return;
-  tablesData[selectedTableNum].status = status;
-  renderTable(selectedTableNum);
-  updateGlobalMetrics();
-  
-  if (activeView === '3d') {
-    syncWithData(tablesData, currentLayout, selectedTableNum);
-  }
-}
-
-// Global Seat Density Selector
-function setGlobalDensity(seats) {
-  globalDensity = seats;
-
-  document.querySelectorAll('.density-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(`density-${seats}`).classList.add('active');
-  document.getElementById('density-val').textContent = `${seats} personas`;
-
-  // Apply to ALL tables (including inactive, so state is preserved)
-  for (let i = 1; i <= 22; i++) {
-    // Keep Mesa Imperial's capacity as 50 or custom unless user explicitly wants to overwrite it
-    if (i !== 22) {
-      tablesData[i].seats = seats;
-    }
+    if (btnIn) btnIn.onclick = function () { if (window.Editor2D) window.Editor2D.zoomIn(); };
+    if (btnOut) btnOut.onclick = function () { if (window.Editor2D) window.Editor2D.zoomOut(); };
+    if (btnReset) btnReset.onclick = function () {
+      if (window.Editor2D) window.Editor2D.resetZoom();
+      if (window.Visualizer3D) window.Visualizer3D.resetCamera();
+    };
   }
 
-  renderAllTables();
-  updateGlobalMetrics();
-
-  if (selectedTableNum) {
-    selectTable(selectedTableNum);
-  }
-  
-  if (activeView === '3d') {
-    syncWithData(tablesData, currentLayout, selectedTableNum);
-  }
-}
-
-// Calculate Dynamic Logistics details for Info Box
-function calculateLogisticsMetrics(data) {
-  // Static scale: 10 SVG units = 1 meter
-  
-  const distance = (x1, y1, x2, y2) => {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    return Math.sqrt(dx*dx + dy*dy) / 10; // Convert to meters
-  };
-  
-  const df = layoutPositions[currentLayout].dancefloor;
-  const dfCenterX = df.x + df.width / 2;
-  const dfCenterY = df.y + df.height / 2;
-  
-  const distPista = distance(data.cx, data.cy, dfCenterX, dfCenterY);
-  
-  // Calculate distance to closest DJ stage
-  let distDJ = distance(data.cx, data.cy, 485, 110); // DJ Stage 1 (top center)
-  if (currentLayout === 'B') {
-    const distDJ2 = distance(data.cx, data.cy, 740, 420); // DJ Stage 2 (right wall)
-    distDJ = Math.min(distDJ, distDJ2);
-  }
-  
-  const distWC = distance(data.cx, data.cy, 510, 50);
-  const distBar = distance(data.cx, data.cy, 776, 140);
-  
-  metricDistPista.innerHTML = `Distancia a Zona de Baile: <strong>${distPista.toFixed(1)} m</strong>`;
-  metricDistDJ.innerHTML = `Distancia a DJ más cercano: <strong>${distDJ.toFixed(1)} m</strong>`;
-  metricDistWc.innerHTML = `Distancia a Baños: <strong>${distWC.toFixed(1)} m</strong>`;
-  
-  let barQuality = 'Directo & Eficiente';
-  if (distBar < 12) barQuality = 'Excelente (Acceso Rápido)';
-  else if (distBar > 25) barQuality = 'Estándar (Requiere pasillo despejado)';
-  metricDistBar.innerHTML = `Servicio de Bar: <strong>${barQuality}</strong>`;
-}
-
-// Update live capacity dashboard in Sidebar and PDF Print Header
-function updateGlobalMetrics() {
-  const layout = layoutPositions[currentLayout];
-  const activeTables = layout.activeTables;
-  let totalCapacity = 0;
-
-  activeTables.forEach(i => {
-    totalCapacity += tablesData[i].seats;
-  });
-
-  document.getElementById('metric-capacity').textContent = totalCapacity;
-  document.getElementById('metric-tables').textContent = `${activeTables.length}/${activeTables.length}`;
-
-  // Update PDF Print Header metadata
-  const pLayoutName = document.getElementById('print-layout-name');
-  const pLayoutCapacity = document.getElementById('print-layout-capacity');
-  if (pLayoutName) {
-    pLayoutName.textContent = currentLayout === 'A'
-      ? 'Versión A (Distribución Estándar con Pista Central)'
-      : 'Versión B (Nueva Distribución con Mesa Imperial y 2° DJ)';
-  }
-  if (pLayoutCapacity) {
-    pLayoutCapacity.textContent = `${totalCapacity} Comensales`;
-  }
-}
-
-// --- DYNAMIC LAYER CONTROLLER ---
-function toggleLayer(layer, isChecked) {
-  const group = document.getElementById(`g-${layer}`);
-  if (group) {
-    group.style.display = isChecked ? 'inline' : 'none';
-  }
-}
-
-// Toggle Circulation Paths & Anim
-function toggleCirculation(pathType, isChecked) {
-  const path = document.getElementById(`path-${pathType}-draw`);
-  if (path) {
-    if (isChecked) {
-      path.classList.add('active');
-    } else {
-      path.classList.remove('active');
-    }
-  }
-  
-  if (activeView === '3d') {
-    toggleCirculation3D(pathType, isChecked);
-  }
-}
-
-// --- LAYOUT / DISTRIBUTION SWITCHER ---
-function setLayout(version) {
-  currentLayout = version;
-
-  // Update sidebar button states
-  document.querySelectorAll('.layout-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(`layout-btn-${version}`).classList.add('active');
-
-  const layout = layoutPositions[version];
-
-  // Reposition all table SVG groups
-  for (let i = 1; i <= 22; i++) {
-    const group = document.getElementById(`table-group-${i}`);
-    if (!group) continue;
-    const pos = layout.tables[i];
-    group.setAttribute('transform', `translate(${pos.cx}, ${pos.cy})`);
-    // Update internal data coords for distance calculations
-    tablesData[i].cx = pos.cx;
-    tablesData[i].cy = pos.cy;
-    tablesData[i].active = layout.activeTables.includes(i);
+  // ══════════════════════════════════════════════════════════
+  // GRID SNAP TOGGLE
+  // ══════════════════════════════════════════════════════════
+  function _wireGridToggle() {
+    var cb = document.getElementById('grid-toggle');
+    if (!cb) return;
+    cb.addEventListener('change', function () {
+      AppState.useGrid = cb.checked;
+      if (window.Editor2D) window.Editor2D.setGridSnap(AppState.useGrid);
+      showToast('Cuadrícula ' + (AppState.useGrid ? 'activada' : 'desactivada') + '.', 'info');
+    });
+    cb.checked = !!AppState.useGrid;
   }
 
-  // Update dance floor SVG element
-  const df = layout.dancefloor;
-  const danceRect = document.querySelector('#dancefloor-group rect');
-  const danceLabel = document.querySelector('#dancefloor-group text');
-  if (danceRect) {
-    danceRect.setAttribute('x', df.x);
-    danceRect.setAttribute('y', df.y);
-    danceRect.setAttribute('width', df.width);
-    danceRect.setAttribute('height', df.height);
-  }
-  if (danceLabel) {
-    danceLabel.setAttribute('x', df.labelX);
-    danceLabel.setAttribute('y', df.labelY);
-    if (df.labelRotate) {
-      danceLabel.setAttribute('transform', `rotate(-90 ${df.labelX} ${df.labelY})`);
-      danceLabel.setAttribute('font-size', '14');
-    } else {
-      danceLabel.removeAttribute('transform');
-      danceLabel.setAttribute('font-size', '16');
-    }
-  }
+  // ══════════════════════════════════════════════════════════
+  // TERRAIN WIZARD / SETTINGS
+  // ══════════════════════════════════════════════════════════
+  function _wireTerrainSettings() {
+    var btnApply = document.getElementById('btn-apply-terrain');
+    if (!btnApply) return;
 
-  // Toggle DJ 2 area visibility
-  const dj2 = document.getElementById('dj2-group');
-  if (dj2) {
-    dj2.style.display = (version === 'B') ? 'inline' : 'none';
-  }
+    btnApply.onclick = function () {
+      var wEl = document.getElementById('terrain-width');
+      var hEl = document.getElementById('terrain-height');
+      if (!wEl || !hEl) return;
+      var w = parseFloat(wEl.value);
+      var h = parseFloat(hEl.value);
+      if (isNaN(w) || isNaN(h) || w < 5 || h < 5) {
+        showToast('Dimensiones inválidas (mínimo 5×5 m).', 'error');
+        return;
+      }
+      AppState.terrain = { w: w, h: h };
+      if (window.Editor2D) window.Editor2D.setTerrain(w, h);
+      showToast('Terreno actualizado: ' + w + 'm × ' + h + 'm.', 'success');
+    };
 
-  // Update dynamic circulation paths coordinates
-  const pGuest = document.getElementById('path-guest-draw');
-  const pService = document.getElementById('path-service-draw');
-  const pEmergency = document.getElementById('path-emergency-draw');
-  if (pGuest && layout.paths) pGuest.setAttribute('d', layout.paths.guest);
-  if (pService && layout.paths) pService.setAttribute('d', layout.paths.service);
-  if (pEmergency && layout.paths) pEmergency.setAttribute('d', layout.paths.emergency);
-
-  // Close drawer if open since selected table might be inactive
-  if (selectedTableNum && !layout.activeTables.includes(selectedTableNum)) {
-    closeDrawer();
+    // Populate current values
+    var wEl = document.getElementById('terrain-width');
+    var hEl = document.getElementById('terrain-height');
+    if (wEl) wEl.value = AppState.terrain.w;
+    if (hEl) hEl.value = AppState.terrain.h;
   }
 
-  // Re-render all tables with new positions
-  renderAllTables();
-  updateGlobalMetrics();
-  
-  if (activeView === '3d') {
-    syncWithData(tablesData, currentLayout, selectedTableNum);
-  }
-}
+  // ══════════════════════════════════════════════════════════
+  // SUPABASE INTEGRATION
+  // ══════════════════════════════════════════════════════════
+  function _initSupabase() {
+    var statusLbl = document.getElementById('db-status-lbl');
+    var layoutsGroup = document.getElementById('supabase-layouts-group');
+    var urlInp = document.getElementById('db-url');
+    var keyInp = document.getElementById('db-key');
 
-// --- THEME ENGINE ---
-function setTheme(theme) {
-  currentTheme = theme;
-  document.body.setAttribute('data-theme', theme);
-  
-  // Toggle sidebar active state
-  document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  document.getElementById(`theme-${theme}`).classList.add('active');
-}
-
-// --- DYNAMIC MOUSE TOOLTIP IN DRAWING ---
-const tooltip = document.getElementById('architect-tooltip');
-
-function showTooltip(e, num) {
-  if (isPanning) return;
-  const data = tablesData[num];
-  const numGuests = data.guests.length;
-  
-  tooltip.style.opacity = '1';
-  tooltip.innerHTML = `
-    <div style="font-weight: 700; color: var(--accent); margin-bottom: 3px;">MESA ${num} (${data.shape === 'square' ? 'Cuadrada' : 'Circular'})</div>
-    <div>Sillas: <strong>${data.seats}</strong></div>
-    <div>Estatus: <strong>${data.status.toUpperCase()}</strong></div>
-    <div>Asignados: <strong>${numGuests} / ${data.seats}</strong></div>
-  `;
-  
-  positionTooltip(e);
-}
-
-function positionTooltip(e) {
-  const padding = 15;
-  tooltip.style.left = `${e.clientX + padding}px`;
-  tooltip.style.top = `${e.clientY + padding}px`;
-}
-
-function hideTooltip() {
-  tooltip.style.opacity = '0';
-}
-
-// --- ZOOM & PAN CANVAS ENGINE ---
-function setupCanvasInteraction() {
-  const svg = document.getElementById('event-svg');
-  
-  // Mouse Drag Panning
-  svg.addEventListener('mousedown', (e) => {
-    // Only pan if we aren't clicking on an interactive table
-    if (e.target.classList.contains('svg-table-block')) return;
-    
-    isPanning = true;
-    svg.style.cursor = 'grabbing';
-    startX = e.clientX - panX;
-    startY = e.clientY - panY;
-    hideTooltip();
-  });
-  
-  window.addEventListener('mousemove', (e) => {
-    if (!isPanning) return;
-    panX = e.clientX - startX;
-    panY = e.clientY - startY;
-    applyViewportTransform();
-  });
-  
-  window.addEventListener('mouseup', () => {
-    if (!isPanning) return;
-    isPanning = false;
-    svg.style.cursor = 'grab';
-  });
-  
-  // Scroll Zoom
-  svg.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const zoomFactor = 1.05;
-    if (e.deltaY < 0) {
-      // Zoom In
-      zoomScale = Math.min(zoomScale * zoomFactor, 4.0);
-    } else {
-      // Zoom Out
-      zoomScale = Math.max(zoomScale / zoomFactor, 0.6);
-    }
-    applyViewportTransform();
-  });
-}
-
-function zoomCanvas(factor) {
-  zoomScale = Math.max(0.6, Math.min(zoomScale * factor, 4.0));
-  applyViewportTransform();
-}
-
-function resetCanvasView() {
-  zoomScale = 1.0;
-  panX = 0;
-  panY = 0;
-  applyViewportTransform();
-}
-
-function applyViewportTransform() {
-  const viewport = document.getElementById('main-viewport');
-  if (viewport) {
-    viewport.setAttribute('transform', `translate(${panX}, ${panY}) scale(${zoomScale})`);
-  }
-}
-
-// --- MOBILE UX INTERACTIONS ---
-function toggleSidebarMobile() {
-  const sidebar = document.querySelector('.sidebar');
-  const backdrop = document.getElementById('sidebar-backdrop');
-  if (!sidebar) return;
-  
-  const isOpen = sidebar.classList.toggle('open');
-  if (backdrop) {
-    backdrop.classList.toggle('visible', isOpen);
-  }
-  
-  const toggleBtn = document.getElementById('mobile-toggle-btn');
-  if (toggleBtn) {
-    toggleBtn.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
-  }
-}
-
-function closeSidebarMobile() {
-  const sidebar = document.querySelector('.sidebar');
-  const backdrop = document.getElementById('sidebar-backdrop');
-  
-  if (sidebar) sidebar.classList.remove('open');
-  if (backdrop) backdrop.classList.remove('visible');
-  
-  const toggleBtn = document.getElementById('mobile-toggle-btn');
-  if (toggleBtn) {
-    toggleBtn.innerHTML = '<i class="fa-solid fa-bars"></i>';
-  }
-}
-
-// Bind touch swipe-to-close gesture on mobile sidebar
-function setupSidebarSwipeGesture() {
-  const sidebar = document.querySelector('.sidebar');
-  if (!sidebar) return;
-  
-  let startX = 0;
-  let startY = 0;
-  let endX = 0;
-  let endY = 0;
-  
-  sidebar.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-  
-  sidebar.addEventListener('touchmove', (e) => {
-    endX = e.touches[0].clientX;
-    endY = e.touches[0].clientY;
-  }, { passive: true });
-  
-  sidebar.addEventListener('touchend', () => {
-    const diffX = endX - startX;
-    const diffY = endY - startY;
-    
-    // Swipe left: X coordinate decreases significantly (more than 50px)
-    // Also verify it's mostly a horizontal swipe (abs(diffX) > abs(diffY))
-    if (diffX < -50 && Math.abs(diffX) > Math.abs(diffY)) {
-      closeSidebarMobile();
-    }
-    
-    // Reset values
-    startX = 0;
-    startY = 0;
-    endX = 0;
-    endY = 0;
-  }, { passive: true });
-}
-
-// Reset canvas zoom and pan before printing to prevent clipping in exported PDF
-window.addEventListener('beforeprint', () => {
-  resetCanvasView();
-});
-
-// --- NATIVE SHARING & TOAST SYSTEM (Primavera UX Extension) ---
-function sharePlan() {
-  const shareData = {
-    title: 'Planificador de Eventos - Jardín Yolomecatl',
-    text: '¡Mira la distribución interactiva de mesas y comensales en el Jardín Yolomecatl organizada con Primavera Events Group!',
-    url: window.location.href
-  };
-
-  if (navigator.share) {
-    navigator.share(shareData)
-      .then(() => {
-        showToast('<i class="fa-solid fa-circle-check" style="color: var(--success);"></i> ¡Plano compartido con éxito!');
+    // First try fetching config.json
+    fetch('config.json')
+      .then(function (res) { return res.json(); })
+      .then(function (cfg) {
+        if (cfg.supabaseUrl && cfg.supabaseKey) {
+          localStorage.setItem(SB_URL_KEY, cfg.supabaseUrl);
+          localStorage.setItem(SB_ANON_KEY, cfg.supabaseKey);
+          console.log('[Supabase] Configured automatically from config.json');
+        }
+        _connectSupabase();
       })
-      .catch((err) => {
-        // If user cancelled, don't show clipboard toast, just print in log
-        if (err.name !== 'AbortError') {
-          copyLinkFallback();
-        }
+      .catch(function () {
+        // Fallback to localStorage if config.json fails or isn't present
+        _connectSupabase();
       });
-  } else {
-    copyLinkFallback();
-  }
-}
 
-function copyLinkFallback() {
-  navigator.clipboard.writeText(window.location.href)
-    .then(() => {
-      showToast('<i class="fa-solid fa-copy" style="color: var(--accent);"></i> ¡Enlace copiado al portapapeles!');
+    function _connectSupabase() {
+      var url = localStorage.getItem(SB_URL_KEY);
+      var key = localStorage.getItem(SB_ANON_KEY);
+
+      if (urlInp && url) urlInp.value = url;
+      if (keyInp && key) keyInp.value = key;
+
+      if (url && key && typeof supabase !== 'undefined') {
+        try {
+          _supabase = supabase.createClient(url, key);
+          if (statusLbl) {
+            statusLbl.textContent = 'Conectado';
+            statusLbl.style.color = 'var(--success)';
+          }
+          if (layoutsGroup) layoutsGroup.style.display = 'block';
+          _fetchSupabaseLayouts();
+        } catch (e) {
+          console.error('[Supabase] Init error:', e);
+          _supabase = null;
+          if (statusLbl) {
+            statusLbl.textContent = 'Error';
+            statusLbl.style.color = 'var(--danger)';
+          }
+        }
+      } else {
+        _supabase = null;
+        if (statusLbl) {
+          statusLbl.textContent = 'Desconectado';
+          statusLbl.style.color = 'var(--danger)';
+        }
+        if (layoutsGroup) layoutsGroup.style.display = 'none';
+      }
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // LOCAL SERVER FILE API (layouts/ folder)
+  // ══════════════════════════════════════════════════════════
+  function _fetchLocalLayouts() {
+    var select = document.getElementById('local-layouts-select');
+    if (!select) return;
+    
+    // Only fetch if running on localhost or 127.0.0.1
+    if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      select.innerHTML = '<option value="">Solo disponible localmente (localhost)</option>';
+      return;
+    }
+    
+    fetch('/api/list')
+      .then(function (res) { return res.json(); })
+      .then(function (files) {
+        select.innerHTML = '<option value="">Selecciona un plano local...</option>';
+        if (files && files.length > 0) {
+          files.forEach(function (file) {
+            var opt = document.createElement('option');
+            opt.value = file;
+            opt.textContent = file + '.json';
+            select.appendChild(opt);
+          });
+        } else {
+          select.innerHTML = '<option value="">No hay planos guardados en /layouts</option>';
+        }
+      })
+      .catch(function (err) {
+        console.warn('[LocalServer] Error listing layouts:', err);
+        select.innerHTML = '<option value="">Error al conectar con servidor local</option>';
+      });
+  }
+
+  function _saveLayoutToLocalServer(name, payload) {
+    if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      return;
+    }
+    
+    fetch('/api/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     })
-    .catch(() => {
-      showToast('<i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> No se pudo copiar el enlace.');
-    });
-}
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.status === 'success') {
+          showToast(res.message, 'success');
+          _fetchLocalLayouts();
+        } else {
+          showToast('Error de servidor: ' + res.message, 'error');
+        }
+      })
+      .catch(function (err) {
+        console.warn('[LocalServer] Error saving layout:', err);
+        showToast('Error al conectar con el servidor para guardar.', 'error');
+      });
+  }
 
-let toastTimeout = null;
-function showToast(messageHtml) {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
+  function _loadLayoutFromLocalServer(name) {
+    showToast('Cargando plano local...', 'info');
+    fetch('/layouts/' + name + '.json')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        saveHistory();
+        if (data.elements) AppState.elements = data.elements;
+        if (data.terrain) AppState.terrain = data.terrain;
+        if (data.layers) Object.assign(AppState.layers, data.layers);
+        
+        var wEl = document.getElementById('terrain-width');
+        var hEl = document.getElementById('terrain-height');
+        if (wEl) wEl.value = AppState.terrain.w;
+        if (hEl) hEl.value = AppState.terrain.h;
+        
+        if (window.Editor2D) {
+          window.Editor2D.setTerrain(AppState.terrain.w, AppState.terrain.h);
+        }
+        _refresh();
+        updateCounters();
+        
+        var cats = ['estructuras', 'accesos', 'mobiliario', 'entretenimiento', 'decoracion', 'proveedores'];
+        cats.forEach(function (cat) {
+          var cb = document.getElementById('layer-toggle-' + cat);
+          if (cb) cb.checked = !!AppState.layers[cat];
+        });
+        
+        showToast('Plano local "' + name + '" cargado exitosamente.', 'success');
+      })
+      .catch(function (err) {
+        showToast('Error al cargar plano local: ' + err.message, 'error');
+      });
+  }
 
-  toast.innerHTML = messageHtml;
-  toast.classList.add('show');
-
-  if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-// --- 3D VIEW TOGGLE ENGINE ---
-let activeView = '2d';
-
-function setViewMode(mode) {
-  if (activeView === mode) return;
-  activeView = mode;
-
-  const btn2d = document.getElementById('btn-view-2d');
-  const btn3d = document.getElementById('btn-view-3d');
-  const container2d = document.getElementById('container-2d');
-  const container3d = document.getElementById('container-3d');
-
-  if (mode === '3d') {
-    if (btn2d && btn3d && container2d && container3d) {
-      btn3d.classList.add('active');
-      btn2d.classList.remove('active');
-      container3d.classList.add('active');
-      container2d.classList.remove('active');
-    }
-
-    // Inicializar el visor 3D
-    init3D(container3d, tablesData, currentLayout, selectedTableNum);
-  } else {
-    if (btn2d && btn3d && container2d && container3d) {
-      btn2d.classList.add('active');
-      btn3d.classList.remove('active');
-      container2d.classList.add('active');
-      container3d.classList.remove('active');
-    }
-
-    // Destruir el motor 3D y liberar memoria
-    destroy3D();
-
-    // Re-renderizar mesas 2D por si acaso
-    renderAllTables();
-    if (selectedTableNum) {
-      selectTable(selectedTableNum);
+  function _wireLocalServerUI() {
+    var btnLoad = document.getElementById('btn-local-load');
+    if (btnLoad) {
+      btnLoad.onclick = function () {
+        var select = document.getElementById('local-layouts-select');
+        if (!select || !select.value) {
+          showToast('Selecciona un plano local para cargar.', 'warning');
+          return;
+        }
+        _loadLayoutFromLocalServer(select.value);
+      };
     }
   }
-}
 
-// --- JSON IMPORT / EXPORT SYSTEM ---
-function exportToJSON() {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-    version: "1.0",
-    currentLayout,
-    currentTheme,
-    globalDensity,
-    tablesData
-  }, null, 2));
-  const downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute("href", dataStr);
-  
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-  downloadAnchor.setAttribute("download", `yolomecatl_layout_${dateStr}_${timeStr}.json`);
-  
-  document.body.appendChild(downloadAnchor);
-  downloadAnchor.click();
-  downloadAnchor.remove();
-  
-  showToast('<i class="fa-solid fa-circle-check" style="color: var(--success);"></i> ¡Configuración exportada con éxito!');
-}
+  function _wireSupabaseUI() {
+    var btnSave = document.getElementById('btn-db-save');
+    var btnTest = document.getElementById('btn-db-test');
+    var btnClear = document.getElementById('btn-db-clear');
+    var btnLoad = document.getElementById('btn-db-load');
 
-function triggerImportJSON() {
-  document.getElementById('import-json-file').click();
-}
-
-function importFromJSON(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      
-      if (!data || !data.tablesData) {
-        throw new Error("Formato JSON inválido");
-      }
-      
-      // Update global states
-      if (data.currentLayout) {
-        setLayout(data.currentLayout);
-      }
-      if (data.currentTheme) {
-        setTheme(data.currentTheme);
-      }
-      if (data.globalDensity) {
-        setGlobalDensity(data.globalDensity);
-      }
-      
-      // Update tablesData
-      Object.keys(data.tablesData).forEach(key => {
-        const tableNum = parseInt(key);
-        if (tablesData[tableNum] && data.tablesData[key]) {
-          const importData = data.tablesData[key];
-          tablesData[tableNum].shape = importData.shape || tablesData[tableNum].shape;
-          tablesData[tableNum].seats = importData.seats || tablesData[tableNum].seats;
-          tablesData[tableNum].status = importData.status || tablesData[tableNum].status;
-          tablesData[tableNum].guests = importData.guests || [];
+    if (btnSave) {
+      btnSave.onclick = function () {
+        var urlInp = document.getElementById('db-url');
+        var keyInp = document.getElementById('db-key');
+        var url = (urlInp ? urlInp.value : '').trim();
+        var key = (keyInp ? keyInp.value : '').trim();
+        if (!url || !key) {
+          showToast('Por favor ingresa la URL y la clave anon.', 'error');
+          return;
         }
+        
+        showToast('Validando conexión...', 'info');
+        _testSupabaseConnection(url, key, function (ok, errMsg) {
+          if (ok) {
+            localStorage.setItem(SB_URL_KEY, url);
+            localStorage.setItem(SB_ANON_KEY, key);
+            _initSupabase();
+            showToast('Conexión exitosa y configurada.', 'success');
+          } else {
+            showToast('Error de conexión: ' + errMsg, 'error');
+          }
+        });
+      };
+    }
+
+    if (btnTest) {
+      btnTest.onclick = function () {
+        var urlInp = document.getElementById('db-url');
+        var keyInp = document.getElementById('db-key');
+        var url = (urlInp ? urlInp.value : '').trim();
+        var key = (keyInp ? keyInp.value : '').trim();
+        if (!url || !key) {
+          showToast('Ingresa credenciales para probar.', 'warning');
+          return;
+        }
+        showToast('Probando conexión...', 'info');
+        _testSupabaseConnection(url, key, function (ok, errMsg) {
+          if (ok) {
+            showToast('Conexión exitosa.', 'success');
+          } else {
+            showToast('Fallo: ' + errMsg, 'error');
+          }
+        });
+      };
+    }
+
+    if (btnClear) {
+      btnClear.onclick = function () {
+        localStorage.removeItem(SB_URL_KEY);
+        localStorage.removeItem(SB_ANON_KEY);
+        var urlInp = document.getElementById('db-url');
+        var keyInp = document.getElementById('db-key');
+        if (urlInp) urlInp.value = '';
+        if (keyInp) keyInp.value = '';
+        _initSupabase();
+        showToast('Desconectado de Supabase.', 'warning');
+      };
+    }
+
+    if (btnLoad) {
+      btnLoad.onclick = function () {
+        var select = document.getElementById('supabase-layouts-select');
+        if (!select || !select.value) {
+          showToast('Selecciona un plano para cargar.', 'warning');
+          return;
+        }
+        _loadLayoutFromSupabase(select.value);
+      };
+    }
+  }
+
+  function _testSupabaseConnection(url, key, callback) {
+    if (typeof supabase === 'undefined') {
+      callback(false, 'SDK de Supabase no cargado');
+      return;
+    }
+    try {
+      var client = supabase.createClient(url, key);
+      client.from('venue_layouts').select('name').limit(1).then(function (res) {
+        if (res.error) {
+          if (res.error.code === '42P01') {
+            callback(true, 'successful but table venue_layouts missing');
+          } else {
+            callback(false, res.error.message);
+          }
+        } else {
+          callback(true);
+        }
+      }).catch(function (err) {
+        callback(false, err.message || err);
+      });
+    } catch (e) {
+      callback(false, e.message || e);
+    }
+  }
+
+  function _fetchSupabaseLayouts() {
+    if (!_supabase) return;
+    _supabase.from('venue_layouts').select('name').order('name').then(function (res) {
+      var select = document.getElementById('supabase-layouts-select');
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">Selecciona un plano...</option>';
+      
+      if (res.error) {
+        console.warn('[Supabase] Error listing layouts:', res.error);
+        if (res.error.code === '42P01') {
+          showToast('Aviso: la tabla venue_layouts no existe en tu proyecto.', 'warning');
+        }
+        return;
+      }
+      
+      if (res.data) {
+        res.data.forEach(function (row) {
+          var opt = document.createElement('option');
+          opt.value = row.name;
+          opt.textContent = row.name;
+          select.appendChild(opt);
+        });
+      }
+    }).catch(function (err) {
+      console.warn('[Supabase] Catch listing layouts:', err);
+    });
+  }
+
+  function _saveLayoutToSupabase(name) {
+    if (!_supabase) return;
+    var payload = {
+      name: name,
+      terrain: AppState.terrain,
+      elements: AppState.elements,
+      layers: AppState.layers,
+      updated_at: new Date().toISOString()
+    };
+    showToast('Guardando en Supabase...', 'info');
+    _supabase.from('venue_layouts').upsert(payload, { onConflict: 'name' }).then(function (res) {
+      if (res.error) {
+        showToast('Error al guardar en Supabase: ' + res.error.message, 'error');
+      } else {
+        showToast('Plano "' + name + '" guardado en Supabase.', 'success');
+        _fetchSupabaseLayouts();
+      }
+    }).catch(function (err) {
+      showToast('Error al guardar: ' + (err.message || err), 'error');
+    });
+  }
+
+  function _loadLayoutFromSupabase(name) {
+    if (!_supabase) return;
+    showToast('Cargando desde Supabase...', 'info');
+    _supabase.from('venue_layouts').select('*').eq('name', name).maybeSingle().then(function (res) {
+      if (res.error) {
+        showToast('Error al cargar: ' + res.error.message, 'error');
+        return;
+      }
+      if (!res.data) {
+        showToast('No se encontró el plano.', 'error');
+        return;
+      }
+      var data = res.data;
+      saveHistory();
+      if (data.elements) AppState.elements = data.elements;
+      if (data.terrain) AppState.terrain = data.terrain;
+      if (data.layers) Object.assign(AppState.layers, data.layers);
+      
+      var wEl = document.getElementById('terrain-width');
+      var hEl = document.getElementById('terrain-height');
+      if (wEl) wEl.value = AppState.terrain.w;
+      if (hEl) hEl.value = AppState.terrain.h;
+      
+      if (window.Editor2D) {
+        window.Editor2D.setTerrain(AppState.terrain.w, AppState.terrain.h);
+      }
+      _refresh();
+      updateCounters();
+      
+      var cats = ['estructuras', 'accesos', 'mobiliario', 'entretenimiento', 'decoracion', 'proveedores'];
+      cats.forEach(function (cat) {
+        var cb = document.getElementById('layer-toggle-' + cat);
+        if (cb) cb.checked = !!AppState.layers[cat];
       });
       
-      // Sync views
-      renderAllTables();
-      updateGlobalMetrics();
-      
-      if (selectedTableNum) {
-        selectTable(selectedTableNum);
-      }
-      
-      if (activeView === '3d') {
-        syncWithData(tablesData, currentLayout, selectedTableNum);
-      }
-      
-      showToast('<i class="fa-solid fa-file-circle-check" style="color: var(--success);"></i> ¡Configuración importada con éxito!');
-    } catch (err) {
-      console.error(err);
-      showToast('<i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Error al importar: archivo inválido.');
+      showToast('Plano "' + name + '" cargado exitosamente.', 'success');
+    }).catch(function (err) {
+      showToast('Error de carga: ' + (err.message || err), 'error');
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // SAVE / LOAD / EXPORT
+  // ══════════════════════════════════════════════════════════
+  function saveToLocalStorage() {
+    var defaultName = localStorage.getItem(LS_KEY + '_name') || 'Mi Plano';
+    var name = prompt('Nombre del plano:', defaultName);
+    if (name === null) return;
+    name = name.trim();
+    if (!name) {
+      showToast('Nombre inválido.', 'error');
+      return;
     }
-    input.value = '';
+
+    var payload = {
+      name: name,
+      elements: AppState.elements,
+      terrain: AppState.terrain,
+      layers: AppState.layers,
+      savedAt: new Date().toISOString()
+    };
+
+    // 1. Save in local browser storage
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(payload));
+      localStorage.setItem(LS_KEY + '_name', name);
+      localStorage.setItem(LS_KEY + '_version', CURRENT_LAYOUT_VERSION);
+    } catch (e) {
+      console.warn('[app] LocalStorage save error:', e);
+    }
+
+    // 2. Save on local Python server if running on localhost
+    var isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+    if (isLocalhost) {
+      _saveLayoutToLocalServer(name, payload);
+    }
+
+    // 3. Save in Supabase cloud if connected
+    if (_supabase) {
+      _saveLayoutToSupabase(name);
+    } else if (!isLocalhost) {
+      // If not running locally and not connected to Supabase, just say saved in browser
+        showToast('Guardado en la memoria de este navegador.', 'success');
+    }
+  }
+
+  function updateLayoutModeFromElements() {
+    var mesa2 = AppState.elements.find(function (e) {
+      return e.type === 'table_imperial' && e.mesaConfig && e.mesaConfig.mesaNum === 2;
+    });
+    if (mesa2) {
+      var mode = (mesa2.rotation === 0) ? 'horizontal' : 'vertical';
+      _currentLayoutMode = mode;
+      var btnVer = document.getElementById('btn-layout-ver');
+      var btnHor = document.getElementById('btn-layout-hor');
+      if (btnVer && btnHor) {
+        if (mode === 'vertical') {
+          btnVer.classList.add('active');
+          btnHor.classList.remove('active');
+        } else {
+          btnHor.classList.add('active');
+          btnVer.classList.remove('active');
+        }
+      }
+    }
+  }
+
+  function _loadLayoutData(data) {
+    if (!data) return;
+    if (data.elements) AppState.elements = data.elements;
+    if (data.terrain) AppState.terrain = data.terrain;
+    if (data.layers) Object.assign(AppState.layers, data.layers);
+    AppState.elements.forEach(function (e) {
+      var n = parseInt((e.id || '').replace('el_', ''), 10);
+      if (!isNaN(n) && n >= _idCounter) _idCounter = n + 1;
+      if (e.mesaConfig && e.mesaConfig.mesaNum > _tableCounter) _tableCounter = e.mesaConfig.mesaNum;
+    });
+    updateLayoutModeFromElements();
+  }
+
+  var CURRENT_LAYOUT_VERSION = '2026-06-30-v25';
+
+  function loadFromLocalStorage() {
+    try {
+      var savedVersion = localStorage.getItem(LS_KEY + '_version');
+      if (savedVersion !== CURRENT_LAYOUT_VERSION) {
+        console.log('[App] Discarding outdated local storage cache.');
+        localStorage.removeItem(LS_KEY);
+        localStorage.removeItem(LS_KEY + '_name');
+        localStorage.removeItem(LS_KEY + '_auto');
+        localStorage.removeItem(LS_KEY + '_version');
+        return false;
+      }
+      var raw = localStorage.getItem(LS_KEY);
+      if (!raw) return false;
+      var data = JSON.parse(raw);
+      _loadLayoutData(data);
+      return true;
+    } catch (e) {
+      console.warn('[app] Failed to load from localStorage:', e);
+      return false;
+    }
+  }
+
+  function exportJSON() {
+    var payload = {
+      version: '1.0',
+      appName: 'Primavera Universal Planner',
+      exportedAt: new Date().toISOString(),
+      terrain: AppState.terrain,
+      elements: AppState.elements,
+      layers: AppState.layers
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'plano_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Plano exportado como JSON.', 'success');
+  }
+
+  function importJSON(file) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (data.elements) {
+          saveHistory();
+          AppState.elements = data.elements;
+          if (data.terrain) AppState.terrain = data.terrain;
+          if (data.layers) Object.assign(AppState.layers, data.layers);
+          if (window.Editor2D) window.Editor2D.setTerrain(AppState.terrain.w, AppState.terrain.h);
+          _refresh();
+          updateCounters();
+          showToast('Plano importado: ' + data.elements.length + ' elementos.', 'success');
+        }
+      } catch (err) {
+        showToast('Error al importar: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function exportPNG() {
+    var svgEl = document.getElementById('svg-canvas');
+    if (!svgEl) { showToast('Canvas SVG no encontrado.', 'error'); return; }
+
+    var svgData = new XMLSerializer().serializeToString(svgEl);
+    var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(svgBlob);
+    var img = new Image();
+    img.onload = function () {
+      var canvas = document.createElement('canvas');
+      canvas.width = svgEl.clientWidth || 1200;
+      canvas.height = svgEl.clientHeight || 800;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      var a = document.createElement('a');
+      a.download = 'plano_' + new Date().toISOString().slice(0, 10) + '.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      showToast('PNG exportado.', 'success');
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      showToast('Error al exportar PNG. Intenta desde vista 2D.', 'warning');
+    };
+    img.src = url;
+  }
+
+  function exportPDF() {
+    var svgEl = document.getElementById('svg-canvas');
+    if (!svgEl) {
+      showToast('Error: No se encontró el lienzo 2D.', 'error');
+      return;
+    }
+
+    var originalElements = JSON.parse(JSON.stringify(AppState.elements));
+    var originalMode = _currentLayoutMode;
+
+    // Helper to generate clean SVG for a given mode
+    function getSvgForMode(mode) {
+      var backupElements = JSON.parse(JSON.stringify(AppState.elements));
+      
+      // If requested mode is not the active mode, load the default preset
+      if (mode !== _currentLayoutMode) {
+        if (mode === 'vertical') {
+          _loadLayoutData(window.LAYOUT_A);
+        } else {
+          _loadLayoutData(window.LAYOUT_B);
+        }
+      }
+      
+      if (window.Editor2D) window.Editor2D.update(AppState.elements);
+
+      var svgElForMode = document.getElementById('svg-canvas');
+      if (!svgElForMode) return '';
+
+      var clonedSvg = svgElForMode.cloneNode(true);
+      var activeSel = clonedSvg.querySelector('.active-selection');
+      if (activeSel) activeSel.remove();
+      var resizeHandles = clonedSvg.querySelectorAll('.resize-handle');
+      resizeHandles.forEach(function (h) { h.remove(); });
+      var rulerH = clonedSvg.querySelector('#svg-ruler-h');
+      if (rulerH) rulerH.remove();
+      var rulerV = clonedSvg.querySelector('#svg-ruler-v');
+      if (rulerV) rulerV.remove();
+      var terrainBorder = clonedSvg.querySelector('#svg-terrain-border');
+      if (terrainBorder) terrainBorder.remove();
+
+      var scale = 10;
+      var tw = AppState.terrain.w * scale;
+      var th = AppState.terrain.h * scale;
+
+      var svgBg = clonedSvg.querySelector('#svg-background');
+      if (svgBg) {
+        svgBg.setAttribute('width', tw);
+        svgBg.setAttribute('height', th);
+      }
+
+      var zoomGroup = clonedSvg.querySelector('#svg-zoom-group');
+      if (zoomGroup) {
+        zoomGroup.removeAttribute('transform');
+      }
+
+      clonedSvg.setAttribute('viewBox', '0 0 ' + tw + ' ' + th);
+      clonedSvg.setAttribute('width', '100%');
+      clonedSvg.setAttribute('height', '100%');
+      clonedSvg.style.width = '100%';
+      clonedSvg.style.height = '100%';
+      clonedSvg.setAttribute('shape-rendering', 'geometricPrecision');
+      clonedSvg.setAttribute('text-rendering', 'geometricPrecision');
+
+      var serialized = new XMLSerializer().serializeToString(clonedSvg);
+      
+      // Restore elements
+      AppState.elements = backupElements;
+      return serialized;
+    }
+
+    // Generate both layouts
+    var verticalSvgString = getSvgForMode('vertical');
+    var horizontalSvgString = getSvgForMode('horizontal');
+
+    // Restore original state
+    AppState.elements = originalElements;
+    _currentLayoutMode = originalMode;
+    if (window.Editor2D) window.Editor2D.update(AppState.elements);
+    _refresh();
+
+    // Get event data
+    var totalGuests = 0;
+    var tablesList = [];
+
+    AppState.elements.forEach(function (elem) {
+      if (elem.chairs) totalGuests += elem.chairs;
+      if (elem.type.startsWith('table_') || elem.type === 'lounge_set') {
+        tablesList.push(elem);
+      }
+    });
+
+    // Sort tables by number
+    tablesList.sort(function (a, b) {
+      var numA = (a.mesaConfig && a.mesaConfig.mesaNum) ? parseInt(a.mesaConfig.mesaNum, 10) : 999;
+      var numB = (b.mesaConfig && b.mesaConfig.mesaNum) ? parseInt(b.mesaConfig.mesaNum, 10) : 999;
+      return numA - numB;
+    });
+
+    var layoutName = localStorage.getItem(LS_KEY + '_name') || 'Mi Plano';
+
+    // Build the print HTML
+    var printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast('Error: El navegador bloqueó la ventana emergente.', 'error');
+      return;
+    }
+
+    var html = '<!DOCTYPE html>\n<html>\n<head>\n';
+    html += '<title>Ficha Técnica - ' + layoutName + '</title>\n';
+    html += '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">\n';
+    html += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">\n';
+    
+    // Inject all stylesheet styles
+    for (var i = 0; i < document.styleSheets.length; i++) {
+      var sheet = document.styleSheets[i];
+      try {
+        if (sheet.href && sheet.href.indexOf(window.location.host) === -1) continue;
+        var rules = "";
+        for (var j = 0; j < sheet.cssRules.length; j++) {
+          rules += sheet.cssRules[j].cssText + "\n";
+        }
+        html += '<style>' + rules + '</style>\n';
+      } catch (e) { console.warn("Could not load stylesheet: ", e); }
+    }
+
+    html += '<style>\n';
+    html += '  body { font-family: "Outfit", sans-serif; color: #1e293b; background: #fff; margin: 0; padding: 40px; line-height: 1.5; }\n';
+    html += '  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; }\n';
+    html += '  .brand-title { font-size: 24px; font-weight: 700; color: #f43f5e; display: flex; align-items: center; gap: 8px; }\n';
+    html += '  .brand-sub { font-size: 14px; color: #64748b; font-weight: 400; }\n';
+    html += '  .doc-title { font-size: 20px; font-weight: 600; text-align: right; color: #0f172a; }\n';
+    html += '  .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }\n';
+    html += '  .meta-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; }\n';
+    html += '  .meta-val { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 5px; }\n';
+    html += '  .meta-lbl { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600; }\n';
+    html += '  .section-title { font-size: 18px; font-weight: 600; color: #0f172a; border-left: 4px solid #f43f5e; padding-left: 10px; margin: 30px 0 15px 0; }\n';
+    html += '  .map-container { border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; background: #f8fafc; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; page-break-inside: avoid; height: 680px; box-sizing: border-box; }\n';
+    html += '  .map-container svg { width: 100%; height: 100%; max-height: 100%; display: block; }\n';
+    html += '  .print-section-wrapper { page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 30px; display: block; }\n';
+    html += '  table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }\n';
+    html += '  th { background: #0f172a; color: #fff; font-weight: 600; text-align: left; padding: 10px; }\n';
+    html += '  td { padding: 10px; border: 1px solid #e2e8f0; }\n';
+    html += '  @media print {\n';
+    html += '    body { padding: 0; margin: 0; }\n';
+    html += '    .no-print { display: none; }\n';
+    html += '    .map-container { height: 480px !important; border: none; background: none; }\n';
+    html += '  }\n';
+    html += '</style>\n</head>\n<body>\n';
+
+    html += '<div class="no-print" style="background: #0f172a; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 30px;">\n';
+    html += '  <div style="color: #fff; font-weight: 500; font-size: 14px;"><i class="fa-solid fa-file-pdf" style="color: #f43f5e; margin-right: 8px;"></i> Ficha Técnica del Evento</div>\n';
+    html += '  <button onclick="window.print();" style="background: #f43f5e; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-print"></i> Guardar como PDF / Imprimir</button>\n';
+    html += '</div>\n';
+
+    html += '<div class="header">\n';
+    html += '  <div><div class="brand-title"><i class="fa-solid fa-compass-drafting"></i> Yolomecatl <span class="brand-sub">by Primavera Events</span></div></div>\n';
+    html += '  <div class="doc-title"><div>FICHA TÉCNICA</div><div style="font-size: 14px; font-weight: 400; color: #64748b; margin-top: 4px;">Proyecto: ' + layoutName + '</div></div>\n';
+    html += '</div>\n';
+
+    var formattedDate = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    html += '<div class="meta-grid">\n';
+    html += '  <div class="meta-card"><div class="meta-val">' + totalGuests + '</div><div class="meta-lbl">Invitados</div></div>\n';
+    html += '  <div class="meta-card"><div class="meta-val">' + tablesList.length + '</div><div class="meta-lbl">Mesas</div></div>\n';
+    html += '  <div class="meta-card"><div class="meta-val">' + (AppState.terrain.w + 'x' + AppState.terrain.h + 'm') + '</div><div class="meta-lbl">Terreno</div></div>\n';
+    html += '  <div class="meta-card"><div class="meta-val" style="font-size: 13px; font-weight: 600; padding: 6px 0;">' + formattedDate + '</div><div class="meta-lbl">Fecha Reporte</div></div>\n';
+    html += '</div>\n';
+
+    html += '<div class="print-section-wrapper" style="margin-bottom: 0;">\n';
+    html += '  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 25px; display: flex; flex-direction: column; gap: 15px;">\n';
+    html += '    <h4 style="margin-top: 0; margin-bottom: 12px; color: #0f172a; border-bottom: 2px solid #f43f5e; padding-bottom: 8px; font-size:16px;"><i class="fa-solid fa-circle-info" style="color:#f43f5e; margin-right: 8px;"></i> Ficha Técnica General</h4>\n';
+    html += '    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">\n';
+    html += '      <div style="font-size: 13px; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">\n';
+    html += '        <div><strong>Festejada:</strong> Zoe (Mis XV Años)</div>\n';
+    html += '        <div><strong>Lugar:</strong> Jardín Manzanares</div>\n';
+    html += '        <div><strong>Fecha:</strong> Sábado 04 de Julio de 2026</div>\n';
+    html += '        <div><strong>Capacidad Máxima:</strong> 150 Personas (Contratados)</div>\n';
+    html += '        <div><strong>Coordinador General:</strong> Alex Salomon</div>\n';
+    html += '        <div><strong>Tiempo de Renta/Servicio:</strong> 9 Horas totales</div>\n';
+    html += '      </div>\n';
+    html += '      <div style="font-size: 13px; line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">\n';
+    html += '        <div>\n';
+    html += '          <div style="font-weight: 700; font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Código de Vestimenta</div>\n';
+    html += '          <div style="font-weight: 600; font-size: 13px; color: #0f172a; margin-top: 2px;">Formal (no etiqueta rigurosa)</div>\n';
+    html += '          <div style="font-size: 11px; color: #b45309; font-weight: 600; margin-top: 2px;">* Se reserva el color beige y dorado exclusivamente para la festejada (Zoe).</div>\n';
+    html += '        </div>\n';
+    html += '        <div>\n';
+    html += '          <div style="font-weight: 700; font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Mesa de Regalos</div>\n';
+    html += '          <div style="font-weight: 600; font-size: 13px; color: #0f172a; margin-top: 2px;">Regalos pequeños o Sobres ($)</div>\n';
+    html += '          <div style="font-size: 11px; color: #475569; margin-top: 2px;">* Se proveerán 100 sobres para los invitados adultos.</div>\n';
+    html += '        </div>\n';
+    html += '      </div>\n';
+    html += '    </div>\n';
+    html += '    <div style="border-top: 1px solid #cbd5e1; padding-top: 12px; margin-top: 5px; font-size: 12px; line-height: 1.5; color: #475569;">\n';
+    html += '      <strong>Detalles Logísticos:</strong> El chicharrón, guacamole y pastel son provistos directamente por los anfitriones. Las paletas heladas se entregan puntualmente a las 15:30 (Se deben entregar 250 piezas).\n';
+    html += '    </div>\n';
+    html += '  </div>\n';
+    html += '</div>\n';
+
+    html += '<div class="page-break"></div>\n';
+    html += '<div class="print-section-wrapper">\n';
+    html += '  <div class="section-title"><i class="fa-solid fa-map" style="margin-right: 6px; color:#f43f5e;"></i> Distribución del Evento - Opción 1: Versión A (Pista Central)</div>\n';
+    html += '  <div class="map-container">\n' + verticalSvgString + '\n</div>\n';
+    html += '</div>\n';
+
+    html += '<div class="page-break"></div>\n';
+    html += '<div class="print-section-wrapper">\n';
+    html += '  <div class="section-title"><i class="fa-solid fa-map" style="margin-right: 6px; color:#f43f5e;"></i> Distribución del Evento - Opción 2: Versión B (Mesa Imperial)</div>\n';
+    html += '  <div class="map-container">\n' + horizontalSvgString + '\n</div>\n';
+    html += '</div>\n';
+
+    html += '<div class="page-break"></div>\n';
+    html += '<div class="print-section-wrapper">\n';
+    html += '  <div class="section-title"><i class="fa-solid fa-list-check" style="margin-right: 6px; color:#f43f5e;"></i> Inventario de Mobiliario y Equipamiento</div>\n';
+    html += '  <table>\n';
+    html += '    <thead>\n';
+    html += '      <tr><th>Elemento</th><th>Tipo</th><th>Cantidad</th><th>Comentarios</th></tr>\n';
+    html += '    </thead>\n';
+    html += '    <tbody>\n';
+
+    var counts = {};
+    AppState.elements.forEach(function (elem) {
+      counts[elem.name] = (counts[elem.name] || 0) + 1;
+    });
+
+    Object.keys(counts).forEach(function (name) {
+      html += '      <tr>\n';
+      html += '        <td><strong>' + name + '</strong></td>\n';
+      html += '        <td>Mobiliario / Decoración</td>\n';
+      html += '        <td>' + counts[name] + '</td>\n';
+      html += '        <td>Distribución según plano adjunto</td>\n';
+      html += '        </tr>\n';
+    });
+
+    html += '    </tbody>\n';
+    html += '  </table>\n';
+    html += '</div>\n';
+
+    html += '<div class="page-break"></div>\n';
+    html += '<div class="print-section-wrapper">\n';
+    html += '  <div class="section-title"><i class="fa-solid fa-chair" style="margin-right: 6px; color:#f43f5e;"></i> Detalle de Montaje de Mesas y Banquetes</div>\n';
+    html += '  <table>\n';
+    html += '    <thead>\n';
+    html += '      <tr><th>Mesa</th><th>Sillas / Tipo</th><th>Mantelería</th><th>Servilletas</th><th>Vajilla / Cristalería</th><th>Invitados</th></tr>\n';
+    html += '    </thead>\n';
+    html += '    <tbody>\n';
+
+    tablesList.forEach(function (elem) {
+      var mc = elem.mesaConfig || {};
+      var mantel = mc.mantelColor || 'Blanco';
+      var servilleta = mc.servilletaColor || 'Blanca';
+      var vajilla = mc.vajillaType || 'Ninguno';
+      var copa = mc.copaType || 'Ninguno';
+      
+      html += '      <tr>\n';
+      html += '        <td><strong>Mesa ' + (mc.mesaNum || elem.name) + '</strong></td>\n';
+      html += '        <td>' + elem.chairs + ' Sillas (' + (mc.tipoSilla || 'tiffany') + ')</td>\n';
+      html += '        <td>Mantel: ' + mantel + ', Camino: ' + (mc.caminoColor || 'ninguno') + '</td>\n';
+      html += '        <td>' + servilleta + '</td>\n';
+      html += '        <td>Base: ' + (mc.platoBaseType || 'ninguno') + ', Copa: ' + copa + '</td>\n';
+      
+      var invs = mc.invitados || [];
+      html += '        <td>' + (invs.length > 0 ? invs.join(', ') : 'Sin asignar') + '</td>\n';
+      html += '      </tr>\n';
+    });
+
+    html += '    </tbody>\n';
+    html += '  </table>\n';
+    html += '</div>\n';
+
+    html += '<div class="footer">\n';
+    html += '  <div>Yolomecatl Event Planner — Generado automáticamente con Primavera Events Group.</div>\n';
+    html += '  <div style="margin-top: 5px;">Este documento es de carácter organizativo oficial y debe respetarse para montaje y logística en sitio.</div>\n';
+    html += '</div>\n';
+    html += '</body>\n</html>\n';
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  }
+
+  function _wireExportButtons() {
+    var btnSave = document.getElementById('btn-save');
+    if (btnSave) btnSave.onclick = saveToLocalStorage;
+
+    var btnExportJSON = document.getElementById('btn-export-json');
+    if (btnExportJSON) btnExportJSON.onclick = exportJSON;
+
+    var btnExportPNG = document.getElementById('btn-export-png');
+    if (btnExportPNG) btnExportPNG.onclick = exportPNG;
+
+    var btnExportPDF = document.getElementById('btn-export-pdf');
+    if (btnExportPDF) btnExportPDF.onclick = exportPDF;
+
+    var btnImport = document.getElementById('btn-import-json');
+    var fileInput = document.getElementById('import-file-input');
+    if (btnImport && fileInput) {
+      btnImport.onclick = function () { fileInput.click(); };
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files && fileInput.files[0]) {
+          importJSON(fileInput.files[0]);
+          fileInput.value = '';
+        }
+      });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // CLEAR
+  // ══════════════════════════════════════════════════════════
+  function _wireClear() {
+    var btn = document.getElementById('btn-clear');
+    if (!btn) return;
+    btn.onclick = function () {
+      if (!confirm('¿Eliminar todos los elementos? Esta acción no se puede deshacer.')) return;
+      saveHistory();
+      AppState.elements = [];
+      _tableCounter = 0;
+      deselectAll();
+      _refresh();
+      updateCounters();
+      showToast('Plano limpiado.', 'warning');
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // KEYBOARD SHORTCUTS (global)
+  // ══════════════════════════════════════════════════════════
+  function _wireKeyboard() {
+    document.addEventListener('keydown', function (e) {
+      var tag = (document.activeElement && document.activeElement.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (e.ctrlKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        undo();
+      } else if (e.ctrlKey && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault();
+        redo();
+      } else if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        saveToLocalStorage();
+      } else if (e.key === 'Escape') {
+        _setPendingType(null);
+        deselectAll();
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (AppState.selectedId) {
+          removeElement(AppState.selectedId);
+        }
+      } else if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey) {
+        if (AppState.selectedId) rotateElement(AppState.selectedId, 45);
+      } else if (e.ctrlKey && (e.key === 'd' || e.key === 'D')) {
+        e.preventDefault();
+        if (AppState.selectedId) duplicateElement(AppState.selectedId);
+      }
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // EDITOR2D CALLBACKS
+  // ══════════════════════════════════════════════════════════
+  function _buildEditor2DCallbacks() {
+    return {
+      onSelect: function (elem) {
+        AppState.selectedId = elem.id;
+        if (window.Visualizer3D) window.Visualizer3D.select(elem.id);
+        _populateInspector(elem);
+        _updateInspectorVisibility(true);
+      },
+      onDeselect: function () {
+        deselectAll();
+      },
+      onMove: function (id, x, y) {
+        var elem = AppState.elements.find(function (e) { return e.id === id; });
+        if (!elem) return;
+        elem.x = Math.max(0, Math.min(x, AppState.terrain.w));
+        elem.y = Math.max(0, Math.min(y, AppState.terrain.h));
+        if (window.Editor2D) window.Editor2D.update(AppState.elements);
+        if (window.Visualizer3D) window.Visualizer3D.sync(AppState.elements);
+        // Live-update inspector position fields
+        updateInspectorField('inp-x', parseFloat(elem.x).toFixed(2));
+        updateInspectorField('inp-y', parseFloat(elem.y).toFixed(2));
+      },
+      onPlaceElement: function (type, x, y) {
+        AppState.pendingType = null;
+        if (_lastPendingCard) {
+          _lastPendingCard.style.background = '#1e293b';
+          _lastPendingCard.style.borderColor = '#334155';
+          _lastPendingCard.style.outline = '';
+          _lastPendingCard = null;
+        }
+        _updateCanvasCursor(false);
+        var banner = document.getElementById('placement-banner');
+        if (banner) banner.classList.add('hidden');
+        addElement(type, x, y);
+      },
+      onRename: function (id, name) {
+        updateElement(id, { name: name });
+        updateInspectorField('inspector-name', name);
+      },
+      onContext_rotate: function (id) {
+        rotateElement(id, 45);
+      },
+      onContext_duplicate: function (id) {
+        duplicateElement(id);
+      },
+      onContext_delete: function (id) {
+        removeElement(id);
+      },
+      onUndo: undo,
+      onRedo: redo
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // NAVIGATION & QUICK-ADD
+  // ══════════════════════════════════════════════════════════
+  var QUICK_ADD_TYPE_MAP = {
+    'salon': 'salon',
+    'jardin': 'garden',
+    'cocina': 'kitchen',
+    'barra': 'bar_area',
+    'terraza': 'terrace',
+    'estacionamiento': 'parking',
+    'capilla': 'chapel',
+    'alberca': 'pool',
+    'entrada': 'door_main',
+    'salida': 'door_exit',
+    'banos': 'bathroom',
+    'rampa': 'ramp',
+    'escaleras': 'stairs'
   };
-  reader.readAsText(file);
-}
 
-// Exponer funciones globales al objeto window para mantener compatibilidad con inline handlers de index.html
-window.closeWelcome = closeWelcome;
-window.closeSidebarMobile = closeSidebarMobile;
-window.toggleSidebarMobile = toggleSidebarMobile;
-window.setLayout = setLayout;
-window.setTheme = setTheme;
-window.setGlobalDensity = setGlobalDensity;
-window.sharePlan = sharePlan;
-window.resetCanvasView = resetCanvasView;
-window.zoomCanvas = zoomCanvas;
-window.closeDrawer = closeDrawer;
-window.clearSelectedTable = clearSelectedTable;
-window.toggleLayer = toggleLayer;
-window.toggleCirculation = toggleCirculation;
-window.updateSelectedTableShape = updateSelectedTableShape;
-window.updateSelectedTableSeats = updateSelectedTableSeats;
-window.updateSelectedTableStatus = updateSelectedTableStatus;
-window.updateSelectedTableGuests = updateSelectedTableGuests;
-window.setViewMode = setViewMode;
-window.exportToJSON = exportToJSON;
-window.triggerImportJSON = triggerImportJSON;
-window.importFromJSON = importFromJSON;
+  function _wireWizardSteps() {
+    var btns = $$('.wizard-step-btn');
+    btns.forEach(function (btn) {
+      btn.onclick = function () {
+        var step = btn.dataset.step;
+        btns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        $$('.wizard-panel').forEach(function (p) { p.classList.remove('active'); });
+        var activePanel = document.getElementById('wizard-content-' + step);
+        if (activePanel) activePanel.classList.add('active');
+      };
+    });
+  }
 
+  function _wireInspectorTabs() {
+    var tabs = $$('.inspector-tab');
+    tabs.forEach(function (tab) {
+      tab.onclick = function () {
+        var tabId = tab.dataset.tab;
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        $$('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        var activePanel = $('[data-panel="' + tabId + '"]');
+        if (activePanel) activePanel.classList.add('active');
+      };
+    });
+  }
+
+  function _wireQuickAdd() {
+    var btns = $$('.quick-add-btn');
+    btns.forEach(function (btn) {
+      btn.onclick = function () {
+        var key = btn.dataset.type;
+        var type = QUICK_ADD_TYPE_MAP[key] || key;
+        var cat = window.getCatalogEntry(type);
+        var color = cat ? cat.color : '#c9a96e';
+        _setPendingType(type, color, btn);
+      };
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // AUTO-SAVE TIMER
+  // ══════════════════════════════════════════════════════════
+  function _startAutoSave() {
+    setInterval(function () {
+      if (AppState.elements.length > 0) {
+        var payload = {
+          elements: AppState.elements,
+          terrain: AppState.terrain,
+          layers: AppState.layers,
+          savedAt: new Date().toISOString()
+        };
+        try {
+          localStorage.setItem(LS_KEY + '_auto', JSON.stringify(payload));
+        } catch (e) { /* quota exceeded silently */ }
+      }
+    }, 60000); // every 60s
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // INITIALIZE
+  // ══════════════════════════════════════════════════════════
+  function init() {
+    console.log('[App] Initializing Universal Venue Planner...');
+
+    // If on mobile, default view is 3D
+    if (window.innerWidth < 768) {
+      AppState.activeView = '3d';
+    }
+
+    // Load saved state
+    var hadSaved = loadFromLocalStorage();
+    if (!hadSaved && window.DEFAULT_LAYOUT) {
+      console.log('[App] Loading default layout...');
+      _loadLayoutData(window.DEFAULT_LAYOUT);
+    }
+
+    // Build toolbox
+    _buildToolbox();
+    _wireSearch();
+
+    // Init 2D Editor
+    var svgCanvas = document.getElementById('svg-canvas');
+    if (svgCanvas && window.Editor2D) {
+      window.Editor2D.init(
+        svgCanvas,
+        function () { return AppState.elements; },
+        function () { return AppState; },
+        _buildEditor2DCallbacks()
+      );
+    }
+
+    // 3D Visualizer is initialized lazily on first view switch to avoid
+    // rendering into a hidden container (clientWidth/Height = 0).
+    // See _wireViewSwitcher > _lazyInit3D().
+
+    // Wire UI Navigation & Actions
+    _wireWizardSteps();
+    _wireInspectorTabs();
+    _wireQuickAdd();
+
+    // Wire UI Views & Buttons
+    _wireViewSwitcher();
+    _wireLayoutSwitcher();
+    _wireLighting();
+    _wireBrightnessSlider();
+    _wireLayerToggles();
+    _wireZoomButtons();
+    _wireGridToggle();
+    _wireTerrainSettings();
+    _wireInspector();
+    _wireExportButtons();
+    _wireClear();
+    _wireKeyboard();
+
+    // Init Supabase Connection
+    _initSupabase();
+    _wireSupabaseUI();
+
+    // Local layouts
+    _fetchLocalLayouts();
+    _wireLocalServerUI();
+
+    // Cancel placement button in banner
+    var btnCancel = document.getElementById('btn-cancel-placement');
+    if (btnCancel) {
+      btnCancel.onclick = function (e) {
+        e.stopPropagation();
+        _setPendingType(null);
+      };
+    }
+
+    // Initial state
+    saveHistory();
+    _refresh();
+    updateCounters();
+    _updateInspectorVisibility(false);
+    _startAutoSave();
+
+    // Wire Mobile Menu & Inspector Toggles
+    var btnToggleMenu = document.getElementById('btn-toggle-menu');
+    var btnCloseMenu = document.getElementById('btn-close-menu');
+    var btnCloseInspector = document.getElementById('btn-close-inspector');
+    var sidebarLeft = document.getElementById('sidebar-left');
+    var sidebarRight = document.getElementById('sidebar-right');
+    
+    if (btnToggleMenu && sidebarLeft) {
+      btnToggleMenu.onclick = function (e) {
+        e.stopPropagation();
+        sidebarLeft.classList.toggle('open');
+      };
+    }
+    
+    if (btnCloseMenu && sidebarLeft) {
+      btnCloseMenu.onclick = function (e) {
+        e.stopPropagation();
+        sidebarLeft.classList.remove('open');
+      };
+    }
+
+    if (btnCloseInspector && sidebarRight) {
+      btnCloseInspector.onclick = function (e) {
+        e.stopPropagation();
+        deselectAll();
+      };
+    }
+
+    // Swipe gestures to close sidebars
+    var touchstartX = 0;
+    var touchendX = 0;
+    if (sidebarLeft) {
+      sidebarLeft.addEventListener('touchstart', function(e) {
+        touchstartX = e.changedTouches[0].screenX;
+      }, {passive: true});
+      sidebarLeft.addEventListener('touchend', function(e) {
+        touchendX = e.changedTouches[0].screenX;
+        if (touchstartX - touchendX > 50) { // Swiped left
+          sidebarLeft.classList.remove('open');
+        }
+      }, {passive: true});
+    }
+
+    var touchstartRightX = 0;
+    var touchendRightX = 0;
+    if (sidebarRight) {
+      sidebarRight.addEventListener('touchstart', function(e) {
+        touchstartRightX = e.changedTouches[0].screenX;
+      }, {passive: true});
+      sidebarRight.addEventListener('touchend', function(e) {
+        touchendRightX = e.changedTouches[0].screenX;
+        if (touchendRightX - touchstartRightX > 50) { // Swiped right
+          deselectAll();
+        }
+      }, {passive: true});
+    }
+
+    if (hadSaved) {
+      showToast('Plano restaurado desde guardado anterior.', 'success');
+    } else {
+      showToast('¡Bienvenido al Planeador Universal Primavera!', 'info');
+    }
+
+    console.log('[App] Ready. Elements loaded:', AppState.elements.length);
+  }
+
+  // ─── Boot on DOMContentLoaded ────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // ─── Theme Engine ─────────────────────────────────────────
+  var _currentTheme = 'premium';
+  function setTheme(theme) {
+    _currentTheme = theme;
+    document.body.setAttribute('data-theme', theme);
+
+    document.querySelectorAll('.theme-btn').forEach(function (btn) {
+      btn.classList.remove('active');
+    });
+    var targetBtn = document.getElementById('theme-' + theme);
+    if (targetBtn) targetBtn.classList.add('active');
+  }
+  window.setTheme = setTheme;
+
+  // ─── Expose public API ───────────────────────────────────
+  window.App = {
+    addElement: addElement,
+    removeElement: removeElement,
+    updateElement: updateElement,
+    selectElement: selectElement,
+    deselectAll: deselectAll,
+    duplicateElement: duplicateElement,
+    rotateElement: rotateElement,
+    undo: undo,
+    redo: redo,
+    save: saveToLocalStorage,
+    exportJSON: exportJSON,
+    exportPNG: exportPNG,
+    importJSON: importJSON,
+    updateCounters: updateCounters,
+    refresh: _refresh,
+    showToast: showToast,
+    getState: function () { return AppState; }
+  };
+
+})();
+
+console.log('[app] App module loaded.');

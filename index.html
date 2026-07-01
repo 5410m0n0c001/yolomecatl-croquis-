@@ -1,293 +1,479 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yolomecatl - Planificador y Visualizador de Eventos Premium</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Maquetador Universal de Planos para eventos y venues — Primavera Events Group" />
+  <title>Maquetador Universal de Planos | Primavera Events Group</title>
 
-  <!-- SEO -->
-  <meta name="description" content="Planificador interactivo del Salón de Eventos Yolomecatl. Visualiza la distribución de mesas, jardín, capilla, alberca y estacionamiento en cuatro modos visuales: Render 2D, CAD Oscuro, CAD Claro y Técnico B/N. Capacidad para 200 comensales en 576 m².">
-  <meta name="keywords" content="Yolomecatl, salón de eventos, planificador de eventos, croquis arquitectónico, distribución de mesas, eventos bodas">
-  <meta name="author" content="Yolomecatl Salón de Eventos">
-  <meta name="robots" content="index, follow">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Yolomecatl · Planificador y Visualizador de Eventos Premium">
-  <meta property="og:description" content="Explora el plano arquitectónico interactivo del Salón Yolomecatl. Cuatro modos de visualización, gestión de mesas para 200 comensales, jardín con alberca, capilla y estacionamiento en 576 m².">
-  <meta property="og:image" content="https://5410m0n0c001.github.io/yolomecatl-croquis-/og_image.png">
-  <meta property="og:image:alt" content="Yolomecatl Salón de Eventos - Planificador Interactivo Premium">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://5410m0n0c001.github.io/yolomecatl-croquis-/">
-  <meta property="og:locale" content="es_MX">
-  <meta property="og:site_name" content="Yolomecatl Salón de Eventos">
+  <!-- Font Awesome 6.5 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Yolomecatl · Planificador de Eventos Premium">
-  <meta name="twitter:description" content="Plano arquitectónico interactivo del Salón Yolomecatl. Visualización en 4 modos, gestión de mesas, distribución completa del salón.">
-  <meta name="twitter:image" content="https://5410m0n0c001.github.io/yolomecatl-croquis-/og_image.png">
-  <meta name="twitter:image:alt" content="Yolomecatl Salón de Eventos - Planificador Interactivo de Eventos">
+  <!-- Three.js r134 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <!-- OrbitControls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <link rel="stylesheet" href="styles.css?v=3.2">
-  <!-- FontAwesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- App Styles -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body data-theme="premium">
+<body>
 
-  <!-- Welcome Overlay (Commercial Presentation Intro) -->
-  <div class="welcome-overlay" id="welcome-overlay">
-    <div class="welcome-box">
-      <div class="welcome-logo">YOLOMECATL</div>
-      <div class="welcome-title">Diseño Arquitectónico e Ingeniería de Eventos</div>
-      <div class="welcome-text">
-        Bienvenido al Planificador de Eventos Yolomecatl. Hemos interpretado el croquis a mano del salón de eventos y lo hemos transformado en un plano arquitectónico interactivo de alta fidelidad. 
-        <br><br>
-        Esta herramienta comercial le permite explorar la distribución en cuatro modos visuales (incluyendo AutoCAD técnico y render de plano), simular la capacidad de comensales, configurar mesas cuadradas de forma individual y gestionar la logística de invitados según el croquis original.
+<!-- APP WRAPPER -->
+<div id="app-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside id="sidebar-left">
+
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌸</div>
+      <div class="logo-text">
+        <span class="logo-brand">Primavera</span>
+        <span class="logo-sub">Maquetador de Planos</span>
       </div>
-      <button class="welcome-btn" onclick="closeWelcome()">Comenzar Visualización</button>
+      <button id="btn-close-menu" class="view-btn" style="display: none; margin-left: auto; border: none; background: transparent; padding: 4px 8px; color: white;" title="Cerrar Menú">
+        <i class="fa-solid fa-xmark" style="font-size: 16px;"></i>
+      </button>
     </div>
-  </div>
 
-  <div class="app-container">
-    
-    <!-- Sidebar backdrop for mobile overlay closing -->
-    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
-    
-    <!-- Floating toggle button for mobile sidebar -->
-    <button class="mobile-toggle-btn" id="mobile-toggle-btn" onclick="toggleSidebarMobile()" title="Menú de Opciones">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-    
-    <!-- LEFT SIDEBAR: Controls & Metrics -->
-    <aside class="sidebar">
-      <div class="brand">
-        <h1>Yolomecatl</h1>
-        <span>Salón de Eventos</span>
+    <!-- Sidebar Navigation Tabs -->
+    <div id="wizard-steps" class="wizard-steps">
+      <button class="wizard-step-btn active" data-step="1">
+        <i class="fa-solid fa-ruler-combined" style="font-size:12px; margin-bottom: 2px;"></i>
+        <span class="step-label">Terreno</span>
+      </button>
+      <button class="wizard-step-btn" data-step="2">
+        <i class="fa-solid fa-boxes-stacked" style="font-size:12px; margin-bottom: 2px;"></i>
+        <span class="step-label">Inventario</span>
+      </button>
+      <button class="wizard-step-btn" data-step="3">
+        <i class="fa-solid fa-floppy-disk" style="font-size:12px; margin-bottom: 2px;"></i>
+        <span class="step-label">Guardado</span>
+      </button>
+    </div>
+
+    <!-- Panel 1: Terrain -->
+    <div id="wizard-content-1" class="wizard-panel active">
+      <div class="panel-header">
+        <i class="fa-solid fa-ruler-combined"></i>
+        <span>Dimensiones del Terreno</span>
+      </div>
+      <p class="panel-hint">Define la forma y tamaño de tu terreno para empezar a maquetar.</p>
+
+      <div class="form-group">
+        <label class="form-label" for="terrain-width">
+          <i class="fa-solid fa-arrows-left-right"></i> Ancho del Terreno (m)
+        </label>
+        <input type="number" id="terrain-width" class="form-input" value="50" min="5" max="500" step="0.5" placeholder="50" />
       </div>
 
-      <!-- Botón de cierre para móvil -->
-      <button class="mobile-close-sidebar-btn" onclick="closeSidebarMobile()" title="Cerrar Menú">
-        <i class="fa-solid fa-xmark"></i> Cerrar Menú
+      <div class="form-group">
+        <label class="form-label" for="terrain-height">
+          <i class="fa-solid fa-arrows-up-down"></i> Largo del Terreno (m)
+        </label>
+        <input type="number" id="terrain-height" class="form-input" value="40" min="5" max="500" step="0.5" placeholder="40" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="terrain-orientation">
+          <i class="fa-solid fa-compass"></i> Orientación del Norte
+        </label>
+        <select class="form-input" id="terrain-orientation">
+          <option value="N">Norte (Arriba)</option>
+          <option value="S">Sur (Abajo)</option>
+          <option value="E">Este (Derecha)</option>
+          <option value="W">Oeste (Izquierda)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fa-solid fa-image"></i> Croquis de Fondo (Opcional)
+        </label>
+        <label class="file-upload-btn">
+          <i class="fa-solid fa-upload"></i> Subir croquis base
+          <input type="file" id="terrain-bg-image" accept="image/*" style="display:none;" />
+        </label>
+      </div>
+
+      <button id="btn-apply-terrain" class="btn-primary full-width">
+        <i class="fa-solid fa-check"></i> Establecer Terreno
       </button>
 
-      <!-- Visualización Selector -->
-      <div>
-        <h3 class="section-title">Visualización</h3>
-        <div class="view-toggle-group">
-          <button class="btn-toggle active" id="btn-view-2d" title="Vista en Planta 2D">
-            <i class="fa-solid fa-map"></i> Vista 2D
-          </button>
-          <button class="btn-toggle" id="btn-view-3d" title="Proyección Realista 3D">
-            <i class="fa-solid fa-cube"></i> Vista 3D
-          </button>
-        </div>
-      </div>
+      <div class="divider"></div>
 
-      <!-- Layout / Distribución Selector -->
-      <div>
-        <h3 class="section-title">Distribución del Salón</h3>
-        <div class="layout-selector">
-          <button class="layout-btn active" id="layout-btn-A" onclick="setLayout('A')">
-            <i class="fa-solid fa-table-cells"></i>
-            <span class="layout-btn-label">Versión A</span>
-            <span class="layout-btn-sub">Pista central · 21 mesas</span>
-          </button>
-          <button class="layout-btn" id="layout-btn-B" onclick="setLayout('B')">
-            <i class="fa-solid fa-grip-lines-vertical"></i>
-            <span class="layout-btn-label">Versión B</span>
-            <span class="layout-btn-sub">Pista longitudinal · 22 mesas</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Theme Selector -->
-      <div>
-        <h3 class="section-title">Estilo del Plano</h3>
-        <div class="theme-selector">
-          <button class="theme-btn active" id="theme-premium" onclick="setTheme('premium')">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Render 2D
-          </button>
-          <button class="theme-btn" id="theme-cad-dark" onclick="setTheme('cad-dark')">
-            <i class="fa-solid fa-terminal"></i> CAD Oscuro
-          </button>
-          <button class="theme-btn" id="theme-cad-light" onclick="setTheme('cad-light')">
-            <i class="fa-solid fa-drafting-compass"></i> CAD Claro
-          </button>
-          <button class="theme-btn" id="theme-minimalist" onclick="setTheme('minimalist')">
-            <i class="fa-solid fa-print"></i> Técnico B/N
-          </button>
-        </div>
-      </div>
-
-
-      <!-- Live Statistics -->
-      <div>
-        <h3 class="section-title">Métricas de Evento</h3>
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <span class="metric-val" id="metric-capacity">200</span>
-            <span class="metric-lbl">Capacidad</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-val" id="metric-tables">20/20</span>
-            <span class="metric-lbl">Mesas Activas</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-val">576 m²</span>
-            <span class="metric-lbl">Área Cubierta</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-val">322 m²</span>
-            <span class="metric-lbl">Área Jardín</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Density Settings (Chairs per table globally) -->
-      <div>
-        <h3 class="section-title">Comensales por Mesa</h3>
-        <div class="density-control">
-          <div class="density-lbl">
-            <span>Distribución Estándar</span>
-            <span id="density-val">10 personas</span>
-          </div>
-          <div class="density-options">
-            <button class="density-btn" id="density-8" onclick="setGlobalDensity(8)">8 Sillas</button>
-            <button class="density-btn active" id="density-10" onclick="setGlobalDensity(10)">10 Sillas</button>
-            <button class="density-btn" id="density-12" onclick="setGlobalDensity(12)">12 Sillas</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Layers Manager -->
-      <div>
-        <h3 class="section-title">Capas (Layers)</h3>
-        <div class="layers-list">
-          <label class="layer-item">
-            <span>Muros y Estructuras</span>
-            <span class="switch">
-              <input type="checkbox" id="layer-walls" checked onchange="toggleLayer('walls', this.checked)">
-              <span class="slider"></span>
-            </span>
-          </label>
-          <label class="layer-item">
-            <span>Distribución de Mesas</span>
-            <span class="switch">
-              <input type="checkbox" id="layer-furniture" checked onchange="toggleLayer('furniture', this.checked)">
-              <span class="slider"></span>
-            </span>
-          </label>
-          <label class="layer-item">
-            <span>Rejilla CAD (Grid)</span>
-            <span class="switch">
-              <input type="checkbox" id="layer-grid" checked onchange="toggleLayer('grid', this.checked)">
-              <span class="slider"></span>
-            </span>
-          </label>
-          <label class="layer-item">
-            <span>Áreas Verdes y Jardín</span>
-            <span class="switch">
-              <input type="checkbox" id="layer-garden" checked onchange="toggleLayer('garden', this.checked)">
-              <span class="slider"></span>
-            </span>
+      <div class="form-group">
+        <div class="toggle-label">
+          <span><i class="fa-solid fa-grip-dots"></i> Ajustar a cuadrícula</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="grid-toggle" checked />
+            <span class="toggle-slider"></span>
           </label>
         </div>
       </div>
+    </div>
 
-      <!-- Circulation Paths (Logistics) -->
-      <div>
-        <h3 class="section-title">Logística y Circulación</h3>
-        <div class="layers-list">
-          <label class="layer-item" style="color: #3b82f6;">
-            <span>Flujo de Invitados</span>
-            <span class="switch">
-              <input type="checkbox" id="path-guest" onchange="toggleCirculation('guest', this.checked)">
-              <span class="slider" style="background-color: rgba(59, 130, 246, 0.3);"></span>
-            </span>
-          </label>
-          <label class="layer-item" style="color: #10b981;">
-            <span>Proveedores y Staff de Servicio</span>
-            <span class="switch">
-              <input type="checkbox" id="path-service" onchange="toggleCirculation('service', this.checked)">
-              <span class="slider" style="background-color: rgba(16, 185, 129, 0.3);"></span>
-            </span>
-          </label>
-          <label class="layer-item" style="color: #ef4444;">
-            <span>Salidas de Emergencia</span>
-            <span class="switch">
-              <input type="checkbox" id="path-emergency" onchange="toggleCirculation('emergency', this.checked)">
-              <span class="slider" style="background-color: rgba(239, 68, 68, 0.3);"></span>
-            </span>
-          </label>
-        </div>
+    <!-- Panel 2: Inventario (Catálogo Completo) -->
+    <div id="wizard-content-2" class="wizard-panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-toolbox"></i>
+        <span>Inventario de Elementos</span>
+      </div>
+      <p class="panel-hint">Selecciona y arrastra un elemento al plano. Puedes colocarlos <strong>dentro o fuera</strong> del terreno.</p>
+
+      <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-elements" class="form-input search-input" placeholder="Buscar en el inventario..." />
       </div>
 
-      <!-- Actions -->
-      <div class="sidebar-actions">
-        <button class="btn-primary" onclick="sharePlan()" id="btn-share" style="background-color: var(--accent); color: #ffffff;">
-          <i class="fa-solid fa-share-nodes"></i> Compartir Plano
-        </button>
-        <button class="btn-secondary" onclick="window.print()">
-          <i class="fa-solid fa-print"></i> Exportar Ficha Comercial
-        </button>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%;">
-          <button class="btn-secondary" onclick="exportToJSON()" id="btn-export-json" title="Exportar plano a archivo JSON" style="padding: 0.6rem 0.4rem; font-size: 0.75rem;">
-            <i class="fa-solid fa-file-export"></i> Exportar JSON
-          </button>
-          <button class="btn-secondary" onclick="triggerImportJSON()" id="btn-import-json" title="Importar plano desde archivo JSON" style="padding: 0.6rem 0.4rem; font-size: 0.75rem;">
-            <i class="fa-solid fa-file-import"></i> Importar JSON
-          </button>
+      <div id="toolbox-list" class="toolbox-list">
+        <div class="toolbox-empty">
+          <i class="fa-solid fa-box-open"></i>
+          <p>Cargando catálogo...</p>
         </div>
-        <input type="file" id="import-json-file" accept=".json" style="display: none;" onchange="importFromJSON(this)">
-
-        <button class="btn-secondary" onclick="resetCanvasView()">
-          <i class="fa-solid fa-compress"></i> Centrar Plano
-        </button>
-        <a href="https://primaveraeventsgroup.com/salon-jardin-yolomecatl/" target="_blank" class="btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; width: 100%;">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> Explorar Jardín Yolomecatl
-        </a>
       </div>
-    </aside>
+    </div>
 
-    <!-- CENTER CANVAS: Interactive architectural layout -->
-    <main class="canvas-area" id="canvas-area">
+    <!-- Panel 3: Guardar / Nube -->
+    <div id="wizard-content-3" class="wizard-panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span>Guardar y Cargar</span>
+      </div>
       
-      <!-- Vista 2D (SVG) -->
-      <div id="container-2d" class="canvas-container active">
-        <!-- Print Header for Commercial Datasheet (Visible only during printing) -->
-        <div class="print-ficha-header print-only">
-        <div class="print-header-top">
-          <img src="logo yolomecatl.png" alt="Logo Yolomecatl" class="print-logo">
-          <div class="print-header-title">
-            <h1>JARDÍN YOLOMECATL</h1>
-            <h2>DISEÑO ARQUITECTÓNICO E INGENIERÍA DE EVENTOS</h2>
+      <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+        El plano se guarda automáticamente en tu navegador. Si ejecutas el servidor en tu PC, se guardará como archivo JSON en el proyecto.
+      </p>
+
+      <!-- Local Plan Operations -->
+      <div class="form-group" id="local-layouts-group">
+        <label class="form-label" for="local-layouts-select">Planos Locales en PC (/layouts)</label>
+        <div class="input-btn-row">
+          <select id="local-layouts-select" class="form-input" style="flex:1;">
+            <option value="">Cargando planos locales...</option>
+          </select>
+          <button id="btn-local-load" class="btn-icon-sm" title="Cargar plano local">
+            <i class="fa-solid fa-folder-open"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="divider-xs"></div>
+
+      <!-- Supabase cloud load section -->
+      <div class="form-group" id="supabase-layouts-group" style="display:none;">
+        <label class="form-label" for="supabase-layouts-select">Planos en Supabase (Nube)</label>
+        <div class="input-btn-row">
+          <select id="supabase-layouts-select" class="form-input" style="flex:1;">
+            <option value="">Selecciona un plano...</option>
+          </select>
+          <button id="btn-db-load" class="btn-icon-sm" title="Cargar plano desde nube">
+            <i class="fa-solid fa-cloud-arrow-down"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Collapsible Supabase Accordion -->
+      <details class="supabase-details" style="margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; background: rgba(255,255,255,0.01);">
+        <summary style="font-size: 12px; font-weight:600; cursor:pointer; color:#fff; display:flex; align-items:center; gap:6px; outline:none; user-select:none;">
+          <i class="fa-solid fa-database" style="color:var(--accent);"></i> Base de Datos Supabase (Opcional)
+        </summary>
+        <div style="margin-top: 10px;">
+          <p style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.3;">
+            Configura tu proyecto Supabase si deseas sincronizar en la nube para publicar el plano.
+          </p>
+          <div class="form-group">
+            <label class="form-label" for="db-url" style="font-size:11px;">URL de Supabase</label>
+            <input type="text" id="db-url" class="form-input" style="padding: 6px 8px; font-size:12px;" placeholder="https://xxxx.supabase.co" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="db-key" style="font-size:11px;">Clave Anon Key</label>
+            <input type="password" id="db-key" class="form-input" style="padding: 6px 8px; font-size:12px;" placeholder="Clave anónima" />
+          </div>
+          <div class="form-row">
+            <button id="btn-db-save" class="btn-primary half" style="font-size:11px; padding:6px;">
+              <i class="fa-solid fa-floppy-disk"></i> Conectar
+            </button>
+            <button id="btn-db-test" class="btn-icon-sm" title="Probar conexión" style="width:30px; height:30px;">
+              <i class="fa-solid fa-plug"></i>
+            </button>
+            <button id="btn-db-clear" class="btn-danger half" style="font-size:11px; padding:6px; background-color:#374151;">
+              <i class="fa-solid fa-eraser"></i> Quitar
+            </button>
+          </div>
+          <div id="db-status-display" style="font-size: 10px; color: var(--text-secondary); margin-top: 8px; text-align: center;">
+            Estado Nube: <span id="db-status-lbl" style="color: var(--danger); font-weight: 600;">Desconectado</span>
           </div>
         </div>
-        <div class="print-info-grid">
-          <div class="print-info-card">
-            <strong>Distribución Seleccionada</strong>
-            <span id="print-layout-name">Versión A (Distribución Estándar)</span>
+      </details>
+    </div>
+
+    <!-- Capas Toggle Panel -->
+    <!-- Temas Visuales Toggle Panel -->
+    <details class="themes-section" open style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+      <summary class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; cursor: pointer; outline: none; user-select: none;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-palette"></i>
+          <span>Temas Visuales (2D)</span>
+        </div>
+        <i class="fa-solid fa-chevron-down themes-chevron" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.2s;"></i>
+      </summary>
+
+      <div class="themes-content" style="margin-top: 15px; cursor: default; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button class="btn-secondary theme-btn active" id="theme-premium" onclick="setTheme('premium')" style="font-size: 11px; padding: 6px; border: 1px solid var(--border-color); background: transparent; color: white; border-radius: 4px; cursor: pointer;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Render 2D
+        </button>
+        <button class="btn-secondary theme-btn" id="theme-cad-dark" onclick="setTheme('cad-dark')" style="font-size: 11px; padding: 6px; border: 1px solid var(--border-color); background: transparent; color: white; border-radius: 4px; cursor: pointer;">
+          <i class="fa-solid fa-moon"></i> CAD Oscuro
+        </button>
+        <button class="btn-secondary theme-btn" id="theme-cad-light" onclick="setTheme('cad-light')" style="font-size: 11px; padding: 6px; border: 1px solid var(--border-color); background: transparent; color: white; border-radius: 4px; cursor: pointer;">
+          <i class="fa-solid fa-sun"></i> CAD Claro
+        </button>
+        <button class="btn-secondary theme-btn" id="theme-minimalist" onclick="setTheme('minimalist')" style="font-size: 11px; padding: 6px; border: 1px solid var(--border-color); background: transparent; color: white; border-radius: 4px; cursor: pointer;">
+          <i class="fa-solid fa-file-lines"></i> Técnico B/N
+        </button>
+      </div>
+    </details>
+
+    <details class="layers-section">
+      <summary class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; cursor: pointer; outline: none; user-select: none;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Capas</span>
+        </div>
+        <i class="fa-solid fa-chevron-down layers-chevron" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.2s;"></i>
+      </summary>
+
+      <div class="layers-content" style="margin-top: 15px; cursor: default;">
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-building layer-icon icon-estructuras"></i> Estructuras
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-estructuras" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-umbrella layer-icon" style="color: #60a5fa; width: 16px; text-align: center;"></i> Techos
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-techos" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-door-open layer-icon icon-accesos"></i> Accesos
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-accesos" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-chair layer-icon icon-mobiliario"></i> Mobiliario
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-mobiliario" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-music layer-icon icon-entretenimiento"></i> Entretenimiento
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-entretenimiento" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-spa layer-icon icon-decoracion"></i> Decoracion
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-decoracion" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-truck layer-icon icon-proveedores"></i> Proveedores
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-proveedores" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <!-- Flujos de Circulación Toggle Panel -->
+    <details class="flows-section">
+      <summary class="section-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; cursor: pointer; outline: none; user-select: none;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-route"></i>
+          <span>Flujos de Circulación</span>
+        </div>
+        <i class="fa-solid fa-chevron-down flows-chevron" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.2s;"></i>
+      </summary>
+
+      <div class="flows-content" style="margin-top: 15px; cursor: default;">
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-person-walking layer-icon icon-flujo-invitados"></i> Invitados
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-flujo_invitados" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-dolly layer-icon icon-flujo-proveedores"></i> Proveedores
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-flujo_proveedores" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="layer-row">
+          <span class="layer-label">
+            <i class="fa-solid fa-user-tie layer-icon icon-flujo-staff"></i> Staff
+          </span>
+          <label class="toggle-switch sm">
+            <input type="checkbox" id="layer-toggle-flujo_staff" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+  </aside><!-- /#sidebar-left -->
+
+
+  <!-- MAIN CANVAS AREA -->
+  <main id="main-canvas">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="btn-toggle-menu" class="view-btn" style="display: none; margin-right: 8px; padding: 6px 12px; border-radius: 6px; font-weight: 500;" title="Abrir Menú">
+          <i class="fa-solid fa-bars"></i> Menú
+        </button>
+        <div class="view-toggle">
+          <button id="btn-view-3d" class="view-btn" title="Vista 3D">
+            <i class="fa-solid fa-cube"></i> 3D
+          </button>
+          <button id="btn-view-2d" class="view-btn active" title="Vista 2D">
+            <i class="fa-solid fa-map"></i> 2D
+          </button>
+        </div>
+        <div class="view-toggle" style="margin-left: 12px; border-color: rgba(255,255,255,0.05);">
+          <button id="btn-light-day" class="view-btn active lighting-btn" title="Luz de Día">
+            <i class="fa-solid fa-sun"></i> Día
+          </button>
+          <button id="btn-light-night" class="view-btn lighting-btn" title="Luz de Noche">
+            <i class="fa-solid fa-moon"></i> Noche
+          </button>
+          <button id="btn-light-gala" class="view-btn lighting-btn" title="Ambiente de Gala">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Gala
+          </button>
+        </div>
+        <!-- Layout Version Toggle -->
+        <div class="view-toggle" id="topbar-layout-group" style="margin-left: 12px; border-color: rgba(255,255,255,0.05);">
+          <button id="btn-layout-ver" class="view-btn active" title="Versión A (Pista Central)">
+            <i class="fa-solid fa-table-cells"></i> Versión A
+          </button>
+          <button id="btn-layout-hor" class="view-btn" title="Versión B (Mesa Imperial)">
+            <i class="fa-solid fa-grip-lines-vertical"></i> Versión B
+          </button></div>
+        <!-- Brightness Slider -->
+        <div class="view-toggle" id="topbar-brightness-group" style="margin-left: 12px; border-color: rgba(255,255,255,0.05); display: none; align-items: center; gap: 8px; padding: 0 10px;">
+          <i class="fa-solid fa-lightbulb" style="color: #fbbf24; font-size: 13px;"></i>
+          <span style="font-size: 11px; color: var(--text-secondary); white-space: nowrap;">Brillo:</span>
+          <input type="range" id="light-intensity-slider" min="0.2" max="2.5" step="0.05" value="1.0" style="width: 70px; height: 4px; accent-color: #fbbf24; cursor: pointer; margin: 0;" />
+          <span id="light-intensity-val" style="font-size: 11px; font-weight: 600; color: var(--text-primary); min-width: 18px; text-align: right;">1.0</span>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <div class="counters-row">
+          <div class="counter-badge">
+            <i class="fa-solid fa-users"></i>
+            <span class="counter-value" id="counter-guests">0</span>
+            <span class="counter-lbl">Invitados / Capacidad</span>
           </div>
-          <div class="print-info-card">
-            <strong>Capacidad del Evento</strong>
-            <span id="print-layout-capacity">200 Comensales</span>
+          <div class="counter-badge">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span class="counter-value" id="counter-tables">0</span>
+            <span class="counter-lbl">Mesas</span>
           </div>
-          <div class="print-info-card">
-            <strong>Área Cubierta y Jardín</strong>
-            <span>576 m² / 322 m²</span>
-          </div>
-          <div class="print-info-card">
-            <strong>Plataforma de Eventos</strong>
-            <span>Primavera Events Group</span>
+          <div class="counter-badge">
+            <i class="fa-solid fa-table-list"></i>
+            <span class="counter-value" id="counter-imperial">0</span>
+            <span class="counter-lbl">Imperiales</span>
           </div>
         </div>
       </div>
 
-      <!-- SVG Architectural Design -->
-      <svg id="event-svg" viewBox="0 0 1000 980" xmlns="http://www.w3.org/2000/svg">
+      <div class="topbar-right">
+        <div class="zoom-controls">
+          <button id="zoom-in" class="zoom-btn" title="Acercar">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <button id="zoom-reset" class="zoom-btn" title="Restablecer zoom">
+            <i class="fa-solid fa-compress"></i>
+          </button>
+          <button id="zoom-out" class="zoom-btn" title="Alejar">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Canvas Area -->
+    <div class="canvas-area">
+
+      <!-- Placement Banner -->
+      <div id="placement-banner" class="placement-banner hidden">
+        <i class="fa-solid fa-wand-magic-sparkles icon-spin"></i>
+        <span id="placement-banner-text">Modo Colocación: Haz clic en el terreno para colocar el elemento.</span>
+        <button id="btn-cancel-placement" class="btn-cancel-placement" title="Cancelar colocación (Esc)">✕</button>
+      </div>
+
+      <!-- 3D Container (default hidden) -->
+      <div id="container-3d" class="view-container">
+        <div id="canvas-3d"></div>
+        <div class="canvas-hint">
+          <i class="fa-solid fa-mouse-pointer"></i>
+          <span>Arrastra para orbitar &middot; Scroll para zoom &middot; Clic derecho para mover</span>
+        </div>
+      </div>
+
+      <!-- 2D Container (default visible) -->
+      <div id="container-2d" class="view-container active">
+        <svg id="svg-canvas" viewBox="0 0 1000 980" xmlns="http://www.w3.org/2000/svg">
         
         <!-- Background definitions for realistic render styling -->
         <defs>
@@ -372,7 +558,7 @@
           <circle cx="200" cy="300" r="14" class="svg-shrub" filter="url(#shadow)" />
           <circle cx="210" cy="460" r="16" class="svg-shrub" filter="url(#shadow)" />
 
-          <!-- CAPILLA (Reubicada en la esquina inferior izquierda del jardín principal) -->
+          <!-- CAPILLA (Reubicada en la esquina inferior izquierda del jard├¡n principal) -->
           <g id="chapel-group">
             <rect x="40" y="800" width="170" height="120" fill="rgba(0,0,0,0.25)" stroke="var(--svg-wall-stroke)" stroke-width="2" rx="4" />
             
@@ -438,7 +624,7 @@
 
           <!-- Estacionamiento driveway arrows -->
           <path d="M 875,650 L 875,350" stroke="#f3f4f6" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.4" />
-          <text x="875" y="580" class="svg-label" text-anchor="middle" transform="rotate(-90 875 580)" opacity="0.7">CIRCULACIÓN VEHICULAR</text>
+          <text x="875" y="580" class="svg-label" text-anchor="middle" transform="rotate(-90 875 580)" opacity="0.7">CIRCULACI├ôN VEHICULAR</text>
 
           <!-- Outer pathway/street border shifted to the new bottom -->
           <rect x="20" y="940" width="960" height="40" fill="#1f2937" opacity="0.2" />
@@ -503,7 +689,7 @@
           <rect x="270" y="755" width="480" height="30" fill="#282830" opacity="0.4" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
           <text x="510" y="775" class="svg-label-sub" text-anchor="middle" font-size="8" letter-spacing="0.05em">PASILLO DE ACCESO PEATONAL</text>
 
-          <!-- Muro divisorio continuo (Línea blanca del croquis) entre Pasillo Peatonal y Jardín 2 -->
+          <!-- Muro divisorio continuo (L├¡nea blanca del croquis) entre Pasillo Peatonal y Jard├¡n 2 -->
           <line x1="270" y1="785" x2="750" y2="785" stroke="var(--svg-wall-stroke)" stroke-width="5" stroke-linecap="round" />
 
           <!-- Grand Reception Lobby (x=270 to 750, y=700 to 755) -->
@@ -512,15 +698,15 @@
           <!-- Desk A (Left Reception Desk) -->
           <rect x="290" y="708" width="90" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
           <circle cx="335" cy="735" r="6" class="svg-chair" />
-          <text x="335" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN A</text>
+          <text x="335" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCI├ôN A</text>
 
           <!-- Desk B (Right Reception Desk) -->
           <rect x="620" y="708" width="90" height="15" fill="#1f2937" stroke="var(--accent)" stroke-width="1" />
           <circle cx="665" cy="735" r="6" class="svg-chair" />
-          <text x="665" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCIÓN B</text>
+          <text x="665" y="720" class="svg-label-sub" text-anchor="middle" font-size="8">RECEPCI├ôN B</text>
 
           <!-- Lobby Label -->
-          <text x="510" y="732" class="svg-label" text-anchor="middle" font-size="10" letter-spacing="0.1em">RECEPCIÓN PRINCIPAL</text>
+          <text x="510" y="732" class="svg-label" text-anchor="middle" font-size="10" letter-spacing="0.1em">RECEPCI├ôN PRINCIPAL</text>
 
           <!-- ACCESO PRINCIPAL DOOR (From pedestrian hallway into reception) -->
           <g transform="translate(510, 755)">
@@ -538,7 +724,7 @@
             <rect x="-2" y="-12" width="4" height="24" fill="var(--svg-bg)" /> <!-- Gap -->
             <line x1="0" y1="-12" x2="-12" y2="-12" stroke="var(--svg-wall-stroke)" stroke-width="1.5" />
             <path d="M -12,-12 A 12,12 0 0,0 0,0" class="svg-door-swing" />
-            <text x="14" y="4" class="svg-label-sub" text-anchor="start" font-size="7">AL JARDÍN</text>
+            <text x="14" y="4" class="svg-label-sub" text-anchor="start" font-size="7">AL JARD├ìN</text>
           </g>
 
           <!-- ACCESS 2: DIRECT GARDEN OPENING FROM PEDESTRIAN WALKWAY (Horizontal path, y=755 to 785, x=270) -->
@@ -548,7 +734,7 @@
           </g>
         </g>
 
-        <!-- JARDÍN 2 CON ALBERCA (Detrás del Acceso Peatonal Principal, ancho del salón) -->
+        <!-- JARD├ìN 2 CON ALBERCA (Detr├ís del Acceso Peatonal Principal, ancho del sal├│n) -->
         <g id="g-jardin2">
           <!-- Background lawn rect for Jardin 2 -->
           <rect x="270" y="785" width="480" height="155" fill="#1b2a1f" stroke="var(--svg-wall-stroke)" stroke-width="2" rx="4" />
@@ -575,17 +761,17 @@
           </g>
 
           <!-- Label -->
-          <text x="690" y="920" class="svg-label" text-anchor="middle" font-size="9" letter-spacing="0.05em">JARDÍN 2</text>
+          <text x="690" y="920" class="svg-label" text-anchor="middle" font-size="9" letter-spacing="0.05em">JARD├ìN 2</text>
         </g>
 
-        <!-- ESPACIO DE CÉSPED Y ARBUSTOS DECORATIVOS (Donde estaba la Capilla anteriormente - Zona libre de jardín) -->
+        <!-- ESPACIO DE C├ëSPED Y ARBUSTOS DECORATIVOS (Donde estaba la Capilla anteriormente - Zona libre de jard├¡n) -->
         <g id="lobby-chapel-lawn">
           <circle cx="305" cy="830" r="14" class="svg-shrub" filter="url(#shadow)" />
           <circle cx="345" cy="880" r="16" class="svg-shrub" filter="url(#shadow)" />
           <circle cx="305" cy="900" r="10" class="svg-shrub" filter="url(#shadow)" />
         </g>
 
-        <!-- RESTROOMS (Baños Damas & Caballeros) - Top Center behind stage -->
+        <!-- RESTROOMS (Ba├▒os Damas & Caballeros) - Top Center behind stage -->
         <g id="g-bathrooms">
           <!-- Backplate structure -->
           <rect x="410" y="20" width="200" height="60" class="zone-bathroom" stroke="var(--svg-wall-stroke)" stroke-width="2" />
@@ -657,7 +843,7 @@
             <path d="M 18,20 A 20,20 0 0,0 0,0" class="svg-door-swing" />
           </g>
 
-          <!-- Muro divisorio de servicio (Línea blanca del croquis) entre Pasillo de Cocina/Bar y Estacionamiento -->
+          <!-- Muro divisorio de servicio (L├¡nea blanca del croquis) entre Pasillo de Cocina/Bar y Estacionamiento -->
           <line x1="750" y1="250" x2="770" y2="250" stroke="var(--svg-wall-stroke)" stroke-width="3" />
 
           <!-- Acceso Proveedores y Personal / Salida de Emergencia (Right wall, below kitchen) -->
@@ -736,7 +922,7 @@
             <text x="744" y="420" class="svg-label-sub" text-anchor="middle" font-size="7" font-weight="bold" transform="rotate(-90 744 420)">SEGUNDO DJ</text>
           </g>
 
-          <text x="510" y="360" class="svg-label" text-anchor="middle" font-size="28" opacity="0.1" letter-spacing="0.2em">SALÓN DE EVENTOS</text>
+          <text x="510" y="360" class="svg-label" text-anchor="middle" font-size="28" opacity="0.1" letter-spacing="0.2em">SAL├ôN DE EVENTOS</text>
         </g>
         <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
         <g id="g-circulation">
@@ -806,117 +992,476 @@
         </g>
 
       </svg>
-
-      <!-- Print Footer for Commercial Datasheet (Visible only during printing) -->
-      <div class="print-ficha-footer print-only">
-        <div class="print-footer-border"></div>
-        <div class="print-footer-content">
-          <span>Jardín Yolomecatl · Plano Técnico Oficial de Distribución</span>
-          <span>Explora más en: https://primaveraeventsgroup.com/salon-jardin-yolomecatl/</span>
-          <span>Página 1 de 1</span>
+        <div class="canvas-hint">
+          <i class="fa-solid fa-hand"></i>
+          <span>Arrastra fondo para mover · Scroll zoom · Clic elemento para seleccionar · Clic derecho menú</span>
         </div>
       </div>
 
-      <!-- FLOATING SCALE BAR -->
-      <div class="scale-bar">
-        <div class="scale-line-container">
-          <div class="scale-line"></div>
-          <span>6m</span>
-        </div>
-        <span>Escala Visual 1:100</span>
+      <!-- Floating Action Buttons -->
+      <div class="fab-group">
+        <button id="btn-save" class="fab-btn fab-primary" title="Guardar proyecto">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span class="fab-label">Guardar</span>
+        </button>
+        <button id="btn-export-png" class="fab-btn fab-secondary" title="Exportar PNG">
+          <i class="fa-solid fa-image"></i>
+          <span class="fab-label">PNG</span>
+        </button>
+        <button id="btn-export-pdf" class="fab-btn fab-secondary" title="Exportar PDF">
+          <i class="fa-solid fa-file-pdf"></i>
+          <span class="fab-label">PDF</span>
+        </button>
+        <button id="btn-export-json" class="fab-btn fab-secondary" title="Exportar JSON">
+          <i class="fa-solid fa-file-code"></i>
+          <span class="fab-label">JSON</span>
+        </button>
+        <button id="btn-import-json" class="fab-btn fab-secondary" title="Importar JSON">
+          <i class="fa-solid fa-file-import"></i>
+          <span class="fab-label">Importar</span>
+        </button>
+        <input type="file" id="import-file-input" accept=".json" style="display:none;" />
       </div>
 
-      <!-- ZOOM & PAN CONTROLS -->
-      <div class="zoom-controls">
-        <button class="zoom-btn" onclick="zoomCanvas(1.2)" title="Acercar"><i class="fa-solid fa-plus"></i></button>
-        <button class="zoom-btn" onclick="zoomCanvas(0.8)" title="Alejar"><i class="fa-solid fa-minus"></i></button>
-        <button class="zoom-btn" onclick="resetCanvasView()" title="Centrar Plano"><i class="fa-solid fa-house"></i></button>
-      </div>
+    </div><!-- /.canvas-area -->
 
-      <!-- COORDINATES AND TOOLTIP MOUSE TRACKER -->
-      <div class="architect-tooltip" id="architect-tooltip"></div>
-      </div>
+  </main><!-- /#main-canvas -->
 
-      <!-- Vista 3D (WebGL) -->
-      <div id="container-3d" class="canvas-container">
-        <!-- Three.js Canvas se insertará aquí -->
-        
-        <div class="canvas-hud">
-          <span class="hud-scale"><i class="fa-solid fa-arrows-spin"></i> Clic Izq: Rotar | Clic Der: Desplazar | Rueda: Zoom</span>
-          <button id="btn-reset-cam-3d" class="hud-btn" title="Restaurar Cámara 3D">
-            <i class="fa-solid fa-camera"></i> Cámara Defecto
-          </button>
-        </div>
-      </div>
-    </main>
 
-    <!-- RIGHT DRAWER: Single Table Customizer -->
-    <aside class="detail-drawer" id="detail-drawer">
-      <div class="drawer-header">
-        <h2 id="drawer-title">Mesa 1</h2>
-        <button class="close-drawer-btn" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
-      </div>
+  <!-- RIGHT SIDEBAR - INSPECTOR -->
+  <aside id="sidebar-right">
 
-      <!-- Seating layout shape -->
-      <div class="form-group">
-        <label>Forma de la Mesa</label>
-        <select class="form-select" id="table-shape" onchange="updateSelectedTableShape(this.value)">
-          <option value="square">Cuadrada (Recomendado)</option>
-          <option value="circle">Circular Tradicional</option>
-          <option value="imperial">Imperial Especial (Vertical)</option>
-        </select>
-      </div>
-
-      <!-- Capacity density -->
-      <div class="form-group">
-        <label>Capacidad (Sillas)</label>
-        <select class="form-select" id="table-seats" onchange="updateSelectedTableSeats(parseInt(this.value))">
-          <option value="8">8 Comensales</option>
-          <option value="10">10 Comensales</option>
-          <option value="12">12 Comensales</option>
-          <option value="50">50 Comensales (Mesa Imperial)</option>
-        </select>
-      </div>
-
-      <!-- VIP/Priority Status -->
-      <div class="form-group">
-        <label>Estatus de Mesa</label>
-        <select class="form-select" id="table-status" onchange="updateSelectedTableStatus(this.value)">
-          <option value="normal">Estándar</option>
-          <option value="vip">Zona VIP (Borde Dorado)</option>
-          <option value="reserved">Reservado (Borde Rojo)</option>
-        </select>
-      </div>
-
-      <!-- Guest Allocation List -->
-      <div class="form-group">
-        <label id="guest-count-label">Invitados Asignados (0 / 10)</label>
-        <textarea class="form-textarea" id="table-guests" placeholder="Escribe un invitado por línea..." oninput="updateSelectedTableGuests(this.value)"></textarea>
-      </div>
-
-      <!-- Key Performance Metrics (Distance, Sightlines) -->
-      <div class="info-box">
-        <div><strong>Logística de la Mesa:</strong></div>
-        <div id="metric-dist-pista">Distancia a Zona de Baile: ~6.2 metros</div>
-        <div id="metric-dist-dj">Distancia a DJ: ~15.0 metros</div>
-        <div id="metric-dist-wc">Distancia a Baños: ~16.8 metros</div>
-        <div id="metric-dist-bar">Servicio de Bar: Directo & Eficiente</div>
-      </div>
-      
-      <button class="btn-secondary" style="border-color: var(--danger); color: var(--danger); margin-top: auto;" onclick="clearSelectedTable()">
-        <i class="fa-solid fa-trash-can"></i> Limpiar Mesa
+    <div class="inspector-header" style="display: flex; align-items: center;">
+      <i class="fa-solid fa-sliders"></i>
+      <span>Inspector de Elementos</span>
+      <button id="btn-close-inspector" class="view-btn" style="display: none; margin-left: auto; border: none; background: transparent; padding: 4px 8px; color: white;" title="Cerrar Inspector">
+        <i class="fa-solid fa-xmark" style="font-size: 16px;"></i>
       </button>
-    </aside>
+    </div>
 
-  </div>
+    <!-- Inspector Tabs -->
+    <div class="inspector-tabs">
+      <button class="inspector-tab active" id="tab-settings" data-tab="properties">
+        <i class="fa-solid fa-gear"></i> Propiedades
+      </button>
+      <button class="inspector-tab" id="tab-mesa" data-tab="mesa">
+        <i class="fa-solid fa-circle-dot"></i> Mesa
+      </button>
+    </div>
 
-  <!-- Toast notification container -->
-  <div id="toast" class="toast-notification"></div>
+    <!-- No-selection placeholder -->
+    <div class="inspector-empty" id="inspector-empty">
+      <div class="inspector-empty-icon">
+        <i class="fa-solid fa-arrow-pointer"></i>
+      </div>
+      <p class="inspector-empty-title">Nada seleccionado</p>
+      <p class="inspector-empty-hint">Haz clic en un elemento del plano para inspeccionarlo</p>
+    </div>
 
-  <!-- Carga de librerías Three.js mediante CDN para soporte 3D fotorrealista -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Inspector Panel -->
+    <div id="inspector-panel" class="inspector-content" style="display:none;">
 
-  <script type="module" src="app.js?v=3.2"></script>
+      <!-- TAB: PROPERTIES -->
+      <div class="tab-panel active" data-panel="properties">
+
+        <div class="form-group">
+          <label class="form-label" for="inspector-name">
+            <i class="fa-solid fa-tag"></i> Nombre
+          </label>
+          <input type="text" id="inspector-name" class="form-input" placeholder="Nombre del elemento" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label class="form-label" for="inspector-x">
+              <i class="fa-solid fa-x"></i> X (m)
+            </label>
+            <input type="number" id="inspector-x" class="form-input" step="0.1" placeholder="0" />
+          </div>
+          <div class="form-group half">
+            <label class="form-label" for="inspector-y">
+              <i class="fa-solid fa-y"></i> Y (m)
+            </label>
+            <input type="number" id="inspector-y" class="form-input" step="0.1" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label class="form-label" for="inspector-w">
+              <i class="fa-solid fa-arrows-left-right"></i> W (m)
+            </label>
+            <input type="number" id="inspector-w" class="form-input" step="0.1" min="0.1" placeholder="1" />
+          </div>
+          <div class="form-group half">
+            <label class="form-label" for="inspector-h">
+              <i class="fa-solid fa-arrows-up-down"></i> H (m)
+            </label>
+            <input type="number" id="inspector-h" class="form-input" step="0.1" min="0.1" placeholder="1" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inspector-rotation">
+            <i class="fa-solid fa-rotate"></i> Rotacion (grados)
+          </label>
+          <div class="input-btn-row">
+            <input type="number" id="inspector-rotation" class="form-input" step="1" min="0" max="360" placeholder="0" />
+            <button id="btn-rotate-90" class="btn-icon-sm" title="Rotar 90 grados">
+              <i class="fa-solid fa-rotate-right"></i> +90
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inspector-color">
+            <i class="fa-solid fa-palette"></i> Color
+          </label>
+          <div class="color-row">
+            <input type="color" id="inspector-color" class="color-picker" value="#C9A96E" />
+            <span class="color-hex-display" id="color-hex-display">#C9A96E</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inspector-elevation">
+            <i class="fa-solid fa-arrows-up-to-line"></i> Elevación / Desnivel (m)
+          </label>
+          <input type="number" id="inspector-elevation" class="form-input" step="0.1" min="-5" max="30" placeholder="0.0" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inspector-chairs">
+            <i class="fa-solid fa-chair"></i> Sillas / Capacidad
+          </label>
+          <input type="number" id="inspector-chairs" class="form-input" min="0" step="1" placeholder="0" />
+        </div>
+
+        <!-- Elevación / Desnivel -->
+        <div class="form-group">
+          <label class="form-label" for="inspector-elevation">
+            <i class="fa-solid fa-up-down"></i> Elevación / Desnivel (m)
+          </label>
+          <input type="number" id="inspector-elevation" class="form-input" min="0" max="10" step="0.05" placeholder="0.0" />
+        </div>
+
+        <!-- Salon Specific Settings -->
+        <div id="inspector-salon-settings" class="form-group hidden">
+          <label class="form-label" for="inspector-salon-type">
+            <i class="fa-solid fa-hotel"></i> Tipo de Salón
+          </label>
+          <select id="inspector-salon-type" class="form-input">
+            <option value="muros">Techado con Muros</option>
+            <option value="sin_muros">Techado sin Muros (Carpa)</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <button id="btn-duplicate-element" class="btn-primary full-width" style="margin-bottom: 10px; background-color: var(--bg-primary); border: 1px solid var(--border-color);">
+          <i class="fa-solid fa-copy"></i> Duplicar Elemento
+        </button>
+
+        <button id="btn-delete-element" class="btn-danger full-width">
+          <i class="fa-solid fa-trash"></i> Eliminar Elemento
+        </button>
+      </div><!-- /.tab-panel properties -->
+
+      <!-- TAB: MESA CONFIG -->
+      <div class="tab-panel" data-panel="mesa">
+
+        <div id="mesa-config-panel">
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-numero">
+              <i class="fa-solid fa-hashtag"></i> Numero de Mesa
+            </label>
+            <input type="number" id="mesa-numero" class="form-input" min="1" placeholder="1" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-capacidad-max">
+              <i class="fa-solid fa-users-gear"></i> Capacidad Máxima
+            </label>
+            <input type="number" id="mesa-capacidad-max" class="form-input" min="1" max="100" placeholder="Ej: 40" />
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-shirt"></i> Manteleria
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-mantel-color">Mantel</label>
+            <select id="mesa-mantel-color" class="form-input">
+              <option value="sin_mantel">Sin Mantel (Madera/Mármol)</option>
+              <option value="blanco">Blanco</option>
+              <option value="negro">Negro</option>
+              <option value="caqui">Caqui</option>
+              <option value="azul_marino">Azul Marino</option>
+              <option value="arena">Arena</option>
+              <option value="chocolate">Chocolate</option>
+              <option value="dorado">Dorado (Cubre)</option>
+              <option value="palo_de_rosa">Palo de Rosa (Cubre)</option>
+              <option value="rojo">Rojo (Cubre)</option>
+              <option value="verde">Verde (Cubre)</option>
+              <option value="amarillo">Amarillo (Cubre)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-camino-color">Camino de Mesa</label>
+            <select id="mesa-camino-color" class="form-input">
+              <option value="ninguno">Sin camino</option>
+              <option value="champagne">Champagne</option>
+              <option value="dorado">Dorado</option>
+              <option value="verde_olivo">Verde Olivo</option>
+              <option value="azul_rey">Azul Rey</option>
+              <option value="azul_marino">Azul Marino</option>
+              <option value="azul_cielo">Azul Cielo</option>
+              <option value="azul_turquesa">Azul Turquesa</option>
+              <option value="palo_de_rosa">Palo de Rosa</option>
+              <option value="rosa_baby">Rosa Baby</option>
+              <option value="rosa_blush">Rosa Blush</option>
+              <option value="rosa_brillante">Rosa Brillante</option>
+              <option value="fuchsia">Fucsia</option>
+              <option value="corrugado_ivory">Corrugado Ivory</option>
+              <option value="corrugado_verde_olivo">Corrugado Verde Olivo</option>
+              <option value="verde_bandera">Verde Bandera</option>
+              <option value="verde_navidad">Verde Navidad</option>
+              <option value="shedron">Shedron / Teja</option>
+              <option value="beige">Beige</option>
+              <option value="rojo">Rojo</option>
+              <option value="negro">Negro</option>
+              <option value="caqui">Caqui</option>
+              <option value="chocolate">Chocolate</option>
+              <option value="arena">Arena</option>
+              <option value="durazno">Durazno</option>
+              <option value="lila">Lila</option>
+              <option value="morado">Morado</option>
+              <option value="salmon">Salmón</option>
+              <option value="rosa_mexicano">Rosa Mexicano</option>
+              <option value="hueso">Hueso / Ivory</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-camino-acomodo">Acomodo del Camino</label>
+            <select id="mesa-camino-acomodo" class="form-input">
+              <option value="centro">Estándar (Al Centro)</option>
+              <option value="diagonal">Diagonal</option>
+              <option value="cruzado">Cruzado / En X</option>
+              <option value="ninguno">Ninguno</option>
+            </select>
+          </div>
+
+          <div id="mesa-servilletas-config-container">
+            <!-- Populated dynamically via JS -->
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-leaf"></i> Arreglo Floral
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-floral-tipo">Tipo de Arreglo</label>
+            <select id="mesa-floral-tipo" class="form-input">
+              <option value="ninguno">Sin Arreglo</option>
+              <option value="bajo">Bajo (Follaje/Bajo en mesa)</option>
+              <option value="alto">Alto (Base alta/Estructura)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-floral-acomodo">Acomodo del Arreglo</label>
+            <select id="mesa-floral-acomodo" class="form-input">
+              <option value="ninguno">Ninguno</option>
+              <option value="horizontal">Horizontal (A lo largo)</option>
+              <option value="vertical">Vertical</option>
+              <option value="cruzado">Cruzado / En X</option>
+              <option value="diagonal">Diagonal</option>
+            </select>
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-utensils"></i> Vajilla y Cubertería
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-plato-base">Plato Base (Decorativo)</label>
+            <select id="mesa-plato-base" class="form-input">
+              <option value="ninguno">Sin Plato Base</option>
+              <option value="romano">Romano</option>
+              <option value="vintage">Vintage</option>
+              <option value="concha_dorado">Concha Dorado</option>
+              <option value="chocolate">Chocolate</option>
+              <option value="gotico">Gótico</option>
+              <option value="plateado">Plateado</option>
+              <option value="espiral">Espiral</option>
+              <option value="cristal_aperlado">Cristal Aperlado</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-plato-trinche">Plato Trinche (Principal)</label>
+            <select id="mesa-plato-trinche" class="form-input">
+              <option value="redondo_blanco">Redondo Blanco</option>
+              <option value="cuadrado_blanco">Cuadrado Blanco</option>
+              <option value="negro">Sopero Negro / Oscuro</option>
+              <option value="entremes_blanco">Entremés Blanco</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-cubiertos">Color Cubiertos</label>
+            <select id="mesa-cubiertos" class="form-input">
+              <option value="plateado">Plateado</option>
+              <option value="dorado">Dorado</option>
+              <option value="gold_rose">Gold Rose</option>
+              <option value="negro">Negro</option>
+            </select>
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-wine-glass"></i> Cristalería
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-cristal">Estilo Cristalería</label>
+            <select id="mesa-cristal" class="form-input">
+              <option value="standard">Estándar</option>
+              <option value="flauta">Copa Flauta</option>
+              <option value="vino">Copa Vino</option>
+              <option value="romana">Copa Romana (Agua)</option>
+              <option value="martinera">Copa Martinera</option>
+              <option value="cubero">Vaso Cubero</option>
+              <option value="old_fashion">Old Fashion</option>
+              <option value="tequilero">Tequilero</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-copas-color">Color de Cristalería</label>
+            <select id="mesa-copas-color" class="form-input">
+              <option value="transparente">Transparente</option>
+              <option value="rojo">Rojo</option>
+              <option value="ambar">Ámbar / Miel</option>
+              <option value="uva">Uva / Morado</option>
+              <option value="verde_olivo">Verde Olivo</option>
+              <option value="azul">Azul</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-cristal2">Copa / Vaso 2 (Opcional)</label>
+            <select id="mesa-cristal2" class="form-input">
+              <option value="ninguno">Ninguno</option>
+              <option value="standard">Estándar</option>
+              <option value="flauta">Copa Flauta</option>
+              <option value="vino">Copa Vino</option>
+              <option value="romana">Copa Romana (Agua)</option>
+              <option value="martinera">Copa Martinera</option>
+              <option value="cubero">Vaso Cubero</option>
+              <option value="old_fashion">Old Fashion</option>
+              <option value="tequilero">Tequilero</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-copas-color2">Color Copa / Vaso 2</label>
+            <select id="mesa-copas-color2" class="form-input">
+              <option value="transparente">Transparente</option>
+              <option value="rojo">Rojo</option>
+              <option value="ambar">Ámbar / Miel</option>
+              <option value="uva">Uva / Morado</option>
+              <option value="verde_olivo">Verde Olivo</option>
+              <option value="azul">Azul</option>
+            </select>
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-chair"></i> Sillas
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-silla-tipo">Tipo de Silla</label>
+            <select id="mesa-silla-tipo" class="form-input">
+              <option value="tiffany">Tiffany Blanca</option>
+              <option value="napoleon">Napoleon Dorada</option>
+              <option value="banquete">Banquete Tapizada</option>
+              <option value="ghost">Ghost Acrilica</option>
+              <option value="crossback">Cross Back Madera</option>
+              <option value="metalica">Metalica</option>
+            </select>
+          </div>
+
+          <!-- Imperial tablones row (hidden unless imperial table) -->
+          <div id="mesa-tablones-row" class="form-group hidden">
+            <label class="form-label" for="mesa-num-tablones">
+              <i class="fa-solid fa-table-list"></i> N. Tablones
+            </label>
+            <input type="number" id="mesa-num-tablones" class="form-input" min="1" max="10" step="1" placeholder="2" />
+          </div>
+
+          <!-- Imperial assembly row (hidden unless imperial table) -->
+          <div id="mesa-ensamble-row" class="form-group hidden">
+            <label class="form-label" for="mesa-ensamble-tipo">
+              <i class="fa-solid fa-arrows-split-up-and-left"></i> Orientación de Ensamble
+            </label>
+            <select id="mesa-ensamble-tipo" class="form-input">
+              <option value="angosto">Largo (Unión extremo a extremo)</option>
+              <option value="ancho">Ancho (Unión lado a lado)</option>
+            </select>
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-book-open"></i> Menu
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="mesa-menu">Descripcion del Menu</label>
+            <textarea id="mesa-menu" class="form-input form-textarea" rows="4" placeholder="Ej: Entrada: Carpaccio&#10;Plato fuerte: Filete..."></textarea>
+          </div>
+
+          <div class="divider-xs"></div>
+          <p class="config-section-label">
+            <i class="fa-solid fa-users"></i> Lista de Invitados
+          </p>
+          <div class="form-group">
+            <div id="mesa-invitados-list" class="form-input" style="background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(244, 63, 94, 0.4); border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto; font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+              No hay invitados asignados a esta mesa.
+            </div>
+          </div>
+
+        </div><!-- /#mesa-config-panel -->
+
+      </div><!-- /.tab-panel mesa -->
+
+    </div><!-- /#inspector-panel -->
+
+  </aside><!-- /#sidebar-right -->
+
+</div><!-- /#app-wrapper -->
+
+
+<!-- TOAST NOTIFICATION -->
+<div id="notification-toast" class="toast" aria-live="polite" role="status">
+  <i class="fa-solid fa-circle-check toast-icon"></i>
+  <span class="toast-message">Listo</span>
+</div>
+
+
+<!-- SCRIPTS (order matters) -->
+<script src="elements-db.js?v=3.2"></script>
+<script src="default-layout.js?v=3.2"></script>
+<script src="editor2d.js?v=3.2"></script>
+<script src="visualizer3d.js?v=3.2"></script>
+<script src="app.js?v=3.2"></script>
+
 </body>
 </html>
