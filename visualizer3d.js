@@ -4321,7 +4321,255 @@ window.Visualizer3D = (function () {
     }
   }
 
+  function _parseSVGPathTo3DLines(dString) {
+  if (!dString) return [];
   
+  // Limpieza de la cadena y estandarizaci├│n de comandos
+  const cleaned = dString.replace(/,/g, ' ').replace(/([MLC])/gi, ' $1 ').trim();
+  const tokens = cleaned.split(/\s+/);
+  
+  const lines = [];
+  let currentLine = [];
+  
+  let i = 0;
+  let lastX = 0;
+  let lastY = 0;
+  
+  while (i < tokens.length) {
+    const token = tokens[i];
+    if (!token) {
+      i++;
+      continue;
+    }
+    
+    if (token === 'M' || token === 'm') {
+      if (currentLine.length > 1) {
+        lines.push(currentLine);
+      }
+      currentLine = [];
+      const x = parseFloat(tokens[i+1]);
+      const y = parseFloat(tokens[i+2]);
+      if (!isNaN(x) && !isNaN(y)) {
+        const pt = new THREE.Vector3(x / 10, 0.08, y / 10);
+        currentLine.push(pt);
+        lastX = x;
+        lastY = y;
+      }
+      i += 3;
+    } else if (token === 'L' || token === 'l') {
+      const x = parseFloat(tokens[i+1]);
+      const y = parseFloat(tokens[i+2]);
+      if (!isNaN(x) && !isNaN(y)) {
+        const pt = new THREE.Vector3(x / 10, 0.08, y / 10);
+        currentLine.push(pt);
+        lastX = x;
+        lastY = y;
+      }
+      i += 3;
+    } else if (token === 'C' || token === 'c') {
+      const cp1x = parseFloat(tokens[i+1]);
+      const cp1y = parseFloat(tokens[i+2]);
+      const cp2x = parseFloat(tokens[i+3]);
+      const cp2y = parseFloat(tokens[i+4]);
+      const destx = parseFloat(tokens[i+5]);
+      const desty = parseFloat(tokens[i+6]);
+      
+      if (!isNaN(cp1x) && !isNaN(cp1y) && !isNaN(cp2x) && !isNaN(cp2y) && !isNaN(destx) && !isNaN(desty)) {
+        const pStart = new THREE.Vector3(lastX / 10, 0.08, lastY / 10);
+        const pCP1 = new THREE.Vector3(cp1x / 10, 0.08, cp1y / 10);
+        const pCP2 = new THREE.Vector3(cp2x / 10, 0.08, cp2y / 10);
+        const pEnd = new THREE.Vector3(destx / 10, 0.08, desty / 10);
+        
+        const curve = new THREE.CubicBezierCurve3(pStart, pCP1, pCP2, pEnd);
+        const curvePoints = curve.getPoints(12); // Mayor muestreo para curvas s├║per fluidas
+        for (let j = 1; j < curvePoints.length; j++) {
+          currentLine.push(curvePoints[j]);
+        }
+        
+        lastX = destx;
+        lastY = desty;
+      }
+      i += 7;
+    } else {
+      // Coordenadas impl├¡citas despu├®s de un comando
+      if (currentLine.length > 0) {
+        const x = parseFloat(token);
+        const y = parseFloat(tokens[i+1]);
+        if (!isNaN(x) && !isNaN(y)) {
+          const pt = new THREE.Vector3(x / 10, 0.08, y / 10);
+          currentLine.push(pt);
+          lastX = x;
+          lastY = y;
+          i += 2;
+          continue;
+        }
+      }
+      i++;
+    }
+  }
+  
+  if (currentLine.length > 1) {
+    lines.push(currentLine);
+  }
+  
+  return lines;
+}
+
+/**
+ * Calcula la longitud total acumulada de una l├¡nea de puntos
+ */
+function _calculatePathLength(points) {
+  let len = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    len += points[i].distanceTo(points[i+1]);
+  }
+  return len;
+}
+
+/**
+ * Obtiene la posici├│n (Vector3) a lo largo de un camino seg├║n un progreso t (0 a 1)
+ */
+function _getPositionAlongPath(points, progress, targetVector) {
+  if (!points || points.length === 0) return;
+  if (points.length === 1) {
+    targetVector.copy(points[0]);
+    return;
+  }
+  
+  const lengths = [0];
+  let totalLength = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    const d = points[i].distanceTo(points[i+1]);
+    totalLength += d;
+    lengths.push(totalLength);
+  }
+  
+  if (totalLength === 0) {
+    targetVector.copy(points[0]);
+    return;
+  }
+  
+  const targetLength = progress * totalLength;
+  
+  let segmentIdx = 0;
+  for (let i = 0; i < lengths.length - 1; i++) {
+    if (targetLength >= lengths[i] && targetLength <= lengths[i+1]) {
+      segmentIdx = i;
+      break;
+    }
+  }
+  
+  const startPt = points[segmentIdx];
+  const endPt = points[segmentIdx + 1];
+  const segmentLength = lengths[segmentIdx + 1] - lengths[segmentIdx];
+  
+  if (segmentLength === 0) {
+    targetVector.copy(startPt);
+    return;
+  }
+  
+  const segmentProgress = (targetLength - lengths[segmentIdx]) / segmentLength;
+  targetVector.lerpVectors(startPt, endPt, segmentProgress);
+}
+
+/**
+ * Reconstruye y sincroniza los flujos de circulaci├│n en 3D
+ */
+function _update3DCirculationPaths(layout) {
+  if (!scene) return;
+  
+  // 1. Limpiar part├¡culas anteriores de la cola de animaci├│n
+  _flowParticles = [];
+  
+  // 2. Eliminar y limpiar los grupos 3D anteriores de la escena
+  const types = ['guest', 'service', 'emergency'];
+  types.forEach(type => {
+    if (_path3DGroups[type]) {
+      _scene.remove(_path3DGroups[type]);
+      _path3DGroups[type] = null;
+    }
+  });
+  
+  const pathColors = {
+    guest: 0x3b82f6,      // Azul brillante satinado para invitados
+    service: 0x10b981,    // Verde brillante para proveedores y staff
+    emergency: 0xef4444   // Rojo brillante para evacuaci├│n/emergencia
+  };
+  
+  // 3. Generar caminos para cada capa interactiva
+  types.forEach(type => {
+    const pathEl = document.getElementById(`path-${type}-draw`);
+    if (!pathEl) return;
+    
+    const dString = pathEl.getAttribute('d');
+    if (!dString) return;
+    
+    const lines = _parseSVGPathTo3DLines(dString);
+    if (lines.length === 0) return;
+    
+    const group = new THREE.Group();
+    group.name = `path-group-3d-${type}`;
+    
+    // Material de la l├¡nea base (camino transl├║cido)
+    const lineMat = new THREE.LineBasicMaterial({
+      color: pathColors[type],
+      transparent: true,
+      opacity: 0.35
+    });
+    
+    lines.forEach(line => {
+      const geometry = new THREE.BufferGeometry().setFromPoints(line);
+      const lineMesh = new THREE.Line(geometry, lineMat);
+      group.add(lineMesh);
+      
+      // Crear part├¡culas brillantes ("gotas de luz") fluyendo a lo largo de este segmento
+      const pathLen = _calculatePathLength(line);
+      // Ajustar densidad de part├¡culas a 1 cada 3.5 metros para que sea una simulaci├│n viva y premium
+      const numParticles = Math.max(3, Math.floor(pathLen / 3.5));
+      
+      const particleGeom = new THREE.SphereGeometry(0.14, 8, 8); // Esferas discretas brillantes
+      const particleMat = new THREE.MeshBasicMaterial({
+        color: pathColors[type],
+        transparent: true,
+        opacity: 0.95
+      });
+      
+      for (let p = 0; p < numParticles; p++) {
+        const particleMesh = new THREE.Mesh(particleGeom, particleMat);
+        
+        // Desfase inicial equitativo a lo largo de la ruta
+        const progress = p / numParticles;
+        _getPositionAlongPath(line, progress, particleMesh.position);
+        group.add(particleMesh);
+        
+        _flowParticles.push({
+          mesh: particleMesh,
+          points: line,
+          progress: progress,
+          speed: 0.004 + Math.random() * 0.002, // Velocidades suaves desfasadas individualmente
+          type: type
+        });
+      }
+    });
+    
+    // Sincronizar visibilidad con el estado actual del checkbox de la interfaz de usuario (2D)
+    const checkbox = document.getElementById(`path-${type}`);
+    group.visible = checkbox ? checkbox.checked : false;
+    
+    _scene.add(group);
+    _path3DGroups[type] = group;
+  });
+}
+
+/**
+ * Controla la visibilidad de los flujos de circulaci├│n en la escena 3D al vuelo
+ */
+function _toggleCirculation3D(pathType, isChecked) {
+  const group = _path3DGroups[pathType];
+  if (group) {
+    group.visible = isChecked;
+  }
+}
 
   // ─── Public API ───────────────────────────────────────────
   return {

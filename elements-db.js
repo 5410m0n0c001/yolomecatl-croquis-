@@ -730,7 +730,8 @@ window.ELEMENTS_CATALOG = [
     color: '#374151',
     defaultChairs: 0,
     description: 'Proveedor o estación genérica.',
-    layer: 'proveedores',
     planoOnly: false
   }
-] Loaded', window.ELEMENTS_CATALOG.length, 'element types across', Object.keys(window.ELEMENT_CATEGORIES).length, 'categories.');
+];
+
+console.log('[elements-db] Loaded', window.ELEMENTS_CATALOG.length, 'element types across', Object.keys(window.ELEMENT_CATEGORIES).length, 'categories.');
