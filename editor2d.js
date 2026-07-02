@@ -128,9 +128,7 @@ window.Editor2D = (function () {
   }
 
   // ─── Build SVG structure ──────────────────────────────────
-  // IMPORTANT: We do NOT use innerHTML='' + cloneNode() because that
-  // destroys CSS classes, inline styles, and filter references.
-  // Instead we MOVE the existing SVG children into a zoom group.
+  // Strategy: move existing SVG content into a zoom group (preserves all styles).
   function _buildSVG() {
     // 1. Separate defs (must stay at SVG root level) from the rest
     var existingDefs = _svg.querySelector('defs');
@@ -144,8 +142,15 @@ window.Editor2D = (function () {
     // 2. Clear SVG
     _svg.innerHTML = '';
 
-    // 3. Re-attach defs (patterns + filters)
+    // 3. Re-attach defs at SVG root level (required for filters/patterns)
     if (existingDefs) {
+      // Ensure sel-glow filter for element selection exists
+      if (!existingDefs.querySelector('#sel-glow')) {
+        var selFilter = svgEl('filter', { id: 'sel-glow', x: '-20%', y: '-20%', width: '140%', height: '140%' });
+        var selGlow = svgEl('feDropShadow', { dx: 0, dy: 0, stdDeviation: 4, 'flood-color': '#f0c040', 'flood-opacity': 0.95 });
+        selFilter.appendChild(selGlow);
+        existingDefs.appendChild(selFilter);
+      }
       _svg.appendChild(existingDefs);
     } else {
       // Create minimal defs if missing
@@ -156,6 +161,14 @@ window.Editor2D = (function () {
       defs.appendChild(filter);
       _svg.appendChild(defs);
     }
+
+    // 4. Dark background covering the full SVG viewport (outside zoom group)
+    var svgBg = svgEl('rect', {
+      id: 'svg-canvas-bg', x: 0, y: 0,
+      width: '100%', height: '100%',
+      fill: '#021526', 'pointer-events': 'none'
+    });
+    _svg.appendChild(svgBg);
 
     // 4. Create zoom group and move ALL original map children into it
     _gZoom = svgEl('g', { id: 'svg-zoom-group' });
@@ -185,7 +198,12 @@ window.Editor2D = (function () {
       _gZoom.appendChild(g);
     });
 
-    // 7. Ensure the g-circulation group is visible (may have been hidden)
+    // 7. Hide g-furniture: pre-drawn static tables — editor renders from AppState instead.
+    //    Without this, tables appear TWICE (ugly double-rendering).
+    var furnitureGroup = _gZoom.querySelector('#g-furniture');
+    if (furnitureGroup) furnitureGroup.style.display = 'none';
+
+    // 8. Ensure g-circulation is visible (circulation flow overlay)
     var circGroup = _gZoom.querySelector('#g-circulation');
     if (circGroup) circGroup.style.display = '';
 
