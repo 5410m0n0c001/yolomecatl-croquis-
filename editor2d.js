@@ -1068,15 +1068,17 @@ window.Editor2D = (function () {
     _callbacks = callbacks || {};
 
     // Extract static Yolomecatl groups before any rendering
+    // NOTE: SVG elements embedded in HTML do NOT have getElementById().
+    // We must use querySelector('#id') instead.
     _bgDefs = _svg.querySelector('defs');
-    _gGridMap = _svg.getElementById('g-grid');
-    _gGarden = _svg.getElementById('g-garden');
-    _gParking = _svg.getElementById('g-parking');
-    _gService = _svg.getElementById('g-service');
-    _gLobby = _svg.getElementById('g-lobby');
-    _gBathrooms = _svg.getElementById('g-bathrooms');
-    _gSalon = _svg.getElementById('g-salon');
-    _gCirculationPaths = _svg.getElementById('g-circulation-paths');
+    _gGridMap = _svg.querySelector('#g-grid');
+    _gGarden = _svg.querySelector('#g-garden');
+    _gParking = _svg.querySelector('#g-parking');
+    _gService = _svg.querySelector('#g-service');
+    _gLobby = _svg.querySelector('#g-lobby');
+    _gBathrooms = _svg.querySelector('#g-bathrooms');
+    _gSalon = _svg.querySelector('#g-salon');
+    _gCirculationPaths = _svg.querySelector('#g-circulation-paths');
 
     var state = getState ? getState() : {};
     _terrain = state.terrain || { w: 100, h: 98 };
