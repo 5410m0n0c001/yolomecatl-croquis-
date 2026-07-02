@@ -128,105 +128,72 @@ window.Editor2D = (function () {
   }
 
   // ─── Build SVG structure ──────────────────────────────────
+  // IMPORTANT: We do NOT use innerHTML='' + cloneNode() because that
+  // destroys CSS classes, inline styles, and filter references.
+  // Instead we MOVE the existing SVG children into a zoom group.
   function _buildSVG() {
+    // 1. Separate defs (must stay at SVG root level) from the rest
+    var existingDefs = _svg.querySelector('defs');
+    var mapChildren = [];
+    Array.from(_svg.children).forEach(function (child) {
+      if (child.tagName.toLowerCase() !== 'defs') {
+        mapChildren.push(child);
+      }
+    });
+
+    // 2. Clear SVG
     _svg.innerHTML = '';
 
-    if (_bgDefs) {
-      _svg.appendChild(_bgDefs.cloneNode(true));
+    // 3. Re-attach defs (patterns + filters)
+    if (existingDefs) {
+      _svg.appendChild(existingDefs);
     } else {
+      // Create minimal defs if missing
       var defs = svgEl('defs');
-
-      // Grid pattern
-      var gridPat = svgEl('pattern', {
-        id: 'grid-pattern',
-        width: mToPx(GRID_M),
-        height: mToPx(GRID_M),
-        patternUnits: 'userSpaceOnUse'
-      });
-      var gridLine1 = svgEl('line', { x1: 0, y1: 0, x2: mToPx(GRID_M), y2: 0, stroke: 'rgba(255,255,255,0.07)', 'stroke-width': 0.5 });
-      var gridLine2 = svgEl('line', { x1: 0, y1: 0, x2: 0, y2: mToPx(GRID_M), stroke: 'rgba(255,255,255,0.07)', 'stroke-width': 0.5 });
-      gridPat.appendChild(gridLine1);
-      gridPat.appendChild(gridLine2);
-      defs.appendChild(gridPat);
-
-      // Selection glow filter
       var filter = svgEl('filter', { id: 'sel-glow', x: '-20%', y: '-20%', width: '140%', height: '140%' });
       var feGlow = svgEl('feDropShadow', { dx: 0, dy: 0, stdDeviation: 4, 'flood-color': '#f0c040', 'flood-opacity': 0.95 });
       filter.appendChild(feGlow);
       defs.appendChild(filter);
-
       _svg.appendChild(defs);
     }
 
-    // Background
-    var bg = svgEl('rect', {
-      id: 'svg-background',
-      x: 0, y: 0,
-      width: '100%', height: '100%',
-      fill: '#0f172a'
-    });
-    _svg.appendChild(bg);
-
-    // Zoom group
+    // 4. Create zoom group and move ALL original map children into it
     _gZoom = svgEl('g', { id: 'svg-zoom-group' });
+    mapChildren.forEach(function (child) {
+      _gZoom.appendChild(child); // re-attach detached nodes (still valid JS objects)
+    });
 
-    if (_gGarden) {
-      // Append static Yolomecatl background map groups
-      if (_gGridMap) _gZoom.appendChild(_gGridMap.cloneNode(true));
-      if (_gGarden) _gZoom.appendChild(_gGarden.cloneNode(true));
-      if (_gParking) _gZoom.appendChild(_gParking.cloneNode(true));
-      if (_gService) _gZoom.appendChild(_gService.cloneNode(true));
-      if (_gLobby) _gZoom.appendChild(_gLobby.cloneNode(true));
-      if (_gBathrooms) _gZoom.appendChild(_gBathrooms.cloneNode(true));
-      if (_gSalon) _gZoom.appendChild(_gSalon.cloneNode(true));
-      if (_gJardin2) _gZoom.appendChild(_gJardin2.cloneNode(true));
-      if (_gCirculationPaths) _gZoom.appendChild(_gCirculationPaths.cloneNode(true));
-      // NOTE: _gFurniture (pre-drawn tables) is intentionally NOT cloned here.
-      // The editor renders tables dynamically from AppState.elements instead.
-    } else {
-      // Terrain fill
-      var terrainFill = svgEl('rect', {
-        id: 'terrain-fill',
-        x: 0, y: 0,
-        width: mToPx(_terrain.w),
-        height: mToPx(_terrain.h),
-        fill: '#1a2c4a',
-        rx: 2,
-        cursor: 'grab'
+    // 5. If no map children found, create a basic terrain background
+    if (mapChildren.length === 0) {
+      var bg = svgEl('rect', {
+        id: 'terrain-fill', x: 0, y: 0,
+        width: mToPx(_terrain.w), height: mToPx(_terrain.h),
+        fill: '#1a2c4a', rx: 2
       });
-      _gZoom.appendChild(terrainFill);
-
-      // Grid overlay
-      _gGrid = svgEl('g', { id: 'svg-grid-overlay' });
-      var gridRect = svgEl('rect', {
-        x: 0, y: 0,
-        width: mToPx(_terrain.w),
-        height: mToPx(_terrain.h),
-        fill: 'url(#grid-pattern)'
-      });
-      _gGrid.appendChild(gridRect);
-      _gZoom.appendChild(_gGrid);
+      _gZoom.appendChild(bg);
     }
 
-    // Layer groups (including flow layers)
-    var layers = [
-      'bg', 'estructuras', 'accesos', 'mobiliario', 'entretenimiento', 'decoracion', 'proveedores',
-      'flujo_invitados', 'flujo_proveedores', 'flujo_staff'
+    // 6. Add dynamic layer groups on top of static map
+    var layerNames = [
+      'bg', 'estructuras', 'accesos', 'mobiliario', 'entretenimiento',
+      'decoracion', 'proveedores', 'flujo_invitados', 'flujo_proveedores', 'flujo_staff'
     ];
     _layerGroups = {};
-    layers.forEach(function (lyr) {
+    layerNames.forEach(function (lyr) {
       var g = svgEl('g', { id: 'layer-' + lyr, 'data-layer': lyr });
       _layerGroups[lyr] = g;
       _gZoom.appendChild(g);
     });
 
+    // 7. Ensure the g-circulation group is visible (may have been hidden)
+    var circGroup = _gZoom.querySelector('#g-circulation');
+    if (circGroup) circGroup.style.display = '';
+
     _svg.appendChild(_gZoom);
 
-    // Terrain border (on top of zoom group)
+    // 8. Border and rulers ON TOP of zoom group (not affected by zoom transform)
     _gBorder = svgEl('g', { id: 'svg-terrain-border' });
     _svg.appendChild(_gBorder);
-
-    // Ruler groups
     _gRulerH = svgEl('g', { id: 'svg-ruler-h' });
     _gRulerV = svgEl('g', { id: 'svg-ruler-v' });
     _svg.appendChild(_gRulerH);
@@ -809,25 +776,40 @@ window.Editor2D = (function () {
     _drawRulers();
   }
 
-  function zoomIn() {
+  /** Get SVG dimensions in SVG user units (not CSS px) using viewBox or createSVGPoint */
+  function _svgSize() {
+    // Use viewBox dimensions if set (most reliable)
+    var vb = _svg.viewBox && _svg.viewBox.baseVal;
+    if (vb && vb.width > 0 && vb.height > 0) {
+      return { w: vb.width, h: vb.height };
+    }
+    // Fallback: use inverse CTM to convert CSS pixel dimensions to SVG units
     var rect = _svg.getBoundingClientRect();
-    _zoomAt(1.2, rect.width / 2, rect.height / 2);
+    var pt = _svg.createSVGPoint();
+    pt.x = rect.width; pt.y = rect.height;
+    var svgPt = pt.matrixTransform(_svg.getScreenCTM().inverse());
+    return { w: svgPt.x, h: svgPt.y };
+  }
+
+  function zoomIn() {
+    var sz = _svgSize();
+    _zoomAt(1.2, sz.w / 2, sz.h / 2);
   }
 
   function zoomOut() {
-    var rect = _svg.getBoundingClientRect();
-    _zoomAt(0.8, rect.width / 2, rect.height / 2);
+    var sz = _svgSize();
+    _zoomAt(0.8, sz.w / 2, sz.h / 2);
   }
 
   function resetZoom() {
-    var rect = _svg.getBoundingClientRect();
-    // Add 100px padding around terrain so elements can be placed outside the plan
-    var OUTER_PAD = 100;
-    var fw = (rect.width - RULER_SIZE * 2 - OUTER_PAD * 2) / mToPx(_terrain.w);
-    var fh = (rect.height - RULER_SIZE * 2 - OUTER_PAD * 2) / mToPx(_terrain.h);
+    var sz = _svgSize(); // SVG user units — consistent with transform coordinate space
+    var OUTER_PAD = 50; // padding in SVG units
+    var fw = (sz.w - RULER_SIZE * 2 - OUTER_PAD * 2) / mToPx(_terrain.w);
+    var fh = (sz.h - RULER_SIZE * 2 - OUTER_PAD * 2) / mToPx(_terrain.h);
     _zoom = Math.min(fw, fh, 1);
-    _panX = RULER_SIZE + ((rect.width - RULER_SIZE) - mToPx(_terrain.w) * _zoom) / 2;
-    _panY = RULER_SIZE + ((rect.height - RULER_SIZE) - mToPx(_terrain.h) * _zoom) / 2;
+    if (_zoom <= 0 || !isFinite(_zoom)) _zoom = 0.8; // safety fallback
+    _panX = RULER_SIZE + (sz.w - RULER_SIZE - mToPx(_terrain.w) * _zoom) / 2;
+    _panY = RULER_SIZE + (sz.h - RULER_SIZE - mToPx(_terrain.h) * _zoom) / 2;
     _applyZoomTransform();
     _drawBorder();
     _drawRulers();
