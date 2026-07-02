@@ -4582,7 +4582,7 @@ function _toggleCirculation3D(pathType, isChecked) {
     select: selectElement,
     deselect: function () { selectElement(null); },
     resetCamera: resetCamera,
-    setTerrain: setTerrain,
+    // setTerrain intentionally omitted — not implemented in this module
     setLighting: setLighting,
     setExposure: setExposure,
     resize: _onResize,

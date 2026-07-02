@@ -4,6 +4,22 @@
 // All globals, no ES modules.
 // ============================================================
 
+// ============================================================
+// ELEMENT_CATEGORIES — metadata for toolbox grouping
+// REQUIRED by app.js _buildToolbox() — DO NOT REMOVE
+// ============================================================
+window.ELEMENT_CATEGORIES = {
+  mobiliario:       { label: 'Mobiliario',         icon: 'fa-chair',           color: '#b45309' },
+  estructuras:      { label: 'Estructuras',         icon: 'fa-building',        color: '#374151' },
+  accesos:          { label: 'Accesos',             icon: 'fa-door-open',       color: '#1d4ed8' },
+  entretenimiento:  { label: 'Entretenimiento',     icon: 'fa-music',           color: '#7c3aed' },
+  decoracion:       { label: 'Decoración',          icon: 'fa-wand-magic-sparkles', color: '#be185d' },
+  proveedores:      { label: 'Proveedores',         icon: 'fa-store',           color: '#065f46' },
+  flujo_invitados:  { label: 'Flujo Invitados',     icon: 'fa-person-walking',  color: '#0ea5e9' },
+  flujo_proveedores:{ label: 'Flujo Proveedores',   icon: 'fa-truck',           color: '#f59e0b' },
+  flujo_staff:      { label: 'Flujo Staff',         icon: 'fa-user-tie',        color: '#10b981' }
+};
+
 window.ELEMENTS_CATALOG = [
 {
     type: 'stage',
