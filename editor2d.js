@@ -59,6 +59,8 @@ window.Editor2D = (function () {
   var _gBathrooms = null;
   var _gSalon = null;
   var _gCirculationPaths = null;
+  var _gJardin2 = null;         // Second garden / pool area
+  var _gFurniture = null;       // Pre-drawn furniture (static table SVGs)
 
   var _pendingContextId = null;
   var _ctxMenu = null;
@@ -97,13 +99,14 @@ window.Editor2D = (function () {
     return { x: mx, y: my };
   }
 
-  /** Get mouse position in SVG coordinate space */
+  /** Get mouse position in SVG coordinate space — properly handles viewBox transforms */
   function getMouseSVG(evt) {
-    var rect = _svg.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
+    // Use createSVGPoint+getScreenCTM to correctly convert screen coords to SVG user units
+    // This handles viewBox scaling, CSS transforms, and scroll offsets correctly
+    var pt = _svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    return pt.matrixTransform(_svg.getScreenCTM().inverse());
   }
 
   // ─── Color helpers ────────────────────────────────────────
@@ -176,7 +179,10 @@ window.Editor2D = (function () {
       if (_gLobby) _gZoom.appendChild(_gLobby.cloneNode(true));
       if (_gBathrooms) _gZoom.appendChild(_gBathrooms.cloneNode(true));
       if (_gSalon) _gZoom.appendChild(_gSalon.cloneNode(true));
+      if (_gJardin2) _gZoom.appendChild(_gJardin2.cloneNode(true));
       if (_gCirculationPaths) _gZoom.appendChild(_gCirculationPaths.cloneNode(true));
+      // NOTE: _gFurniture (pre-drawn tables) is intentionally NOT cloned here.
+      // The editor renders tables dynamically from AppState.elements instead.
     } else {
       // Terrain fill
       var terrainFill = svgEl('rect', {
@@ -1067,9 +1073,9 @@ window.Editor2D = (function () {
     _getState = getState;
     _callbacks = callbacks || {};
 
-    // Extract static Yolomecatl groups before any rendering
-    // NOTE: SVG elements embedded in HTML do NOT have getElementById().
-    // We must use querySelector('#id') instead.
+    // Extract static Yolomecatl groups before any rendering.
+    // Uses querySelector (getElementById does NOT work on inline SVG in HTML).
+    // Group IDs are matched to the actual IDs present in index.html.
     _bgDefs = _svg.querySelector('defs');
     _gGridMap = _svg.querySelector('#g-grid');
     _gGarden = _svg.querySelector('#g-garden');
@@ -1077,8 +1083,13 @@ window.Editor2D = (function () {
     _gService = _svg.querySelector('#g-service');
     _gLobby = _svg.querySelector('#g-lobby');
     _gBathrooms = _svg.querySelector('#g-bathrooms');
-    _gSalon = _svg.querySelector('#g-salon');
-    _gCirculationPaths = _svg.querySelector('#g-circulation-paths');
+    // 'g-salon' in HTML is actually 'g-walls' (main salon walls, stage, dancefloor)
+    _gSalon = _svg.querySelector('#g-walls');
+    // 'g-circulation-paths' in HTML is 'g-circulation'
+    _gCirculationPaths = _svg.querySelector('#g-circulation');
+    // Additional Yolomecatl groups
+    _gJardin2 = _svg.querySelector('#g-jardin2');
+    _gFurniture = _svg.querySelector('#g-furniture');
 
     var state = getState ? getState() : {};
     _terrain = state.terrain || { w: 100, h: 98 };
