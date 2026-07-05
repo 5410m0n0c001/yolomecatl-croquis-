@@ -4,27 +4,225 @@
 // All globals, no ES modules.
 // ============================================================
 
-// ============================================================
-// ELEMENT_CATEGORIES — metadata for toolbox grouping
-// REQUIRED by app.js _buildToolbox() — DO NOT REMOVE
-// ============================================================
-window.ELEMENT_CATEGORIES = {
-  mobiliario:       { label: 'Mobiliario',         icon: 'fa-chair',           color: '#b45309' },
-  estructuras:      { label: 'Estructuras',         icon: 'fa-building',        color: '#374151' },
-  accesos:          { label: 'Accesos',             icon: 'fa-door-open',       color: '#1d4ed8' },
-  entretenimiento:  { label: 'Entretenimiento',     icon: 'fa-music',           color: '#7c3aed' },
-  decoracion:       { label: 'Decoración',          icon: 'fa-wand-magic-sparkles', color: '#be185d' },
-  proveedores:      { label: 'Proveedores',         icon: 'fa-store',           color: '#065f46' },
-  flujo_invitados:  { label: 'Flujo Invitados',     icon: 'fa-person-walking',  color: '#0ea5e9' },
-  flujo_proveedores:{ label: 'Flujo Proveedores',   icon: 'fa-truck',           color: '#f59e0b' },
-  flujo_staff:      { label: 'Flujo Staff',         icon: 'fa-user-tie',        color: '#10b981' }
-};
-
 window.ELEMENTS_CATALOG = [
-{
+
+  // ──────────────────────────────────────────
+  // ESTRUCTURAS
+  // ──────────────────────────────────────────
+  {
+    type: 'terrain',
+    name: 'Terreno Base',
+    category: 'estructuras',
+    icon: 'fa-border-all',
+    defaultW: 50,
+    defaultH: 60,
+    shape: 'rect',
+    color: '#1a2744',
+    defaultChairs: 0,
+    description: 'El terreno o lote base del evento.',
+    layer: 'bg',
+    planoOnly: false
+  },
+  {
+    type: 'dressing_room',
+    name: 'Vestidor (2do Piso)',
+    category: 'estructuras',
+    icon: 'fa-user-tie',
+    defaultW: 4,
+    defaultH: 3,
+    shape: 'rect',
+    color: '#475569',
+    defaultChairs: 0,
+    description: 'Área de vestidor (segundo piso).',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'salon',
+    name: 'Salón Techado',
+    category: 'estructuras',
+    icon: 'fa-home',
+    defaultW: 20,
+    defaultH: 30,
+    shape: 'rect',
+    color: '#1e293b',
+    defaultChairs: 0,
+    description: 'Área cubierta / salón cerrado.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'salon_carpa',
+    name: 'Carpa para Eventos',
+    category: 'estructuras',
+    icon: 'fa-campground',
+    defaultW: 20,
+    defaultH: 30,
+    shape: 'rect',
+    color: '#f8fafc',
+    defaultChairs: 0,
+    description: 'Estructura de carpa abierta con postes y techo piramidal.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'garden',
+    name: 'Área de Jardín',
+    category: 'estructuras',
+    icon: 'fa-leaf',
+    defaultW: 10,
+    defaultH: 15,
+    shape: 'rect',
+    color: '#166534',
+    defaultChairs: 0,
+    description: 'Zona de jardín / área verde.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'kitchen',
+    name: 'Área de Cocina',
+    category: 'estructuras',
+    icon: 'fa-utensils',
+    defaultW: 8,
+    defaultH: 6,
+    shape: 'rect',
+    color: '#78350f',
+    defaultChairs: 0,
+    description: 'Área de cocina y preparación.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'bar_area',
+    name: 'Área de Barra',
+    category: 'estructuras',
+    icon: 'fa-cocktail',
+    defaultW: 6,
+    defaultH: 2,
+    shape: 'rect',
+    color: '#92400e',
+    defaultChairs: 0,
+    description: 'Barra de bebidas.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'terrace',
+    name: 'Terraza',
+    category: 'estructuras',
+    icon: 'fa-umbrella-beach',
+    defaultW: 8,
+    defaultH: 6,
+    shape: 'rect',
+    color: '#1e3a5f',
+    defaultChairs: 0,
+    description: 'Terraza exterior.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'parking',
+    name: 'Estacionamiento',
+    category: 'estructuras',
+    icon: 'fa-car',
+    defaultW: 10,
+    defaultH: 8,
+    shape: 'rect',
+    color: '#374151',
+    defaultChairs: 0,
+    description: 'Área de estacionamiento.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'kids_area',
+    name: 'Área Infantil',
+    category: 'estructuras',
+    icon: 'fa-child',
+    defaultW: 6,
+    defaultH: 5,
+    shape: 'rect',
+    color: '#7c3aed',
+    defaultChairs: 0,
+    description: 'Zona para niños.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'fountain',
+    name: 'Fuente',
+    category: 'estructuras',
+    icon: 'fa-tint',
+    defaultW: 2,
+    defaultH: 2,
+    shape: 'circle',
+    color: '#1d4ed8',
+    defaultChairs: 0,
+    description: 'Fuente decorativa.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'pool',
+    name: 'Alberca',
+    category: 'estructuras',
+    icon: 'fa-swimmer',
+    defaultW: 10,
+    defaultH: 5,
+    shape: 'rect',
+    color: '#0369a1',
+    defaultChairs: 0,
+    description: 'Alberca / piscina.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'chapel',
+    name: 'Capilla',
+    category: 'estructuras',
+    icon: 'fa-church',
+    defaultW: 8,
+    defaultH: 10,
+    shape: 'rect',
+    color: '#854d0e',
+    defaultChairs: 0,
+    description: 'Capilla para ceremonias.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'waterfall',
+    name: 'Cascada',
+    category: 'estructuras',
+    icon: 'fa-water',
+    defaultW: 5,
+    defaultH: 3,
+    shape: 'rect',
+    color: '#1e40af',
+    defaultChairs: 0,
+    description: 'Cascada decorativa.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
+    type: 'lobby_reception',
+    name: 'Lobby/Recepción',
+    category: 'estructuras',
+    icon: 'fa-door-open',
+    defaultW: 10,
+    defaultH: 3,
+    shape: 'rect',
+    color: '#374151',
+    defaultChairs: 0,
+    description: 'Área de recepción y lobby.',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
     type: 'stage',
     name: 'Escenario/Templete',
-    category: 'entretenimiento',
+    category: 'estructuras',
     icon: 'fa-star',
     defaultW: 6,
     defaultH: 4,
@@ -32,10 +230,200 @@ window.ELEMENTS_CATALOG = [
     color: '#5c3d2e',
     defaultChairs: 0,
     description: 'Escenario o templete para presentaciones.',
-    layer: 'entretenimiento',
+    layer: 'estructuras',
     planoOnly: false
   },
-{
+
+  // ──────────────────────────────────────────
+  // ACCESOS
+  // ──────────────────────────────────────────
+  {
+    type: 'door_main',
+    name: 'Entrada Principal',
+    category: 'accesos',
+    icon: 'fa-door-open',
+    defaultW: 3,
+    defaultH: 0.3,
+    shape: 'door',
+    color: '#10b981',
+    defaultChairs: 0,
+    description: 'Acceso principal de invitados.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'door_exit',
+    name: 'Salida/Emergencia',
+    category: 'accesos',
+    icon: 'fa-sign-out-alt',
+    defaultW: 2,
+    defaultH: 0.3,
+    shape: 'door',
+    color: '#ef4444',
+    defaultChairs: 0,
+    description: 'Salida de emergencia.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'door_service',
+    name: 'Acceso Servicio',
+    category: 'accesos',
+    icon: 'fa-truck',
+    defaultW: 2,
+    defaultH: 0.3,
+    shape: 'door',
+    color: '#6b7280',
+    defaultChairs: 0,
+    description: 'Acceso para personal de servicio.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'door_single',
+    name: 'Puerta Sencilla',
+    category: 'accesos',
+    icon: 'fa-door-closed',
+    defaultW: 1.2,
+    defaultH: 0.2,
+    shape: 'door',
+    color: '#10b981',
+    defaultChairs: 0,
+    description: 'Puerta estándar de una hoja.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'door_double',
+    name: 'Puerta Doble',
+    category: 'accesos',
+    icon: 'fa-door-open',
+    defaultW: 2.4,
+    defaultH: 0.2,
+    shape: 'door',
+    color: '#10b981',
+    defaultChairs: 0,
+    description: 'Puerta doble de dos hojas.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'gate_large',
+    name: 'Portón de Acceso',
+    category: 'accesos',
+    icon: 'fa-archway',
+    defaultW: 4.5,
+    defaultH: 0.4,
+    shape: 'door',
+    color: '#334155',
+    defaultChairs: 0,
+    description: 'Portón grande para vehículos o equipo pesado.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'bathroom',
+    name: 'Baños',
+    category: 'accesos',
+    icon: 'fa-restroom',
+    defaultW: 4,
+    defaultH: 3,
+    shape: 'rect',
+    color: '#0891b2',
+    defaultChairs: 0,
+    description: 'Servicios sanitarios.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'ramp',
+    name: 'Rampa',
+    category: 'accesos',
+    icon: 'fa-wheelchair',
+    defaultW: 3,
+    defaultH: 1.5,
+    shape: 'rect',
+    color: '#475569',
+    defaultChairs: 0,
+    description: 'Rampa de accesibilidad.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'stairs',
+    name: 'Escaleras',
+    category: 'accesos',
+    icon: 'fa-stairs',
+    defaultW: 2,
+    defaultH: 1.5,
+    shape: 'rect',
+    color: '#64748b',
+    defaultChairs: 0,
+    description: 'Escaleras.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'street',
+    name: 'Calle/Avenida',
+    category: 'accesos',
+    icon: 'fa-road',
+    defaultW: 6,
+    defaultH: 2,
+    shape: 'rect',
+    color: '#374151',
+    defaultChairs: 0,
+    description: 'Calle o avenida frente al venue.',
+    layer: 'accesos',
+    planoOnly: false
+  },
+  {
+    type: 'flow_guest',
+    name: 'Flujo Invitados',
+    category: 'accesos',
+    icon: 'fa-route',
+    defaultW: 0,
+    defaultH: 0,
+    shape: 'flow',
+    color: '#22c55e',
+    defaultChairs: 0,
+    description: 'Línea de flujo / circulación de invitados.',
+    layer: 'accesos',
+    planoOnly: true
+  },
+  {
+    type: 'flow_service',
+    name: 'Flujo Servicio',
+    category: 'accesos',
+    icon: 'fa-truck-fast',
+    defaultW: 0,
+    defaultH: 0,
+    shape: 'flow',
+    color: '#f59e0b',
+    defaultChairs: 0,
+    description: 'Línea de flujo de servicio.',
+    layer: 'accesos',
+    planoOnly: true
+  },
+  {
+    type: 'flow_emergency',
+    name: 'Flujo Emergencia',
+    category: 'accesos',
+    icon: 'fa-ambulance',
+    defaultW: 0,
+    defaultH: 0,
+    shape: 'flow',
+    color: '#ef4444',
+    defaultChairs: 0,
+    description: 'Ruta de evacuación / emergencia.',
+    layer: 'accesos',
+    planoOnly: true
+  },
+
+  // ──────────────────────────────────────────
+  // MOBILIARIO
+  // ──────────────────────────────────────────
+  {
     type: 'table_round',
     name: 'Mesa Redonda (10p)',
     category: 'mobiliario',
@@ -49,7 +437,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_square',
     name: 'Mesa Cuadrada (10p)',
     category: 'mobiliario',
@@ -63,7 +451,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_marble_round',
     name: 'Mesa Mármol Redonda',
     category: 'mobiliario',
@@ -77,7 +465,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_marble_square',
     name: 'Mesa Mármol Cuadrada',
     category: 'mobiliario',
@@ -91,7 +479,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_campirana',
     name: 'Mesa Campirana Madera',
     category: 'mobiliario',
@@ -105,7 +493,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_rectangular',
     name: 'Mesa Rectangular Madera',
     category: 'mobiliario',
@@ -119,7 +507,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_imperial',
     name: 'Mesa Imperial (tablones)',
     category: 'mobiliario',
@@ -133,7 +521,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_periquera',
     name: 'Periquera Alta',
     category: 'mobiliario',
@@ -147,7 +535,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_umbrella',
     name: 'Mesa con Sombrilla',
     category: 'mobiliario',
@@ -161,7 +549,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_kids',
     name: 'Mesa Infantil',
     category: 'mobiliario',
@@ -175,7 +563,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'lounge_set',
     name: 'Sala Lounge',
     category: 'mobiliario',
@@ -189,7 +577,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_cake',
     name: 'Mesa de Pastel',
     category: 'mobiliario',
@@ -203,7 +591,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_gifts',
     name: 'Mesa de Regalos',
     category: 'mobiliario',
@@ -217,7 +605,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_candy',
     name: 'Mesa de Dulces/Barra Mix',
     category: 'mobiliario',
@@ -231,7 +619,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_honor_xv',
     name: 'Mesa Honor XV',
     category: 'mobiliario',
@@ -245,7 +633,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_honor_bride',
     name: 'Mesa Novios (Rey & Reyna)',
     category: 'mobiliario',
@@ -259,7 +647,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_honor_king',
     name: 'Sillones Imperiales',
     category: 'mobiliario',
@@ -273,7 +661,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_shots',
     name: 'Carrito de Shots',
     category: 'mobiliario',
@@ -287,7 +675,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+  {
     type: 'table_buffet',
     name: 'Mesa de Buffet',
     category: 'mobiliario',
@@ -301,7 +689,11 @@ window.ELEMENTS_CATALOG = [
     layer: 'mobiliario',
     planoOnly: false
   },
-{
+
+  // ──────────────────────────────────────────
+  // ENTRETENIMIENTO
+  // ──────────────────────────────────────────
+  {
     type: 'dancefloor',
     name: 'Pista de Baile',
     category: 'entretenimiento',
@@ -315,7 +707,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'dancefloor_pixel',
     name: 'Pista Pixel LED',
     category: 'entretenimiento',
@@ -329,7 +721,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'dancefloor_marble',
     name: 'Pista Mármol/Madera',
     category: 'entretenimiento',
@@ -343,7 +735,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'dj_booth',
     name: 'Cabina de DJ',
     category: 'entretenimiento',
@@ -357,7 +749,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'photobooth_360',
     name: 'Cabina 360°',
     category: 'entretenimiento',
@@ -371,7 +763,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'photobooth_mirror',
     name: 'Espejo Selfie',
     category: 'entretenimiento',
@@ -385,7 +777,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'photobooth_inflatable',
     name: 'Cabina Inflable',
     category: 'entretenimiento',
@@ -399,7 +791,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'giant_letters',
     name: 'Letras Gigantes',
     category: 'entretenimiento',
@@ -413,7 +805,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'heart_illuminated',
     name: 'Corazón Iluminado',
     category: 'entretenimiento',
@@ -427,7 +819,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'sparklers',
     name: 'Chisperos',
     category: 'entretenimiento',
@@ -441,7 +833,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'red_carpet',
     name: 'Alfombra Roja',
     category: 'entretenimiento',
@@ -455,7 +847,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'robot_led',
     name: 'Robot de LEDs',
     category: 'entretenimiento',
@@ -469,7 +861,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'showmen_inflatables',
     name: 'Inflables en Pista',
     category: 'entretenimiento',
@@ -483,7 +875,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'limo',
     name: 'Limusina',
     category: 'entretenimiento',
@@ -497,7 +889,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'photo_firma',
     name: 'Foto Firma Caballete',
     category: 'entretenimiento',
@@ -511,7 +903,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+  {
     type: 'projector_screen',
     name: 'Pantalla Proyección',
     category: 'entretenimiento',
@@ -525,7 +917,11 @@ window.ELEMENTS_CATALOG = [
     layer: 'entretenimiento',
     planoOnly: false
   },
-{
+
+  // ──────────────────────────────────────────
+  // DECORACION
+  // ──────────────────────────────────────────
+  {
     type: 'centerpiece_tall',
     name: 'Centro Mesa Alto',
     category: 'decoracion',
@@ -539,7 +935,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'centerpiece_round',
     name: 'Centro Mesa Bajo',
     category: 'decoracion',
@@ -553,7 +949,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'centerpiece_long',
     name: 'Centro Mesa Largo',
     category: 'decoracion',
@@ -567,7 +963,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'flower_arch',
     name: 'Arco Floral',
     category: 'decoracion',
@@ -581,7 +977,21 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
+    type: 'flower_arch_wood',
+    name: 'Arco de Madera Floral',
+    category: 'decoracion',
+    icon: 'fa-archway',
+    defaultW: 3.5,
+    defaultH: 0.8,
+    shape: 'arch',
+    color: '#854d0e',
+    defaultChairs: 0,
+    description: 'Arco de madera rústica decorado con flores.',
+    layer: 'decoracion',
+    planoOnly: false
+  },
+  {
     type: 'balloon_arch',
     name: 'Arco de Globos',
     category: 'decoracion',
@@ -595,7 +1005,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'backdrop',
     name: 'Fondo Fotográfico',
     category: 'decoracion',
@@ -609,7 +1019,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'shrub',
     name: 'Arbusto Decorativo',
     category: 'decoracion',
@@ -623,7 +1033,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'arch_decor',
     name: 'Arco Estructural/Salón',
     category: 'decoracion',
@@ -637,7 +1047,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+  {
     type: 'tree_decor',
     name: 'Árbol Decorativo',
     category: 'decoracion',
@@ -651,7 +1061,11 @@ window.ELEMENTS_CATALOG = [
     layer: 'decoracion',
     planoOnly: false
   },
-{
+
+  // ──────────────────────────────────────────
+  // PROVEEDORES
+  // ──────────────────────────────────────────
+  {
     type: 'vendor_paletas',
     name: 'Paletas La Princesa',
     category: 'proveedores',
@@ -665,7 +1079,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'proveedores',
     planoOnly: false
   },
-{
+  {
     type: 'vendor_taquiza',
     name: 'Carrito de Taquiza',
     category: 'proveedores',
@@ -679,7 +1093,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'proveedores',
     planoOnly: false
   },
-{
+  {
     type: 'vendor_mariachi',
     name: 'Mariachi',
     category: 'proveedores',
@@ -693,7 +1107,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'proveedores',
     planoOnly: false
   },
-{
+  {
     type: 'vendor_banda',
     name: 'Banda en Vivo',
     category: 'proveedores',
@@ -707,7 +1121,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'proveedores',
     planoOnly: false
   },
-{
+  {
     type: 'vendor_saxo',
     name: 'Saxofonista',
     category: 'proveedores',
@@ -721,7 +1135,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'proveedores',
     planoOnly: false
   },
-{
+  {
     type: 'cart_esquites',
     name: 'Carrito de Esquites',
     category: 'proveedores',
@@ -735,7 +1149,7 @@ window.ELEMENTS_CATALOG = [
     layer: 'proveedores',
     planoOnly: false
   },
-{
+  {
     type: 'vendor_generic',
     name: 'Proveedor Genérico',
     category: 'proveedores',
@@ -746,8 +1160,44 @@ window.ELEMENTS_CATALOG = [
     color: '#374151',
     defaultChairs: 0,
     description: 'Proveedor o estación genérica.',
+    layer: 'proveedores',
     planoOnly: false
   }
 ];
+
+// ────────────────────────────────────────────────
+// Category metadata
+// ────────────────────────────────────────────────
+window.ELEMENT_CATEGORIES = {
+  estructuras:    { label: 'Estructuras',     icon: 'fa-building',        color: '#1e293b' },
+  accesos:        { label: 'Accesos',         icon: 'fa-door-open',       color: '#10b981' },
+  mobiliario:     { label: 'Mobiliario',      icon: 'fa-chair',           color: '#b45309' },
+  entretenimiento:{ label: 'Entretenimiento', icon: 'fa-music',           color: '#820ad1' },
+  decoracion:     { label: 'Decoración',      icon: 'fa-star',            color: '#f472b6' },
+  proveedores:    { label: 'Proveedores',     icon: 'fa-store',           color: '#374151' }
+};
+
+window.CATEGORY_ICONS = {
+  estructuras:     'fa-building',
+  accesos:         'fa-door-open',
+  mobiliario:      'fa-chair',
+  entretenimiento: 'fa-music',
+  decoracion:      'fa-star',
+  proveedores:     'fa-store'
+};
+
+window.CATEGORY_LABELS = {
+  estructuras:     'Estructuras',
+  accesos:         'Accesos',
+  mobiliario:      'Mobiliario',
+  entretenimiento: 'Entretenimiento',
+  decoracion:      'Decoración',
+  proveedores:     'Proveedores'
+};
+
+// Helper: look up a catalog entry by type
+window.getCatalogEntry = function(type) {
+  return window.ELEMENTS_CATALOG.find(function(e) { return e.type === type; }) || null;
+};
 
 console.log('[elements-db] Loaded', window.ELEMENTS_CATALOG.length, 'element types across', Object.keys(window.ELEMENT_CATEGORIES).length, 'categories.');

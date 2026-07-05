@@ -1869,8 +1869,8 @@ window.Visualizer3D = (function () {
     var colorNum = parseColor(elem.color, elem.type);
     var showTechos = _getLayerVisibility('techos');
 
-    if (elem.type === 'salon') {
-      var salonType = elem.salonType || 'muros';
+    if (elem.type === 'salon' || elem.type === 'salon_carpa') {
+      var salonType = elem.type === 'salon_carpa' ? 'sin_muros' : (elem.salonType || 'muros');
 
       // Floor slab
       var floor = new THREE.Mesh(
@@ -2351,6 +2351,34 @@ window.Visualizer3D = (function () {
       );
       basinWater.position.set(0, 0.175, 0.2);
       group.add(basinWater);
+
+    } else if (elem.type === 'dressing_room') {
+      // Dressing Room structure (2nd floor)
+      var wallMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+      var room = new THREE.Mesh(
+        new THREE.BoxGeometry(w, 2.8, h),
+        wallMat
+      );
+      room.position.y = 1.4;
+      room.castShadow = true;
+      room.receiveShadow = true;
+      group.add(room);
+
+      // Glass door facade
+      var doorMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.1, transparent: true, opacity: 0.5 });
+      var door = new THREE.Mesh(new THREE.BoxGeometry(w * 0.4, 2.0, 0.1), doorMat);
+      door.position.set(0, 1.0, h/2 - 0.05);
+      group.add(door);
+
+      // Label sign on top of door
+      var sign = new THREE.Mesh(new THREE.BoxGeometry(w * 0.5, 0.3, 0.12), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      sign.position.set(0, 2.2, h/2 - 0.02);
+      group.add(sign);
+
+      // 3D Floating label card
+      var labelCard = _createFloatingLabel("Vestidor (2do Piso)", null, "#3b82f6");
+      labelCard.position.set(0, 3.2, h/2 + 0.1);
+      group.add(labelCard);
 
     } else {
       _buildGenericBox(group, elem, colorNum, 1.2);
@@ -3760,6 +3788,56 @@ window.Visualizer3D = (function () {
       bdLegR.castShadow = true;
       group.add(bdLegR);
 
+    } else if (elem.type === 'flower_arch_wood') {
+      // Wooden Floral Arch (Archway)
+      var woodMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 }); // Dark wood
+      var leafMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.95 }); // Foliage green
+      var flowerMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.9 }); // Pink flowers
+      
+      var archWidth = w;
+      var archHeight = 3.0; // 3m tall
+
+      // 2 square pillars (wooden columns)
+      var pillarGeom = new THREE.BoxGeometry(0.18, archHeight, 0.18);
+      var pillarL = new THREE.Mesh(pillarGeom, woodMat);
+      pillarL.position.set(-archWidth / 2, archHeight / 2, 0);
+      pillarL.castShadow = true;
+      group.add(pillarL);
+
+      var pillarR = new THREE.Mesh(pillarGeom, woodMat);
+      pillarR.position.set(archWidth / 2, archHeight / 2, 0);
+      pillarR.castShadow = true;
+      group.add(pillarR);
+
+      // Top crossbeam
+      var beamGeom = new THREE.BoxGeometry(archWidth + 0.36, 0.18, 0.18);
+      var crossbeam = new THREE.Mesh(beamGeom, woodMat);
+      crossbeam.position.set(0, archHeight - 0.09, 0);
+      crossbeam.castShadow = true;
+      group.add(crossbeam);
+
+      // Floral decorations (foliage blocks on top corners)
+      var foliageGeom = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+      var foliageL = new THREE.Mesh(foliageGeom, leafMat);
+      foliageL.position.set(-archWidth / 2, archHeight, 0);
+      group.add(foliageL);
+
+      var foliageR = new THREE.Mesh(foliageGeom, leafMat);
+      foliageR.position.set(archWidth / 2, archHeight, 0);
+      group.add(foliageR);
+
+      // Some flowers spheres on corners
+      var flGeom = new THREE.SphereGeometry(0.12, 6, 6);
+      for (var fIdx = 0; fIdx < 3; fIdx++) {
+        var flL = new THREE.Mesh(flGeom, flowerMat);
+        flL.position.set(-archWidth / 2 + (fIdx - 1) * 0.15, archHeight + 0.1, 0.1);
+        group.add(flL);
+
+        var flR = new THREE.Mesh(flGeom, flowerMat);
+        flR.position.set(archWidth / 2 + (fIdx - 1) * 0.15, archHeight + 0.1, 0.1);
+        group.add(flR);
+      }
+
     } else {
       _buildGenericBox(group, elem, colorNum, 1.5);
     }
@@ -4311,6 +4389,53 @@ window.Visualizer3D = (function () {
 
     labelGroup.position.set(0, heightOffset, 0);
     return labelGroup;
+  }
+
+  function _createFloatingLabel(text, colorHex, borderHex) {
+    var canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    var ctx = canvas.getContext('2d');
+    
+    // Background card (dark, high contrast)
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    
+    // Draw rounded rect
+    var x = 0, y = 0, width = 512, height = 128, radius = 16;
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Colorful border
+    ctx.strokeStyle = borderHex || '#f43f5e';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    
+    // Text Label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 256, 64);
+    
+    var texture = new THREE.CanvasTexture(canvas);
+    var labelMat = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    var labelGeom = new THREE.PlaneGeometry(3.0, 0.75);
+    var labelMesh = new THREE.Mesh(labelGeom, labelMat);
+    return labelMesh;
   }
 
   function setExposure(val) {
