@@ -1864,38 +1864,7 @@ input:checked + .slider:before {
   transition: background-color 0.3s ease;
 }
 
-/* Zoom controls */
-.zoom-controls {
-  position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 5;
-}
-
-.zoom-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: var(--transition);
-}
-
-.zoom-btn:hover {
-  background-color: var(--accent-glow);
-  border-color: var(--accent);
-  color: var(--accent);
-}
+/* Zoom buttons are styled inside header rules */
 
 /* Scale Bar */
 .scale-bar {

@@ -128,18 +128,13 @@ window.Editor2D = (function () {
   }
 
   // ─── Build SVG structure ──────────────────────────────────
-  // Strategy: move existing SVG content into a zoom group (preserves all styles).
+  // Reconstructs the zoom group by cloning the static Yolomecatl map elements.
+  // This prevents the nesting bug when called multiple times (e.g., during setTerrain).
   function _buildSVG() {
-    // 1. Separate defs (must stay at SVG root level) from the rest
+    // 1. Preserve original defs (patterns, filters)
     var existingDefs = _svg.querySelector('defs');
-    var mapChildren = [];
-    Array.from(_svg.children).forEach(function (child) {
-      if (child.tagName.toLowerCase() !== 'defs') {
-        mapChildren.push(child);
-      }
-    });
 
-    // 2. Clear SVG
+    // 2. Clear SVG completely
     _svg.innerHTML = '';
 
     // 3. Re-attach defs at SVG root level (required for filters/patterns)
@@ -152,6 +147,8 @@ window.Editor2D = (function () {
         existingDefs.appendChild(selFilter);
       }
       _svg.appendChild(existingDefs);
+    } else if (_bgDefs) {
+      _svg.appendChild(_bgDefs.cloneNode(true));
     } else {
       // Create minimal defs if missing
       var defs = svgEl('defs');
@@ -170,23 +167,31 @@ window.Editor2D = (function () {
     });
     _svg.appendChild(svgBg);
 
-    // 4. Create zoom group and move ALL original map children into it
+    // 5. Create zoom group
     _gZoom = svgEl('g', { id: 'svg-zoom-group' });
-    mapChildren.forEach(function (child) {
-      _gZoom.appendChild(child); // re-attach detached nodes (still valid JS objects)
-    });
 
-    // 5. If no map children found, create a basic terrain background
-    if (mapChildren.length === 0) {
-      var bg = svgEl('rect', {
+    // 6. Append clean clones of the original static map elements
+    if (_gGarden) {
+      if (_gGridMap) _gZoom.appendChild(_gGridMap.cloneNode(true));
+      if (_gGarden) _gZoom.appendChild(_gGarden.cloneNode(true));
+      if (_gParking) _gZoom.appendChild(_gParking.cloneNode(true));
+      if (_gService) _gZoom.appendChild(_gService.cloneNode(true));
+      if (_gLobby) _gZoom.appendChild(_gLobby.cloneNode(true));
+      if (_gJardin2) _gZoom.appendChild(_gJardin2.cloneNode(true));
+      if (_gBathrooms) _gZoom.appendChild(_gBathrooms.cloneNode(true));
+      if (_gSalon) _gZoom.appendChild(_gSalon.cloneNode(true));
+      if (_gCirculationPaths) _gZoom.appendChild(_gCirculationPaths.cloneNode(true));
+    } else {
+      // Terrain fill (fallback when there is no background garden map)
+      var terrainFill = svgEl('rect', {
         id: 'terrain-fill', x: 0, y: 0,
         width: mToPx(_terrain.w), height: mToPx(_terrain.h),
         fill: '#1a2c4a', rx: 2
       });
-      _gZoom.appendChild(bg);
+      _gZoom.appendChild(terrainFill);
     }
 
-    // 6. Add dynamic layer groups on top of static map
+    // 7. Add dynamic editor layer groups on top of static map content
     var layerNames = [
       'bg', 'estructuras', 'accesos', 'mobiliario', 'entretenimiento',
       'decoracion', 'proveedores', 'flujo_invitados', 'flujo_proveedores', 'flujo_staff'
@@ -198,18 +203,17 @@ window.Editor2D = (function () {
       _gZoom.appendChild(g);
     });
 
-    // 7. Hide g-furniture: pre-drawn static tables — editor renders from AppState instead.
-    //    Without this, tables appear TWICE (ugly double-rendering).
+    // 8. Hide g-furniture: pre-drawn static tables — editor renders from AppState instead.
     var furnitureGroup = _gZoom.querySelector('#g-furniture');
     if (furnitureGroup) furnitureGroup.style.display = 'none';
 
-    // 8. Ensure g-circulation is visible (circulation flow overlay)
+    // 9. Ensure g-circulation is visible (circulation flow overlay)
     var circGroup = _gZoom.querySelector('#g-circulation');
     if (circGroup) circGroup.style.display = '';
 
     _svg.appendChild(_gZoom);
 
-    // 8. Border and rulers ON TOP of zoom group (not affected by zoom transform)
+    // 10. Border and rulers rendered OUTSIDE zoom group (fixed position, not zoomed)
     _gBorder = svgEl('g', { id: 'svg-terrain-border' });
     _svg.appendChild(_gBorder);
     _gRulerH = svgEl('g', { id: 'svg-ruler-h' });
@@ -1003,15 +1007,15 @@ window.Editor2D = (function () {
       if (gParking) gParking.style.display = visible ? '' : 'none';
     }
     if (layerName === 'flujo_invitados') {
-      var pGuest = document.getElementById('path-line-guest');
+      var pGuest = document.getElementById('path-guest-draw');
       if (pGuest) pGuest.style.opacity = visible ? '1' : '0';
     }
     if (layerName === 'flujo_proveedores' || layerName === 'flujo_staff') {
-      var pService = document.getElementById('path-line-service');
+      var pService = document.getElementById('path-service-draw');
       if (pService) pService.style.opacity = visible ? '1' : '0';
     }
     if (layerName === 'flujo_emergencia' || layerName === 'safety') {
-      var pEmergency = document.getElementById('path-line-emergency');
+      var pEmergency = document.getElementById('path-emergency-draw');
       if (pEmergency) pEmergency.style.opacity = visible ? '1' : '0';
     }
   }

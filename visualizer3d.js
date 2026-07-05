@@ -797,17 +797,17 @@ window.Visualizer3D = (function () {
     roughness: 0.08, 
     metalness: 0.35 
   });
-  danceFloorMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), danceMat);
+  const danceFloorMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), danceMat);
   danceFloorMesh.receiveShadow = true;
   _staticEnvironmentGroup.add(danceFloorMesh);
   
-  // Borde dorado met├ílico de la pista
+  // Borde dorado metálico de la pista
   const danceBorderMat = new THREE.MeshStandardMaterial({ 
     color: COLORS.gold, 
     roughness: 0.1, 
     metalness: 0.9 
   });
-  danceFloorBorderMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), danceBorderMat);
+  const danceFloorBorderMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), danceBorderMat);
   _staticEnvironmentGroup.add(danceFloorBorderMesh);
   
   // --- C) MUROS PERIMETRALES Y COLUMNAS ---
