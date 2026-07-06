@@ -351,13 +351,59 @@ window.Editor2D = (function () {
       'class': 'elem-group' + (isSelected ? ' selected' : ''),
       cursor: 'grab'
     });
-
     if (isSelected) {
       g.setAttribute('filter', 'url(#sel-glow)');
     }
 
     var rot = elem.rotation || 0;
     g.setAttribute('transform', 'rotate(' + rot + ',' + px + ',' + py + ')');
+
+    // ── HiFi SVG Templates ────────────────────────────────
+    var hifiMap = {
+      'salon': { selector: '#g-walls', cx: 51.0, cy: 39.0 },
+      'pool': { selector: '#swimming-pool', cx: 51.5, cy: 86.0 },
+      'chapel': { selector: '#chapel-group', cx: 12.5, cy: 86.0 },
+      'parking': { selector: '#g-parking', cx: 87.5, cy: 60.5 },
+      'waterfall': { selector: '#waterfall-group', cx: 4.0, cy: 32.0 },
+      'lobby_reception': { selector: '#g-lobby', cx: 51.0, cy: 72.75 },
+      'kitchen': { selector: '#g-service', cx: 87.5, cy: 13.5 },
+      'stage': { selector: '#stage-group', cx: 48.5, cy: 11.0 },
+      'dj_booth': { selector: '#dj2-group', cx: 48.5, cy: 9.0 },
+      'bathrooms': { selector: '#g-bathrooms', cx: 51.0, cy: 5.0 },
+      'dancefloor_pixel': { selector: '#dancefloor-group', cx: 48.5, cy: 21.5 },
+      'dancefloor': { selector: '#dancefloor-group', cx: 48.5, cy: 21.5 }
+    };
+
+    var hifi = hifiMap[elem.type];
+    if (hifi) {
+      var templateNode = document.querySelector(hifi.selector);
+      if (templateNode) {
+        var clone = templateNode.cloneNode(true);
+        clone.removeAttribute('id');
+        clone.style.display = '';
+        clone.style.pointerEvents = 'none';
+        
+        var dx = mToPx(elem.x - hifi.cx);
+        var dy = mToPx(elem.y - hifi.cy);
+        clone.setAttribute('transform', 'translate(' + dx + ',' + dy + ')');
+        g.appendChild(clone);
+        
+        var selectRect = svgEl('rect', {
+          x: px - pw/2,
+          y: py - ph/2,
+          width: pw,
+          height: ph,
+          fill: isSelected ? 'rgba(251, 191, 36, 0.08)' : 'rgba(0, 0, 0, 0.0)',
+          stroke: isSelected ? '#f0c040' : 'rgba(0,0,0,0)',
+          'stroke-width': isSelected ? 2.5 : 1,
+          'pointer-events': 'all'
+        });
+        g.appendChild(selectRect);
+        
+        group.appendChild(g);
+        return;
+      }
+    }
 
     // ── Shape rendering ───────────────────────────────────
     if (shape === 'circle') {

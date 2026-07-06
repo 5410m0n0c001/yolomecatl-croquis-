@@ -119,6 +119,22 @@
         layer: "entretenimiento"
       },
       {
+        id: "struct_bathrooms",
+        type: "bathrooms",
+        category: "estructuras",
+        name: "Servicios Sanitarios",
+        x: 51.0,
+        y: 5.0,
+        w: 20.0,
+        h: 6.0,
+        rotation: 0,
+        color: "#374151",
+        chairs: 0,
+        editable: true,
+        removable: true,
+        layer: "estructuras"
+      },
+      {
         id: "struct_pool",
         type: "pool",
         category: "estructuras",

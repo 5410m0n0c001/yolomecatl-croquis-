@@ -1996,6 +1996,9 @@ window.Visualizer3D = (function () {
     } else if (elem.type === 'waterfall') {
       _buildHiFiWaterfall(group, elem);
 
+    } else if (elem.type === 'bathrooms') {
+      // Restrooms are modeled as part of the stage structure in 3D, so we skip duplicating them here.
+
     } else if (elem.type === 'kids_area') {
       // Colourful foam rubber play mat floor
       var playMat = new THREE.Mesh(
