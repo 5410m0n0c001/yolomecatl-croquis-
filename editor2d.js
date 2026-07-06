@@ -61,6 +61,8 @@ window.Editor2D = (function () {
   var _gCirculationPaths = null;
   var _gJardin2 = null;         // Second garden / pool area
   var _gFurniture = null;       // Pre-drawn furniture (static table SVGs)
+  var _gLobbyChapelLawn = null; // Lawn area between lobby and chapel
+  var _hifiTemplates = {};      // Pre-cached high-fidelity SVG templates
 
   var _pendingContextId = null;
   var _ctxMenu = null;
@@ -181,6 +183,7 @@ window.Editor2D = (function () {
       if (_gBathrooms) _gZoom.appendChild(_gBathrooms.cloneNode(true));
       if (_gSalon) _gZoom.appendChild(_gSalon.cloneNode(true));
       if (_gCirculationPaths) _gZoom.appendChild(_gCirculationPaths.cloneNode(true));
+      if (_gLobbyChapelLawn) _gZoom.appendChild(_gLobbyChapelLawn.cloneNode(true));
     } else {
       // Terrain fill (fallback when there is no background garden map)
       var terrainFill = svgEl('rect', {
@@ -375,34 +378,32 @@ window.Editor2D = (function () {
     };
 
     var hifi = hifiMap[elem.type];
-    if (hifi) {
-      var templateNode = document.querySelector(hifi.selector);
-      if (templateNode) {
-        var clone = templateNode.cloneNode(true);
-        clone.removeAttribute('id');
-        clone.style.display = '';
-        clone.style.pointerEvents = 'none';
-        
-        var dx = mToPx(elem.x - hifi.cx);
-        var dy = mToPx(elem.y - hifi.cy);
-        clone.setAttribute('transform', 'translate(' + dx + ',' + dy + ')');
-        g.appendChild(clone);
-        
-        var selectRect = svgEl('rect', {
-          x: px - pw/2,
-          y: py - ph/2,
-          width: pw,
-          height: ph,
-          fill: isSelected ? 'rgba(251, 191, 36, 0.08)' : 'rgba(0, 0, 0, 0.0)',
-          stroke: isSelected ? '#f0c040' : 'rgba(0,0,0,0)',
-          'stroke-width': isSelected ? 2.5 : 1,
-          'pointer-events': 'all'
-        });
-        g.appendChild(selectRect);
-        
-        group.appendChild(g);
-        return;
-      }
+    if (hifi && _hifiTemplates[elem.type]) {
+      var templateNode = _hifiTemplates[elem.type];
+      var clone = templateNode.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.style.display = '';
+      clone.style.pointerEvents = 'none';
+      
+      var dx = mToPx(elem.x - hifi.cx);
+      var dy = mToPx(elem.y - hifi.cy);
+      clone.setAttribute('transform', 'translate(' + dx + ',' + dy + ')');
+      g.appendChild(clone);
+      
+      var selectRect = svgEl('rect', {
+        x: px - pw/2,
+        y: py - ph/2,
+        width: pw,
+        height: ph,
+        fill: isSelected ? 'rgba(251, 191, 36, 0.08)' : 'rgba(0, 0, 0, 0.0)',
+        stroke: isSelected ? '#f0c040' : 'rgba(0,0,0,0)',
+        'stroke-width': isSelected ? 2.5 : 1,
+        'pointer-events': 'all'
+      });
+      g.appendChild(selectRect);
+      
+      group.appendChild(g);
+      return;
     }
 
     // ── Shape rendering ───────────────────────────────────
@@ -410,6 +411,7 @@ window.Editor2D = (function () {
       var r = pw / 2;
       var circ = svgEl('circle', {
         cx: px, cy: py, r: r,
+        'class': 'svg-table-block',
         fill: color,
         stroke: isSelected ? '#f0c040' : colorLight,
         'stroke-width': isSelected ? 2 : 1,
@@ -424,6 +426,7 @@ window.Editor2D = (function () {
       var srect = svgEl('rect', {
         x: px - pw / 2, y: py - ph / 2,
         width: pw, height: ph,
+        'class': 'svg-table-block',
         fill: color,
         stroke: isSelected ? '#f0c040' : colorLight,
         'stroke-width': isSelected ? 2 : 1,
@@ -487,6 +490,7 @@ window.Editor2D = (function () {
       var impRect = svgEl('rect', {
         x: px - pw / 2, y: py - ph / 2,
         width: pw, height: ph,
+        'class': 'svg-table-block imperial',
         fill: color,
         stroke: isSelected ? '#f0c040' : colorLight,
         'stroke-width': isSelected ? 2 : 1,
@@ -743,6 +747,7 @@ window.Editor2D = (function () {
       var cY = cy + Math.sin(angle) * chairDist;
       var chair = svgEl('circle', {
         cx: cX, cy: cY, r: mToPx(CHAIR_R_M),
+        'class': 'svg-chair',
         fill: lighten(color, 0.45),
         stroke: 'rgba(255,255,255,0.25)',
         'stroke-width': 0.5,
@@ -1086,15 +1091,24 @@ window.Editor2D = (function () {
     }
     if (layerName === 'flujo_invitados') {
       var pGuest = document.getElementById('path-guest-draw');
-      if (pGuest) pGuest.style.opacity = visible ? '1' : '0';
+      if (pGuest) {
+        pGuest.style.opacity = visible ? '1' : '0';
+        pGuest.classList.toggle('active', visible);
+      }
     }
     if (layerName === 'flujo_proveedores' || layerName === 'flujo_staff') {
       var pService = document.getElementById('path-service-draw');
-      if (pService) pService.style.opacity = visible ? '1' : '0';
+      if (pService) {
+        pService.style.opacity = visible ? '1' : '0';
+        pService.classList.toggle('active', visible);
+      }
     }
     if (layerName === 'flujo_emergencia' || layerName === 'safety') {
       var pEmergency = document.getElementById('path-emergency-draw');
-      if (pEmergency) pEmergency.style.opacity = visible ? '1' : '0';
+      if (pEmergency) {
+        pEmergency.style.opacity = visible ? '1' : '0';
+        pEmergency.classList.toggle('active', visible);
+      }
     }
   }
 
@@ -1165,13 +1179,34 @@ window.Editor2D = (function () {
     _gService = _svg.querySelector('#g-service');
     _gLobby = _svg.querySelector('#g-lobby');
     _gBathrooms = _svg.querySelector('#g-bathrooms');
-    // 'g-salon' in HTML is actually 'g-walls' (main salon walls, stage, dancefloor)
     _gSalon = _svg.querySelector('#g-walls');
-    // 'g-circulation-paths' in HTML is 'g-circulation'
     _gCirculationPaths = _svg.querySelector('#g-circulation');
-    // Additional Yolomecatl groups
     _gJardin2 = _svg.querySelector('#g-jardin2');
     _gFurniture = _svg.querySelector('#g-furniture');
+    _gLobbyChapelLawn = _svg.querySelector('#lobby-chapel-lawn');
+
+    // Pre-cache clean original high-fidelity SVG templates before they get cleared/hidden
+    var hifiSelectors = {
+      'salon': '#g-walls',
+      'pool': '#swimming-pool',
+      'chapel': '#chapel-group',
+      'parking': '#g-parking',
+      'waterfall': '#waterfall-group',
+      'lobby_reception': '#g-lobby',
+      'kitchen': '#g-service',
+      'stage': '#stage-group',
+      'dj_booth': '#dj2-group',
+      'bathrooms': '#g-bathrooms',
+      'dancefloor_pixel': '#dancefloor-group',
+      'dancefloor': '#dancefloor-group'
+    };
+    _hifiTemplates = {};
+    Object.keys(hifiSelectors).forEach(function (type) {
+      var node = _svg.querySelector(hifiSelectors[type]);
+      if (node) {
+        _hifiTemplates[type] = node.cloneNode(true);
+      }
+    });
 
     var state = getState ? getState() : {};
     _terrain = state.terrain || { w: 100, h: 98 };

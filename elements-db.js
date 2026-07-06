@@ -192,6 +192,20 @@ window.ELEMENTS_CATALOG = [
     planoOnly: false
   },
   {
+    type: 'bathrooms',
+    name: 'Servicios Sanitarios',
+    category: 'estructuras',
+    icon: 'fa-restroom',
+    defaultW: 20,
+    defaultH: 6,
+    shape: 'rect',
+    color: '#374151',
+    defaultChairs: 0,
+    description: 'Área de sanitarios (Servicios Sanitarios).',
+    layer: 'estructuras',
+    planoOnly: false
+  },
+  {
     type: 'waterfall',
     name: 'Cascada',
     category: 'estructuras',
