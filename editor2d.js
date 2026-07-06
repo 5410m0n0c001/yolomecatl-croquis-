@@ -654,32 +654,36 @@ window.Editor2D = (function () {
     }
 
     // ── Label ─────────────────────────────────────────────
+    var isTable = (elem.type.indexOf('table_') === 0);
     var labelFontSize = Math.min(Math.max(mToPx(0.5) * _zoom, 7), 13) / _zoom;
+    if (isTable) {
+      labelFontSize = 8; // fixed 0.8m font-size in SVG coordinate space so it scales with tables
+    }
     var labelEl = svgEl('text', {
       x: px,
       y: py + (shape === 'arch' ? ph * 0.15 : 0),
       'text-anchor': 'middle',
       'dominant-baseline': 'middle',
-      fill: '#ffffff',
+      fill: isTable ? 'var(--svg-text-num)' : '#ffffff',
       'font-size': labelFontSize,
       'font-family': 'sans-serif',
-      'font-weight': '600',
+      'font-weight': isTable ? '700' : '600',
       'pointer-events': 'none',
       'paint-order': 'stroke',
-      stroke: 'rgba(0,0,0,0.7)',
-      'stroke-width': 2
+      stroke: isTable ? 'none' : 'rgba(0,0,0,0.7)',
+      'stroke-width': isTable ? 0 : 2
     });
     // Shorten long names
     var displayName = elem.name || (cat ? cat.name : elem.type);
     if (elem.mesaConfig && elem.mesaConfig.mesaNum) {
-      displayName = 'Mesa ' + elem.mesaConfig.mesaNum;
+      displayName = elem.mesaConfig.mesaNum; // show only the table number (e.g. 1)
     }
     if (displayName.length > 18) displayName = displayName.slice(0, 16) + '…';
     labelEl.textContent = displayName;
     g.appendChild(labelEl);
 
-    // Chair / capacity badge
-    if (elem.chairs && elem.chairs > 0) {
+    // Chair / capacity badge (hide for tables in 2D unless not a table)
+    if (!isTable && elem.chairs && elem.chairs > 0) {
       var badge = svgEl('text', {
         x: px,
         y: py + labelFontSize * 1.4,
