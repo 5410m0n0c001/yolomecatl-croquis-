@@ -258,14 +258,33 @@ window.Editor2D = (function () {
     _gRulerH.innerHTML = '';
     _gRulerV.innerHTML = '';
 
+    var sz = _svgSize();
+    var width = sz.w;
+    var height = sz.h;
+
     var rulerBg = svgEl('rect', { x: 0, y: 0, width: '100%', height: RULER_SIZE, fill: '#1e293b' });
     _gRulerH.appendChild(rulerBg);
     var rulerBgV = svgEl('rect', { x: 0, y: 0, width: RULER_SIZE, height: '100%', fill: '#1e293b' });
     _gRulerV.appendChild(rulerBgV);
 
-    // Horizontal marks every 5m
-    for (var mx = 0; mx <= _terrain.w; mx += 5) {
+    // Auto-scale tick interval based on zoom to prevent text overlap
+    var interval = 5;
+    var stepPx = 5 * SCALE * _zoom;
+    if (stepPx < 25) {
+      if (stepPx * 2 >= 25) interval = 10;
+      else if (stepPx * 4 >= 25) interval = 20;
+      else interval = 50;
+    }
+
+    // Horizontal marks across visible viewport
+    var mMinX = (RULER_SIZE - _panX) / (SCALE * _zoom);
+    var mMaxX = (width - _panX) / (SCALE * _zoom);
+    var mStartX = Math.ceil(mMinX / interval) * interval;
+    var mEndX = Math.floor(mMaxX / interval) * interval;
+
+    for (var mx = mStartX; mx <= mEndX; mx += interval) {
       var px = _panX + mx * SCALE * _zoom;
+      if (px < RULER_SIZE || px > width) continue;
       var tick = svgEl('line', { x1: px, y1: RULER_SIZE - 6, x2: px, y2: RULER_SIZE, stroke: '#94a3b8', 'stroke-width': 1 });
       _gRulerH.appendChild(tick);
       var lbl = svgEl('text', { x: px + 2, y: RULER_SIZE - 8, fill: '#94a3b8', 'font-size': 9, 'font-family': 'sans-serif' });
@@ -273,9 +292,15 @@ window.Editor2D = (function () {
       _gRulerH.appendChild(lbl);
     }
 
-    // Vertical marks every 5m
-    for (var my = 0; my <= _terrain.h; my += 5) {
+    // Vertical marks across visible viewport
+    var mMinY = (RULER_SIZE - _panY) / (SCALE * _zoom);
+    var mMaxY = (height - _panY) / (SCALE * _zoom);
+    var mStartY = Math.ceil(mMinY / interval) * interval;
+    var mEndY = Math.floor(mMaxY / interval) * interval;
+
+    for (var my = mStartY; my <= mEndY; my += interval) {
       var py = _panY + my * SCALE * _zoom;
+      if (py < RULER_SIZE || py > height) continue;
       var tickV = svgEl('line', { x1: RULER_SIZE - 6, y1: py, x2: RULER_SIZE, y2: py, stroke: '#94a3b8', 'stroke-width': 1 });
       _gRulerV.appendChild(tickV);
       var lblV = svgEl('text', {
