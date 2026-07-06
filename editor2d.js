@@ -378,7 +378,9 @@ window.Editor2D = (function () {
     };
 
     var hifi = hifiMap[elem.type];
+    var isHifi = false;
     if (hifi && _hifiTemplates[elem.type]) {
+      isHifi = true;
       var templateNode = _hifiTemplates[elem.type];
       var clone = templateNode.cloneNode(true);
       clone.removeAttribute('id');
@@ -401,11 +403,9 @@ window.Editor2D = (function () {
         'pointer-events': 'all'
       });
       g.appendChild(selectRect);
-      
-      group.appendChild(g);
-      return;
     }
 
+    if (!isHifi) {
     // ── Shape rendering ───────────────────────────────────
     if (shape === 'circle') {
       var r = pw / 2;
@@ -696,6 +696,7 @@ window.Editor2D = (function () {
       });
       badge.textContent = elem.chairs + 'p';
       g.appendChild(badge);
+    }
     }
 
     // ── Selection ring ────────────────────────────────────
