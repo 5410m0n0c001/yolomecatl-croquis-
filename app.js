@@ -2317,17 +2317,34 @@
   // CLEAR
   // ══════════════════════════════════════════════════════════
   function _wireClear() {
-    var btn = document.getElementById('btn-clear');
+    var btn = document.getElementById('btn-clear') || document.getElementById('btn-reset-layout');
     if (!btn) return;
     btn.onclick = function () {
-      if (!confirm('¿Eliminar todos los elementos? Esta acción no se puede deshacer.')) return;
+      if (!confirm('¿Estás seguro de que deseas iniciar un nuevo proyecto? Esto borrará todos los elementos actuales del plano.')) return;
       saveHistory();
-      AppState.elements = [];
+      AppState.elements = [
+        {
+          id: "struct_terrain",
+          type: "terrain",
+          category: "estructuras",
+          name: "Terreno Base",
+          x: 50.0,
+          y: 49.0,
+          w: 100.0,
+          h: 98.0,
+          rotation: 0,
+          color: "#03182b",
+          chairs: 0,
+          editable: false,
+          removable: false,
+          layer: "bg"
+        }
+      ];
       _tableCounter = 0;
       deselectAll();
       _refresh();
       updateCounters();
-      showToast('Plano limpiado.', 'warning');
+      showToast('Nuevo plano iniciado.', 'warning');
     };
   }
 

@@ -782,34 +782,25 @@ window.Visualizer3D = (function () {
   garden2.receiveShadow = true;
   _staticEnvironmentGroup.add(garden2);
   
-  // --- B) PLATAFORMA ELEVADA Y PISO INTERIOR DEL SAL├ôN ---
+
+  // --- High-fidelity models are now rendered dynamically ---
+
+    
+
+  function _buildHiFiSalon(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- B) PLATAFORMA ELEVADA Y PISO INTERIOR DEL SAL├ôN ---
   const floorSalonGeom = new THREE.BoxGeometry(SALON.w, 0.05, SALON.h);
   const floorSalonMat = new THREE.MeshStandardMaterial({ color: COLORS.floorSalon, roughness: 0.35, metalness: 0.1 });
   const floorSalon = new THREE.Mesh(floorSalonGeom, floorSalonMat);
-  floorSalon.position.set(51.0, 0.025, 39.0);
+  floorSalon.position.set(0, 0.025, 0);
   floorSalon.receiveShadow = true;
-  _staticEnvironmentGroup.add(floorSalon);
+  group.add(floorSalon);
   
   // Inicializaci├│n de la Pista de Baile Din├ímica (Brillante y pulida de color caf├®)
   // Usamos un roughness ultra bajo (0.08) y metalness moderado (0.35) para que brille y refleje de forma premium
-  const danceMat = new THREE.MeshStandardMaterial({ 
-    color: COLORS.floorDance, 
-    roughness: 0.08, 
-    metalness: 0.35 
-  });
-  const danceFloorMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), danceMat);
-  danceFloorMesh.receiveShadow = true;
-  _staticEnvironmentGroup.add(danceFloorMesh);
-  
-  // Borde dorado metálico de la pista
-  const danceBorderMat = new THREE.MeshStandardMaterial({ 
-    color: COLORS.gold, 
-    roughness: 0.1, 
-    metalness: 0.9 
-  });
-  const danceFloorBorderMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), danceBorderMat);
-  _staticEnvironmentGroup.add(danceFloorBorderMesh);
-  
+    
   // --- C) MUROS PERIMETRALES Y COLUMNAS ---
   const wallMat = new THREE.MeshStandardMaterial({ color: COLORS.wallsSalon, roughness: 0.85 });
   const colMat = new THREE.MeshStandardMaterial({ color: COLORS.columns, roughness: 0.6 });
@@ -821,26 +812,26 @@ window.Visualizer3D = (function () {
   colZs.forEach(z => {
     // Izquierda
     const cL = new THREE.Mesh(colGeom, colMat);
-    cL.position.set(27.0, SALON.height / 2, z);
+    cL.position.set(-24.0, SALON.height / 2, z - 39.0);
     cL.castShadow = true;
     cL.receiveShadow = true;
-    _staticEnvironmentGroup.add(cL);
+    group.add(cL);
     
     // Derecha
     const cR = new THREE.Mesh(colGeom, colMat);
-    cR.position.set(75.0, SALON.height / 2, z);
+    cR.position.set(24.0, SALON.height / 2, z - 39.0);
     cR.castShadow = true;
     cR.receiveShadow = true;
-    _staticEnvironmentGroup.add(cR);
+    group.add(cR);
     
     // Luces de Acento en Columnas (Pink Coral Uplights)
     const uplightL = new THREE.PointLight(COLORS.roseCoral, 0.8, 6.0, 1.5);
-    uplightL.position.set(27.4, 0.2, z);
-    _staticEnvironmentGroup.add(uplightL);
+    uplightL.position.set(-23.6, 0.2, z - 39.0);
+    group.add(uplightL);
     
     const uplightR = new THREE.PointLight(COLORS.roseCoral, 0.8, 6.0, 1.5);
-    uplightR.position.set(74.6, 0.2, z);
-    _staticEnvironmentGroup.add(uplightR);
+    uplightR.position.set(23.6, 0.2, z - 39.0);
+    group.add(uplightR);
   });
   
   // Muros perimetrales (Cajas simples de doble altura)
@@ -852,45 +843,45 @@ window.Visualizer3D = (function () {
     // 1. Antepecho base (muro bajo colonial)
     const baseGeom = new THREE.BoxGeometry(0.3, 0.9, zLength);
     const baseMesh = new THREE.Mesh(baseGeom, wallMat);
-    baseMesh.position.set(27.0, 0.45, zCenter);
+    baseMesh.position.set(-24.0, 0.45, zCenter - 39.0);
     baseMesh.castShadow = true;
     baseMesh.receiveShadow = true;
-    _staticEnvironmentGroup.add(baseMesh);
+    group.add(baseMesh);
     
     // 2. Dintel superior de carga
     const topGeom = new THREE.BoxGeometry(0.3, 1.7, zLength);
     const topMesh = new THREE.Mesh(topGeom, wallMat);
-    topMesh.position.set(27.0, 6.5 - 0.85, zCenter);
+    topMesh.position.set(-24.0, 6.5 - 0.85, zCenter - 39.0);
     topMesh.castShadow = true;
-    _staticEnvironmentGroup.add(topMesh);
+    group.add(topMesh);
     
     // 3. Pilares laterales de cantera que enmarcan la apertura
     const pilarW = 0.6;
     const pilarGeom = new THREE.BoxGeometry(0.3, 3.9, pilarW);
     
     const pilarL = new THREE.Mesh(pilarGeom, wallMat);
-    pilarL.position.set(27.0, 0.9 + 1.95, zStart + pilarW/2);
+    pilarL.position.set(-24.0, 0.9 + 1.95, zStart + pilarW/2 - 39.0);
     pilarL.castShadow = true;
-    _staticEnvironmentGroup.add(pilarL);
+    group.add(pilarL);
     
     const pilarR = new THREE.Mesh(pilarGeom, wallMat);
-    pilarR.position.set(27.0, 0.9 + 1.95, zEnd - pilarW/2);
+    pilarR.position.set(-24.0, 0.9 + 1.95, zEnd - pilarW/2 - 39.0);
     pilarR.castShadow = true;
-    _staticEnvironmentGroup.add(pilarR);
+    group.add(pilarR);
     
     // 4. Esquinas arqueadas a 45 grados para conformar el dintel colonial arqueado
     const cornerGeom = new THREE.BoxGeometry(0.32, 0.6, 0.6);
     const cornerMat = new THREE.MeshStandardMaterial({ color: COLORS.columns, roughness: 0.7 });
     
     const cL = new THREE.Mesh(cornerGeom, cornerMat);
-    cL.position.set(27.0, 4.8 - 0.3, zStart + pilarW + 0.3);
+    cL.position.set(-24.0, 4.8 - 0.3, zStart + pilarW + 0.3 - 39.0);
     cL.rotation.x = Math.PI / 4;
-    _staticEnvironmentGroup.add(cL);
+    group.add(cL);
     
     const cR = new THREE.Mesh(cornerGeom, cornerMat);
-    cR.position.set(27.0, 4.8 - 0.3, zEnd - pilarW - 0.3);
+    cR.position.set(-24.0, 4.8 - 0.3, zEnd - pilarW - 0.3 - 39.0);
     cR.rotation.x = -Math.PI / 4;
-    _staticEnvironmentGroup.add(cR);
+    group.add(cR);
   };
 
   // Construir las 5 arcadas a lo largo de todo el lateral izquierdo que conecta al jard├¡n
@@ -903,39 +894,39 @@ window.Visualizer3D = (function () {
   // Muro derecho
   const wallRightGeom = new THREE.BoxGeometry(0.3, SALON.height, SALON.h);
   const wallRight = new THREE.Mesh(wallRightGeom, wallMat);
-  wallRight.position.set(75.0, SALON.height / 2, 39.0);
+  wallRight.position.set(24.0, SALON.height / 2, 0.0);
   wallRight.castShadow = true;
-  _staticEnvironmentGroup.add(wallRight);
+  group.add(wallRight);
   
   // Muro trasero (Norte) - exceptuando zona de conexi├│n con el DJ central
   const wallBackLGeom = new THREE.BoxGeometry(11.5, SALON.height, 0.3);
   const wallBackL = new THREE.Mesh(wallBackLGeom, wallMat);
-  wallBackL.position.set(32.75, SALON.height / 2, 8.0);
+  wallBackL.position.set(-18.25, SALON.height / 2, -31.0);
   wallBackL.castShadow = true;
-  _staticEnvironmentGroup.add(wallBackL);
+  group.add(wallBackL);
   
   const wallBackRGeom = new THREE.BoxGeometry(16.5, SALON.height, 0.3);
   const wallBackR = new THREE.Mesh(wallBackRGeom, wallMat);
-  wallBackR.position.set(66.75, SALON.height / 2, 8.0);
+  wallBackR.position.set(15.75, SALON.height / 2, -31.0);
   wallBackR.castShadow = true;
-  _staticEnvironmentGroup.add(wallBackR);
+  group.add(wallBackR);
   
   // Muro frontal (Lobby - Sur)
   const wallFrontLGeom = new THREE.BoxGeometry(20.0, SALON.height, 0.3);
   const wallFrontL = new THREE.Mesh(wallFrontLGeom, wallMat);
-  wallFrontL.position.set(37.0, SALON.height / 2, 70.0);
+  wallFrontL.position.set(-14.0, SALON.height / 2, 31.0);
   wallFrontL.castShadow = true;
-  _staticEnvironmentGroup.add(wallFrontL);
+  group.add(wallFrontL);
   
   const wallFrontRGeom = new THREE.BoxGeometry(20.0, SALON.height, 0.3);
   const wallFrontR = new THREE.Mesh(wallFrontRGeom, wallMat);
-  wallFrontR.position.set(65.0, SALON.height / 2, 70.0);
+  wallFrontR.position.set(14.0, SALON.height / 2, 31.0);
   wallFrontR.castShadow = true;
-  _staticEnvironmentGroup.add(wallFrontR);
+  group.add(wallFrontR);
   
   // --- D) ARMADURA DE TECHO (A DOS AGUAS) ---
   const roofGroup = new THREE.Group();
-  _staticEnvironmentGroup.add(roofGroup);
+  group.add(roofGroup);
   
   // Vigas de madera r├║stica longitudinales
   const beamMat = new THREE.MeshStandardMaterial({ color: COLORS.woodDark, roughness: 0.8 });
@@ -943,13 +934,13 @@ window.Visualizer3D = (function () {
   for (let z = 8.0; z <= 70.0; z += 10.0) {
     // Viga izquierda inclinada
     const beamL = new THREE.Mesh(beamGeom, beamMat);
-    beamL.position.set(51.0 - 12.0, 6.5 + (8.2 - 6.5)/2, z);
+    beamL.position.set(-12.0, 6.5 + (8.2 - 6.5)/2, z - 39.0);
     beamL.rotation.z = Math.atan2((8.2 - 6.5), 24.0);
     roofGroup.add(beamL);
     
     // Viga derecha inclinada
     const beamR = new THREE.Mesh(beamGeom, beamMat);
-    beamR.position.set(51.0 + 12.0, 6.5 + (8.2 - 6.5)/2, z);
+    beamR.position.set(12.0, 6.5 + (8.2 - 6.5)/2, z - 39.0);
     beamR.rotation.z = -Math.atan2((8.2 - 6.5), 24.0);
     roofGroup.add(beamR);
   }
@@ -961,22 +952,29 @@ window.Visualizer3D = (function () {
     const chainGeom = new THREE.CylinderGeometry(0.015, 0.015, 2.0, 8);
     const chainMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.9 });
     const chain = new THREE.Mesh(chainGeom, chainMat);
-    chain.position.set(51.0, 8.2 - 1.0, z);
-    _staticEnvironmentGroup.add(chain);
+    chain.position.set(0.0, 8.2 - 1.0, z - 39.0);
+    group.add(chain);
     
     const chandelier = new THREE.Mesh(bulbGeom, bulbMat);
-    chandelier.position.set(51.0, 8.2 - 2.0, z);
-    _staticEnvironmentGroup.add(chandelier);
+    chandelier.position.set(0.0, 8.2 - 2.0, z - 39.0);
+    group.add(chandelier);
     
     const chandelierLight = new THREE.PointLight(0xfff3e0, 0.65, 12, 2.0);
-    chandelierLight.position.set(51.0, 8.2 - 2.1, z);
-    _staticEnvironmentGroup.add(chandelierLight);
+    chandelierLight.position.set(0.0, 8.2 - 2.1, z - 39.0);
+    group.add(chandelierLight);
   }
   
-  // --- E) ESCENARIO DJ CON BA├æOS SUBTERR├üNEOS Y ESCALERAS LATERALES DESCENDENTES ---
+
+  }
+
+
+  function _buildHiFiStage(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- E) ESCENARIO DJ CON BA├æOS SUBTERR├üNEOS Y ESCALERAS LATERALES DESCENDENTES ---
   const stageGroup = new THREE.Group();
   stageGroup.name = "stage-and-sub-bathrooms";
-  stageGroup.position.set(48.5, 0, 11.0); // Centrado en (48.5, 11)
+  stageGroup.position.set(0, 0, 0); // Centrado en (48.5, 11)
   
   // Materiales de alta fidelidad
   const stageMat = new THREE.MeshStandardMaterial({ color: COLORS.woodDark, roughness: 0.5 });
@@ -1094,27 +1092,7 @@ window.Visualizer3D = (function () {
   stageGroup.add(railingR1);
   
   // 4. Consola de DJ (Tope del Stage, Y = 1.0m)
-  const djConsoleGeom = new THREE.BoxGeometry(4.0, 1.0, 1.2);
-  const djConsoleMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
-  const djConsole = new THREE.Mesh(djConsoleGeom, djConsoleMat);
-  djConsole.position.set(0, 1.0 + 0.5, -1.8);
-  djConsole.castShadow = true;
-  stageGroup.add(djConsole);
-  
-  // Altavoces de Gala
-  const spkGeom = new THREE.BoxGeometry(0.7, 1.8, 0.7);
-  const spkMat = new THREE.MeshStandardMaterial({ color: 0x070b12, roughness: 0.95 });
-  
-  const spkL = new THREE.Mesh(spkGeom, spkMat);
-  spkL.position.set(-8.5, 1.0 + 0.9, 1.5);
-  spkL.castShadow = true;
-  stageGroup.add(spkL);
-  
-  const spkR = new THREE.Mesh(spkGeom, spkMat);
-  spkR.position.set(8.5, 1.0 + 0.9, 1.5);
-  spkR.castShadow = true;
-  stageGroup.add(spkR);
-  
+    
   // Rampa/Acceso t├®cnico desde el pasillo de la barra al Stage en el lateral derecho posterior
   // Conecta el pasillo (X = 27.0 en base, o local X = +10) con la plataforma
   const stageRampGeom = new THREE.BoxGeometry(1.5, 0.5, 1.2);
@@ -1123,15 +1101,22 @@ window.Visualizer3D = (function () {
   stageRamp.rotation.y = 0;
   stageGroup.add(stageRamp);
   
-  _staticEnvironmentGroup.add(stageGroup);
+  group.add(stageGroup);
   
-  // --- F) COCINA Y BARRA DE EVENTOS DE ALTO DETALLE ---
+
+  }
+
+
+  function _buildHiFiKitchen(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- F) COCINA Y BARRA DE EVENTOS DE ALTO DETALLE ---
   // Muros de cocina (X: 77 a 98, Z: 2 a 25)
   // --- F) COCINA Y BARRA DE EVENTOS DE ALTO DETALLE ---
   // Muros de cocina (X: 77 a 98, Z: 2 a 25)
   const kitchenGroup = new THREE.Group();
   kitchenGroup.name = "kitchen-industrial-structure";
-  kitchenGroup.position.set(87.5, 0, 13.5); // Centro de la cocina
+  kitchenGroup.position.set(0, 0, 0); // Centro de la cocina
   
   const kWallMat = new THREE.MeshStandardMaterial({ color: 0x092135, roughness: 0.85 });
   
@@ -1323,11 +1308,18 @@ window.Visualizer3D = (function () {
   hood.castShadow = true;
   kitchenGroup.add(hood);
   
-  _staticEnvironmentGroup.add(kitchenGroup);
+  group.add(kitchenGroup);
   
   // --- G) SERVICIOS SANITARIOS SUBTERR├üNEOS (Modelados debajo del escenario en la secci├│n E) ---
   
-  // --- H) RECEPCI├ôN PRINCIPAL (LOBBY) CON ALTURA 6.5M Y ACCESOS ABIERTOS ---
+
+  }
+
+
+  function _buildHiFiLobby(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- H) RECEPCI├ôN PRINCIPAL (LOBBY) CON ALTURA 6.5M Y ACCESOS ABIERTOS ---
   const lobbyGroup = new THREE.Group();
   lobbyGroup.name = "lobby-structure";
   
@@ -1341,43 +1333,43 @@ window.Visualizer3D = (function () {
   
   // Tramo s├│lido 1: X: 27 a 32 (ancho 5m)
   const lobbyWallS1 = new THREE.Mesh(new THREE.BoxGeometry(5.0, 6.5, 0.3), lobbyWallMat);
-  lobbyWallS1.position.set(29.5, 3.25, 75.5);
+  lobbyWallS1.position.set(29.5 - 51.0, 3.25, 75.5 - 72.75);
   lobbyWallS1.castShadow = true;
   lobbyGroup.add(lobbyWallS1);
   
   // Tramo s├│lido 2: X: 42 a 48 (ancho 6m)
   const lobbyWallS2 = new THREE.Mesh(new THREE.BoxGeometry(6.0, 6.5, 0.3), lobbyWallMat);
-  lobbyWallS2.position.set(45.0, 3.25, 75.5);
+  lobbyWallS2.position.set(45.0 - 51.0, 3.25, 75.5 - 72.75);
   lobbyWallS2.castShadow = true;
   lobbyGroup.add(lobbyWallS2);
   
   // Tramo s├│lido 3: X: 54 a 60 (ancho 6m)
   const lobbyWallS3 = new THREE.Mesh(new THREE.BoxGeometry(6.0, 6.5, 0.3), lobbyWallMat);
-  lobbyWallS3.position.set(57.0, 3.25, 75.5);
+  lobbyWallS3.position.set(57.0 - 51.0, 3.25, 75.5 - 72.75);
   lobbyWallS3.castShadow = true;
   lobbyGroup.add(lobbyWallS3);
   
   // Tramo s├│lido 4: X: 70 a 75 (ancho 5m)
   const lobbyWallS4 = new THREE.Mesh(new THREE.BoxGeometry(5.0, 6.5, 0.3), lobbyWallMat);
-  lobbyWallS4.position.set(72.5, 3.25, 75.5);
+  lobbyWallS4.position.set(72.5 - 51.0, 3.25, 75.5 - 72.75);
   lobbyWallS4.castShadow = true;
   lobbyGroup.add(lobbyWallS4);
   
   // Dintel Entrada Principal Central: X: 48 a 54 (Y: 3.5 a 6.5, altura 3.0m)
   const lobbyDintelCenter = new THREE.Mesh(new THREE.BoxGeometry(6.0, 3.0, 0.3), lobbyWallMat);
-  lobbyDintelCenter.position.set(51.0, 5.0, 75.5);
+  lobbyDintelCenter.position.set(51.0 - 51.0, 5.0, 75.5 - 72.75);
   lobbyDintelCenter.castShadow = true;
   lobbyGroup.add(lobbyDintelCenter);
   
   // Dintel Vano Izquierdo: X: 32 a 42 (Y: 3.2 a 6.5, altura 3.3m)
   const lobbyDintelLeft = new THREE.Mesh(new THREE.BoxGeometry(10.0, 3.3, 0.3), lobbyWallMat);
-  lobbyDintelLeft.position.set(37.0, 4.85, 75.5);
+  lobbyDintelLeft.position.set(37.0 - 51.0, 4.85, 75.5 - 72.75);
   lobbyDintelLeft.castShadow = true;
   lobbyGroup.add(lobbyDintelLeft);
   
   // Dintel Vano Derecho: X: 60 a 70 (Y: 3.2 a 6.5, altura 3.3m)
   const lobbyDintelRight = new THREE.Mesh(new THREE.BoxGeometry(10.0, 3.3, 0.3), lobbyWallMat);
-  lobbyDintelRight.position.set(65.0, 4.85, 75.5);
+  lobbyDintelRight.position.set(65.0 - 51.0, 4.85, 75.5 - 72.75);
   lobbyDintelRight.castShadow = true;
   lobbyGroup.add(lobbyDintelRight);
   
@@ -1387,7 +1379,7 @@ window.Visualizer3D = (function () {
   const lobbyColZs = [32.0, 42.0, 48.0, 54.0, 60.0, 70.0];
   lobbyColZs.forEach(x => {
     const col = new THREE.Mesh(lobbyColGeom, lobbyColMat);
-    col.position.set(x, 1.6, 75.5);
+    col.position.set(x - 51.0, 1.6, 75.5 - 72.75);
     col.castShadow = true;
     lobbyGroup.add(col);
   });
@@ -1396,19 +1388,19 @@ window.Visualizer3D = (function () {
   // Z: 70 a 75.5 (ancho 5.5m). Apertura central para puerta de emergencia marcada en la imagen.
   // Tramo s├│lido posterior: Z: 70.0 a 71.5 (ancho 1.5m)
   const lobbyWallLeft1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.5, 1.5), lobbyWallMat);
-  lobbyWallLeft1.position.set(27.0, 3.25, 70.75);
+  lobbyWallLeft1.position.set(27.0 - 51.0, 3.25, 70.75 - 72.75);
   lobbyWallLeft1.castShadow = true;
   lobbyGroup.add(lobbyWallLeft1);
   
   // Tramo s├│lido anterior: Z: 74.0 a 75.5 (ancho 1.5m)
   const lobbyWallLeft2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.5, 1.5), lobbyWallMat);
-  lobbyWallLeft2.position.set(27.0, 3.25, 74.75);
+  lobbyWallLeft2.position.set(27.0 - 51.0, 3.25, 74.75 - 72.75);
   lobbyWallLeft2.castShadow = true;
   lobbyGroup.add(lobbyWallLeft2);
   
   // Dintel Puerta de Emergencia: Z: 71.5 a 74.0 (Y: 3.2 a 6.5, altura 3.3m)
   const lobbyDintelLeftJ = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.3, 2.5), lobbyWallMat);
-  lobbyDintelLeftJ.position.set(27.0, 4.85, 72.75);
+  lobbyDintelLeftJ.position.set(27.0 - 51.0, 4.85, 72.75 - 72.75);
   lobbyDintelLeftJ.castShadow = true;
   lobbyGroup.add(lobbyDintelLeftJ);
 
@@ -1416,7 +1408,7 @@ window.Visualizer3D = (function () {
   const emergencyDoorGeom = new THREE.BoxGeometry(0.05, 3.2, 2.5);
   const emergencyDoorMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, metalness: 0.8 });
   const emergencyDoor = new THREE.Mesh(emergencyDoorGeom, emergencyDoorMat);
-  emergencyDoor.position.set(27.0, 1.6, 72.75);
+  emergencyDoor.position.set(27.0 - 51.0, 1.6, 72.75 - 72.75);
   emergencyDoor.castShadow = true;
   lobbyGroup.add(emergencyDoor);
   
@@ -1425,17 +1417,17 @@ window.Visualizer3D = (function () {
   const emergencySignMat = new THREE.MeshBasicMaterial({ color: 0x22c55e }); // Verde LED autoluminoso
   
   const emergencySignOut = new THREE.Mesh(emergencySignGeom, emergencySignMat);
-  emergencySignOut.position.set(26.84, 3.5, 72.75); // Lado exterior (estacionamiento/jard├¡n)
+  emergencySignOut.position.set(26.84 - 51.0, 3.5, 72.75 - 72.75); // Lado exterior (estacionamiento/jard├¡n)
   lobbyGroup.add(emergencySignOut);
   
   const emergencySignIn = new THREE.Mesh(emergencySignGeom, emergencySignMat);
-  emergencySignIn.position.set(27.16, 3.5, 72.75); // Lado interior (lobby)
+  emergencySignIn.position.set(27.16 - 51.0, 3.5, 72.75 - 72.75); // Lado interior (lobby)
   lobbyGroup.add(emergencySignIn);
 
   // 3. Muro Derecho de la Recepci├│n (Conexi├│n Cocina/Servicio, X = 75.0)
   // Z: 70 a 75.5 (ancho 5.5m). S├│lido con puerta de servicio de 1.2m
   const lobbyWallRight = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.5, 5.5), lobbyWallMat);
-  lobbyWallRight.position.set(75.0, 3.25, 72.75);
+  lobbyWallRight.position.set(75.0 - 51.0, 3.25, 72.75 - 72.75);
   lobbyWallRight.castShadow = true;
   lobbyGroup.add(lobbyWallRight);
   
@@ -1443,16 +1435,23 @@ window.Visualizer3D = (function () {
   const lobbyFloorGeom = new THREE.BoxGeometry(48.0, 0.05, 5.5);
   const lobbyFloorMat = new THREE.MeshStandardMaterial({ color: COLORS.floorSalon, roughness: 0.3 });
   const lobbyFloor = new THREE.Mesh(lobbyFloorGeom, lobbyFloorMat);
-  lobbyFloor.position.set(51.0, 0.025, 72.75);
+  lobbyFloor.position.set(51.0 - 51.0, 0.025, 72.75 - 72.75);
   lobbyFloor.receiveShadow = true;
   lobbyGroup.add(lobbyFloor);
   
-  _staticEnvironmentGroup.add(lobbyGroup);
+  group.add(lobbyGroup);
   
-  // --- I) ALBERCA CON BORDE DE M├üRMOL ---
+
+  }
+
+
+  function _buildHiFiPool(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- I) ALBERCA CON BORDE DE M├üRMOL ---
   // Vaso y agua (X: 39 a 64, Z: 80.5 a 91.5)
   const poolGroup = new THREE.Group();
-  poolGroup.position.set(51.5, 0, 86.0); // Centro de la alberca
+  poolGroup.position.set(0, 0, 0); // Centro de la alberca
   
   // Vaso excavado (Y negativo)
   const poolBaseGeom = new THREE.BoxGeometry(25.0, 1.6, 11.0);
@@ -1496,12 +1495,19 @@ window.Visualizer3D = (function () {
   uLight2.position.set(6, -0.4, 0);
   poolGroup.add(uLight2);
   
-  _staticEnvironmentGroup.add(poolGroup);
+  group.add(poolGroup);
   
-  // --- J) CAPILLA (ESQUINA INFERIOR IZQUIERDA DEL JARD├ìN) ---
+
+  }
+
+
+  function _buildHiFiChapel(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- J) CAPILLA (ESQUINA INFERIOR IZQUIERDA DEL JARD├ìN) ---
   // Pabell├│n de X: 4 a 21 (Ancho 17m), Z: 80 a 92 (Fondo 12m)
   const chapelGroup = new THREE.Group();
-  chapelGroup.position.set(12.5, 0, 86.0); // Centro de la capilla
+  chapelGroup.position.set(0, 0, 0); // Centro de la capilla
   
   // Suelo de piedra de la capilla
   const cFloorGeom = new THREE.BoxGeometry(17.0, 0.05, 12.0);
@@ -1552,12 +1558,19 @@ window.Visualizer3D = (function () {
   roofR.castShadow = true;
   chapelGroup.add(roofR);
   
-  _staticEnvironmentGroup.add(chapelGroup);
+  group.add(chapelGroup);
   
-  // --- K) CASCADA DE AGUA ---
+
+  }
+
+
+  function _buildHiFiWaterfall(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+      // --- K) CASCADA DE AGUA ---
   // Pileta de cascada (X: 2.5 a 5.5, Z: 19.5 a 44.5)
   const cascadeGroup = new THREE.Group();
-  cascadeGroup.position.set(4.0, 0, 32.0); // Centro de la cascada
+  cascadeGroup.position.set(0, 0, 0); // Centro de la cascada
   
   const cascadePoolGeom = new THREE.BoxGeometry(3.0, 0.5, 25.0);
   const cascadePoolMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
@@ -1585,16 +1598,24 @@ window.Visualizer3D = (function () {
   cascadeLight.position.set(1.5, 1.5, 0);
   cascadeGroup.add(cascadeLight);
   
-  _staticEnvironmentGroup.add(cascadeGroup);
+  group.add(cascadeGroup);
   
-  // --- L) ESTACIONAMIENTO (ZONA VEHICULAR) ---
+
+  }
+
+
+  function _buildHiFiParking(group, elem) {
+    var w = elem.w;
+    var h = elem.h;
+    const parkingGroup = new THREE.Group();
+      // --- L) ESTACIONAMIENTO (ZONA VEHICULAR) ---
   // Piso asfalto (X: 77 a 98, Z: 27 a 94)
   const parkingGeom = new THREE.BoxGeometry(21.0, 0.02, 67.0);
   const parkingMat = new THREE.MeshStandardMaterial({ color: COLORS.asphalt, roughness: 0.95 });
   const parking = new THREE.Mesh(parkingGeom, parkingMat);
-  parking.position.set(87.5, 0.01, 60.5);
+  parking.position.set(0, 0.01, 0);
   parking.receiveShadow = true;
-  _staticEnvironmentGroup.add(parking);
+  parkingGroup.add(parking);
   
   // Autos 3D procedurales para dar escala
   const carColors = [0xb91c1c, 0x1d4ed8, 0x9ca3af];
@@ -1604,13 +1625,18 @@ window.Visualizer3D = (function () {
     const car = _create3DCar(carColors[idx % 3]);
     car.position.set(idx % 2 === 0 ? 82.0 : 93.0, 0.02, z);
     car.rotation.y = idx % 2 === 0 ? Math.PI / 2 : -Math.PI / 2;
-    _staticEnvironmentGroup.add(car);
+    parkingGroup.add(car);
   });
 }
 
 /**
  * Crea un carrito 3D minimalista para estacionamiento
  */
+
+
+    group.add(parkingGroup);
+  }
+
 
   function _create3DCar(colorHex) {
   const carGroup = new THREE.Group();
@@ -1871,16 +1897,6 @@ window.Visualizer3D = (function () {
 
     if (elem.type === 'salon' || elem.type === 'salon_carpa') {
       var salonType = elem.type === 'salon_carpa' ? 'sin_muros' : (elem.salonType || 'muros');
-
-      // Floor slab
-      var floor = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.04, h),
-        new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.5 })
-      );
-      floor.position.y = 0.02;
-      floor.receiveShadow = true;
-      group.add(floor);
-
       if (salonType === 'sin_muros') {
         // --- CARPA / TENT STYLE ---
         // Metal columns
@@ -1908,300 +1924,77 @@ window.Visualizer3D = (function () {
           var countW = Math.floor(w / 5);
           for (var i = 1; i < countW; i++) {
             var pct = i / countW;
-            var xPos = -w/2 + pct * w;
-            pillars.push({ x: xPos, z: -h/2 + 0.15 });
-            pillars.push({ x: xPos, z: h/2 - 0.15 });
+            var wx = -w/2 + pct * w;
+            pillars.push({ x: wx, z: -h/2 + 0.15 });
+            pillars.push({ x: wx, z: h/2 - 0.15 });
           }
         }
         if (h > 8) {
           var countH = Math.floor(h / 5);
           for (var j = 1; j < countH; j++) {
-            var pct = j / countH;
-            var zPos = -h/2 + pct * h;
-            pillars.push({ x: -w/2 + 0.15, z: zPos });
-            pillars.push({ x: w/2 - 0.15, z: zPos });
+            var pctH = j / countH;
+            var hz = -h/2 + pctH * h;
+            pillars.push({ x: -w/2 + 0.15, z: hz });
+            pillars.push({ x: w/2 - 0.15, z: hz });
           }
         }
 
-        pillars.forEach(function (pos) {
+        // Add pillars & curtains to scene
+        pillars.forEach(function (pos, index) {
           var col = new THREE.Mesh(colGeom, colMat);
           col.position.set(pos.x, 2.0, pos.z);
           col.castShadow = true;
-          col.receiveShadow = true;
           group.add(col);
 
-          var curtain = new THREE.Mesh(curtainGeom, curtainMat);
-          var offX = pos.x > 0 ? -0.12 : 0.12;
-          var offZ = pos.z > 0 ? -0.12 : 0.12;
-          curtain.position.set(pos.x + offX, 1.9, pos.z + offZ);
-          curtain.castShadow = true;
-          group.add(curtain);
+          // Add a curtain next to corner pillars for realism
+          if (index < 4) {
+            var curtain = new THREE.Mesh(curtainGeom, curtainMat);
+            curtain.position.set(pos.x + (pos.x < 0 ? 0.2 : -0.2), 1.9, pos.z + (pos.z < 0 ? 0.2 : -0.2));
+            curtain.rotation.y = (pos.x * pos.z < 0) ? -Math.PI / 4 : Math.PI / 4;
+            curtain.castShadow = true;
+            group.add(curtain);
+          }
         });
 
-        // Pyramidal canvas roof
+        // Pyramidal fabric roof canopy if techos layer is visible
         if (showTechos) {
-          var peakH = 4.0 + Math.max(2.0, Math.min(w, h) * 0.2);
-          var vertices = new Float32Array([
-            // Front face
-            0, peakH, 0,   -w/2, 4.0, h/2,   w/2, 4.0, h/2,
-            // Right face
-            0, peakH, 0,   w/2, 4.0, h/2,    w/2, 4.0, -h/2,
-            // Back face
-            0, peakH, 0,   w/2, 4.0, -h/2,   -w/2, 4.0, -h/2,
-            // Left face
-            0, peakH, 0,   -w/2, 4.0, -h/2,  -w/2, 4.0, h/2
-          ]);
-          var roofGeom = new THREE.BufferGeometry();
-          roofGeom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-          roofGeom.computeVertexNormals();
-
-          var roofMat = new THREE.MeshStandardMaterial({
-            color: 0xf8fafc,
+          var roofGeom = new THREE.ConeGeometry(Math.max(w, h) * 0.72, 2.2, 4);
+          var fabricMat = new THREE.MeshStandardMaterial({
+            color: 0xfafafa,
             roughness: 0.9,
             side: THREE.DoubleSide
           });
-          var roofMesh = new THREE.Mesh(roofGeom, roofMat);
-          roofMesh.castShadow = true;
-          roofMesh.receiveShadow = true;
-          group.add(roofMesh);
+          var canopy = new THREE.Mesh(roofGeom, fabricMat);
+          canopy.rotation.y = Math.PI / 4;
+          canopy.position.set(0, 4.0 + 1.1, 0);
+          canopy.scale.set(w / (Math.max(w, h) * 0.72), 1, h / (Math.max(w, h) * 0.72));
+          canopy.castShadow = true;
+          group.add(canopy);
         }
-
       } else {
-        // --- CLOSED MASONRY SALON STYLE ---
-        var wallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.85 });
-
-        // North wall
-        var wallN = new THREE.Mesh(new THREE.BoxGeometry(w, 4.0, 0.2), wallMat);
-        wallN.position.set(0, 2.0, -h/2 + 0.1);
-        wallN.castShadow = true;
-        wallN.receiveShadow = true;
-        group.add(wallN);
-
-        // West wall
-        var wallW = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.0, h), wallMat);
-        wallW.position.set(-w/2 + 0.1, 2.0, 0);
-        wallW.castShadow = true;
-        wallW.receiveShadow = true;
-        group.add(wallW);
-
-        // East wall
-        var wallE = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.0, h), wallMat);
-        wallE.position.set(w/2 - 0.1, 2.0, 0);
-        wallE.castShadow = true;
-        wallE.receiveShadow = true;
-        group.add(wallE);
-
-        // South wall with entrance gap
-        var gapW = Math.min(4.0, w * 0.35);
-        var sideWallW = (w - gapW) / 2;
-
-        var wallSLeft = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), wallMat);
-        wallSLeft.position.set(-w/2 + sideWallW/2, 2.0, h/2 - 0.1);
-        wallSLeft.castShadow = true;
-        wallSLeft.receiveShadow = true;
-        group.add(wallSLeft);
-
-        var wallSRight = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), wallMat);
-        wallSRight.position.set(w/2 - sideWallW/2, 2.0, h/2 - 0.1);
-        wallSRight.castShadow = true;
-        wallSRight.receiveShadow = true;
-        group.add(wallSRight);
-
-        // Beam above door gap
-        var beam = new THREE.Mesh(new THREE.BoxGeometry(gapW, 0.8, 0.2), wallMat);
-        beam.position.set(0, 3.6, h/2 - 0.1);
-        beam.castShadow = true;
-        beam.receiveShadow = true;
-        group.add(beam);
-
-        // Flat concrete roof slab
-        if (showTechos) {
-          var roof = new THREE.Mesh(
-            new THREE.BoxGeometry(w + 0.2, 0.15, h + 0.2),
-            new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 })
-          );
-          roof.position.y = 4.075;
-          roof.castShadow = true;
-          group.add(roof);
-        }
+        _buildHiFiSalon(group, elem);
       }
-      
-    } else if (elem.type === 'garden') {
-      // Grass patch
-      var grass = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.02, h),
-        new THREE.MeshStandardMaterial({ color: COLORS.grass, roughness: 0.9 })
-      );
-      grass.position.y = 0.01;
-      grass.receiveShadow = true;
-      group.add(grass);
-
-      // Add a couple of trees
-      var trunkGeom = new THREE.CylinderGeometry(0.1, 0.15, 2.0, 8);
-      var trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
-      var foliageGeom = new THREE.SphereGeometry(0.8, 8, 8);
-      var foliageMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.8 });
-
-      var tree1 = new THREE.Group();
-      tree1.position.set(-w * 0.25, 1.0, -h * 0.2);
-      var tr1 = new THREE.Mesh(trunkGeom, trunkMat);
-      var fol1 = new THREE.Mesh(foliageGeom, foliageMat);
-      fol1.position.y = 1.2;
-      tree1.add(tr1);
-      tree1.add(fol1);
-      group.add(tree1);
-
-      var tree2 = new THREE.Group();
-      tree2.position.set(w * 0.25, 1.0, h * 0.2);
-      var tr2 = new THREE.Mesh(trunkGeom, trunkMat);
-      var fol2 = new THREE.Mesh(foliageGeom, foliageMat);
-      fol2.position.y = 1.2;
-      tree2.add(tr2);
-      tree2.add(fol2);
-      group.add(tree2);
-
-    } else if (elem.type === 'pool') {
-      // Pool basin
-      var border = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.2, h),
-        new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 })
-      );
-      border.position.y = 0.1;
-      group.add(border);
-
-      // Water surface
-      var water = new THREE.Mesh(
-        new THREE.BoxGeometry(w - 0.4, 0.02, h - 0.4),
-        new THREE.MeshStandardMaterial({ color: COLORS.water, roughness: 0.1, metalness: 0.8 })
-      );
-      water.position.y = 0.18;
-      group.add(water);
-
-    } else if (elem.type === 'fountain') {
-      // Fountain base ring
-      var basin = new THREE.Mesh(
-        new THREE.CylinderGeometry(w/2, w/2, 0.4, 16),
-        new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.7 })
-      );
-      basin.position.y = 0.2;
-      basin.castShadow = true;
-      group.add(basin);
-
-      // Water plane
-      var fWater = new THREE.Mesh(
-        new THREE.CylinderGeometry(w/2 - 0.1, w/2 - 0.1, 0.02, 16),
-        new THREE.MeshStandardMaterial({ color: COLORS.water, roughness: 0.1, metalness: 0.6 })
-      );
-      fWater.position.y = 0.36;
-      group.add(fWater);
-
-      // Foutain central column
-      var col = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.2, 1.2, 8),
-        new THREE.MeshStandardMaterial({ color: 0x78716c })
-      );
-      col.position.y = 0.8;
-      col.castShadow = true;
-      group.add(col);
-
-    } else if (elem.type === 'chapel') {
-      // Chapel floor
-      var cFloor = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.04, h),
-        new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.8 })
-      );
-      cFloor.position.y = 0.02;
-      group.add(cFloor);
-
-      // Altar table
-      var altar = new THREE.Mesh(
-        new THREE.BoxGeometry(2.0, 0.9, 0.8),
-        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 })
-      );
-      altar.position.set(0, 0.47, -h/2 + 1.2);
-      altar.castShadow = true;
-      group.add(altar);
-
-      // Wooden cross on wall/altar
-      var crossH = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.08), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
-      crossH.position.set(0, 1.6, -h/2 + 0.1);
-      group.add(crossH);
-
-      var crossV = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 0.08), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
-      crossV.position.set(0, 1.5, -h/2 + 0.1);
-      group.add(crossV);
-
-    } else if (elem.type === 'kitchen' || elem.type === 'bar_area') {
-      // Counter top block
-      var base = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.9, h),
-        new THREE.MeshStandardMaterial({ color: colorNum, roughness: 0.6 })
-      );
-      base.position.y = 0.45;
-      base.castShadow = true;
-      base.receiveShadow = true;
-      group.add(base);
-
-      // Top surface
-      var top = new THREE.Mesh(
-        new THREE.BoxGeometry(w + 0.05, 0.06, h + 0.05),
-        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 })
-      );
-      top.position.y = 0.93;
-      group.add(top);
-
-    } else if (elem.type === 'terrain') {
-      // Base Terrain element placed in the scene (flat 0.005m slab)
-      var terrainMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.005, h),
-        new THREE.MeshStandardMaterial({ color: colorNum, roughness: 0.9 })
-      );
-      terrainMesh.position.y = 0.0025;
-      terrainMesh.receiveShadow = true;
-      group.add(terrainMesh);
 
     } else if (elem.type === 'stage') {
-      // Stage platform elevated 40cm
-      var stagePlatform = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.4, h),
-        new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 })
-      );
-      stagePlatform.position.y = 0.2;
-      stagePlatform.castShadow = true;
-      stagePlatform.receiveShadow = true;
-      group.add(stagePlatform);
+      _buildHiFiStage(group, elem);
 
-      // Truss structure at the back of the stage
-      var trussMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 });
-      var trussRadius = 0.05;
-      
-      // Left vertical truss pillar
-      var trussL = new THREE.Mesh(
-        new THREE.CylinderGeometry(trussRadius, trussRadius, 3.0, 8),
-        trussMat
-      );
-      trussL.position.set(-w / 2 + 0.15, 1.9, -h / 2 + 0.15);
-      trussL.castShadow = true;
-      group.add(trussL);
+    } else if (elem.type === 'kitchen' || elem.type === 'bar_area') {
+      _buildHiFiKitchen(group, elem);
 
-      // Right vertical truss pillar
-      var trussR = new THREE.Mesh(
-        new THREE.CylinderGeometry(trussRadius, trussRadius, 3.0, 8),
-        trussMat
-      );
-      trussR.position.set(w / 2 - 0.15, 1.9, -h / 2 + 0.15);
-      trussR.castShadow = true;
-      group.add(trussR);
+    } else if (elem.type === 'lobby_reception') {
+      _buildHiFiLobby(group, elem);
 
-      // Horizontal cross truss beam
-      var trussBeam = new THREE.Mesh(
-        new THREE.CylinderGeometry(trussRadius, trussRadius, w - 0.3, 8),
-        trussMat
-      );
-      trussBeam.rotation.z = Math.PI / 2;
-      trussBeam.position.set(0, 3.4, -h / 2 + 0.15);
-      trussBeam.castShadow = true;
-      group.add(trussBeam);
+    } else if (elem.type === 'parking') {
+      _buildHiFiParking(group, elem);
+
+    } else if (elem.type === 'pool') {
+      _buildHiFiPool(group, elem);
+
+    } else if (elem.type === 'chapel') {
+      _buildHiFiChapel(group, elem);
+
+    } else if (elem.type === 'waterfall') {
+      _buildHiFiWaterfall(group, elem);
 
     } else if (elem.type === 'kids_area') {
       // Colourful foam rubber play mat floor
@@ -2226,59 +2019,6 @@ window.Visualizer3D = (function () {
       block2.position.set(w * 0.2, 0.41, h * 0.15);
       block2.castShadow = true;
       group.add(block2);
-
-    } else if (elem.type === 'lobby_reception') {
-      // Lobby ground floor
-      var lobbyFloor = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.02, h),
-        new THREE.MeshStandardMaterial({ color: 0xe4e4e7, roughness: 0.5 })
-      );
-      lobbyFloor.position.y = 0.01;
-      lobbyFloor.receiveShadow = true;
-      group.add(lobbyFloor);
-
-      // Reception counter desk in the middle
-      var deskMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.6 });
-      var desk = new THREE.Mesh(
-        new THREE.BoxGeometry(w * 0.5, 1.0, 0.6),
-        deskMat
-      );
-      desk.position.set(0, 0.51, -h * 0.1);
-      desk.castShadow = true;
-      group.add(desk);
-
-      // Glass divider panel on desk
-      var glassMat = new THREE.MeshStandardMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.5, roughness: 0.1 });
-      var divider = new THREE.Mesh(
-        new THREE.BoxGeometry(w * 0.5 - 0.1, 0.4, 0.02),
-        glassMat
-      );
-      divider.position.set(0, 1.21, -h * 0.1);
-      group.add(divider);
-
-    } else if (elem.type === 'parking') {
-      // Asphalt floor
-      var asphalt = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.02, h),
-        new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.9 })
-      );
-      asphalt.position.y = 0.01;
-      asphalt.receiveShadow = true;
-      group.add(asphalt);
-
-      // White parking lines
-      var whiteLineMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-      var numSpaces = Math.max(2, Math.floor(w / 2.5));
-      var spaceW = w / numSpaces;
-      for (var pi = 1; pi < numSpaces; pi++) {
-        var px = -w / 2 + pi * spaceW;
-        var pLine = new THREE.Mesh(
-          new THREE.BoxGeometry(0.08, 0.002, h * 0.8),
-          whiteLineMat
-        );
-        pLine.position.set(px, 0.021, 0);
-        group.add(pLine);
-      }
 
     } else if (elem.type === 'terrace') {
       // Wooden deck floor
@@ -2309,48 +2049,6 @@ window.Visualizer3D = (function () {
       railR.position.set(w/2 - 0.03, 0.49, 0);
       railR.castShadow = true;
       group.add(railR);
-
-    } else if (elem.type === 'waterfall') {
-      // Stone back wall
-      var stoneWallMat = new THREE.MeshStandardMaterial({ color: 0x57534e, roughness: 0.9 });
-      var backWall = new THREE.Mesh(
-        new THREE.BoxGeometry(w, h, 0.3),
-        stoneWallMat
-      );
-      backWall.position.set(0, h/2, -0.15);
-      backWall.castShadow = true;
-      group.add(backWall);
-
-      // Blue translucent water flow sheet in front of the wall
-      var waterMat = new THREE.MeshStandardMaterial({
-        color: 0x0ea5e9,
-        roughness: 0.1,
-        metalness: 0.8,
-        transparent: true,
-        opacity: 0.7
-      });
-      var waterSheet = new THREE.Mesh(
-        new THREE.BoxGeometry(w - 0.1, h, 0.05),
-        waterMat
-      );
-      waterSheet.position.set(0, h/2, 0.035);
-      group.add(waterSheet);
-
-      // Splash bottom basin
-      var basin = new THREE.Mesh(
-        new THREE.BoxGeometry(w, 0.2, 0.6),
-        stoneWallMat
-      );
-      basin.position.set(0, 0.1, 0.2);
-      basin.castShadow = true;
-      group.add(basin);
-
-      var basinWater = new THREE.Mesh(
-        new THREE.BoxGeometry(w - 0.1, 0.05, 0.5),
-        waterMat
-      );
-      basinWater.position.set(0, 0.175, 0.2);
-      group.add(basinWater);
 
     } else if (elem.type === 'dressing_room') {
       // Dressing Room structure (2nd floor)

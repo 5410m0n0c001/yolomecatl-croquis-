@@ -203,9 +203,16 @@ window.Editor2D = (function () {
       _gZoom.appendChild(g);
     });
 
-    // 8. Hide g-furniture: pre-drawn static tables — editor renders from AppState instead.
-    var furnitureGroup = _gZoom.querySelector('#g-furniture');
-    if (furnitureGroup) furnitureGroup.style.display = 'none';
+    // 8. Hide pre-drawn static groups — editor renders them dynamically from AppState instead.
+    var hideList = [
+      '#g-furniture', '#g-walls', '#stage-group', '#dancefloor-group', 
+      '#dj2-group', '#swimming-pool', '#chapel-group', '#g-parking', 
+      '#waterfall-group', '#g-lobby', '#g-service', '#g-bathrooms'
+    ];
+    hideList.forEach(function (sel) {
+      var node = _gZoom.querySelector(sel);
+      if (node) node.style.display = 'none';
+    });
 
     // 9. Ensure g-circulation is visible (circulation flow overlay)
     var circGroup = _gZoom.querySelector('#g-circulation');

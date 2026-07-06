@@ -926,11 +926,11 @@
         </g>
         <!-- LOGISTICS & CIRCULATION LAYER (Toggleable) -->
         <g id="g-circulation">
-          <!-- Guest Path: Vehicular/Parking -> Pedestrian -> Lobby -> Salon -> Zona de Baile & Bathrooms (Blue) -->
-          <path id="path-guest-draw" d="M 980,770 L 875,770 L 510,770 L 510,755 L 510,730 L 510,700 L 510,220 M 510,730 L 290,727 L 270,727 L 200,727 L 200,860 L 210,860 M 510,770 L 200,770 L 200,860 L 210,860 M 810,300 L 875,300 L 875,770 M 945,360 L 875,360 L 875,770 M 510,300 C 400,300 310,250 310,250 L 310,60 L 440,60 M 510,300 C 620,300 690,250 690,250 L 690,60 L 580,60" class="circulation-path circulation-guest" />
+          <!-- Guest Path: Vehicular/Parking -> Pedestrian -> Lobby -> Salon -> Seating loops, Garden, Chapel & Pool (Blue) -->
+          <path id="path-guest-draw" d="M 980,770 L 875,770 L 510,770 L 510,755 L 510,730 L 510,700 L 510,680 M 810,300 L 875,300 L 875,770 M 945,360 L 875,360 L 875,770 M 510,680 H 650 V 220 H 320 V 680 H 510 M 370,220 V 680 M 480,220 V 680 M 590,220 V 680 M 320,300 H 650 M 320,400 H 650 M 320,500 H 650 M 320,600 H 650 M 320,400 H 200 V 100 H 135 V 860 H 210 M 200,800 H 125 V 860 M 510,700 V 860 H 640" class="circulation-path circulation-guest" />
           
-          <!-- Service Path: Kitchen/Providers -> Bar -> Tables Norte & Salon (Green) -->
-          <path id="path-service-draw" d="M 875,120 L 780,120 M 820,180 L 760,180 L 760,250 M 875,340 L 875,280 L 755,280 L 720,280 M 760,250 L 760,260 L 680,260 C 510,260 420,350 420,450" class="circulation-path circulation-service" />
+          <!-- Service Path: Kitchen/Providers -> Service Door -> Full Seating Grid & Salon Circulation (Green) -->
+          <path id="path-service-draw" d="M 875,135 L 750,135 L 750,200 L 720,200 L 720,140 L 650,140 V 680 H 590 V 140 H 480 V 680 H 370 V 140 H 280 V 680 M 280,300 H 650 M 280,400 H 650 M 280,500 H 650 M 280,600 H 650 M 750,200 V 680 H 720" class="circulation-path circulation-service" />
 
           <!-- Emergency Path: Salon Evacuation to Vehicular exits (Red) -->
           <path id="path-emergency-draw" d="M 285,95 L 285,685 L 300,705 L 510,705 L 510,755 L 510,770 L 980,770 M 735,95 L 735,280 L 755,280 L 875,280 L 875,770 L 980,770 M 735,280 L 735,685 L 700,705 L 510,705" class="circulation-path circulation-emergency" />
@@ -1019,6 +1019,10 @@
         <button id="btn-import-json" class="fab-btn fab-secondary" title="Importar JSON">
           <i class="fa-solid fa-file-import"></i>
           <span class="fab-label">Importar</span>
+        </button>
+        <button id="btn-reset-layout" class="fab-btn fab-secondary" title="Reiniciar plano" style="background-color: #ef4444; color: white;">
+          <i class="fa-solid fa-trash-can"></i>
+          <span class="fab-label">Reiniciar</span>
         </button>
         <input type="file" id="import-file-input" accept=".json" style="display:none;" />
       </div>
